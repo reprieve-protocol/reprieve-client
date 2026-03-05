@@ -4,10 +4,7 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, DatabaseZap } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import { AggregateGauge } from "@/components/dashboard/AggregateGauge";
 import { PositionCard } from "@/components/dashboard/PositionCard";
-import { ProtectionCard } from "@/components/dashboard/ProtectionCard";
-import { MockScenarioPanel } from "@/components/dev/MockScenarioPanel";
 import { ProtocolIcon } from "@/components/common/ProtocolIcon";
 import { RescueOverlay } from "@/components/rescue/RescueOverlay";
 
@@ -34,7 +31,6 @@ export function DashboardView() {
   const { connect } = useConnect();
   const {
     state: { loading, error, snapshot, rescueRun },
-    triggerRescue,
   } = useAppState();
 
   const { data: positionsData, isLoading: isLoadingPositions } =
@@ -123,21 +119,49 @@ export function DashboardView() {
       };
     });
 
-    const mockMorphoPosition: Position = {
-      id: "pos-mock-morpho-short",
-      protocol: "morpho-v2",
-      chain: "base-sepolia",
-      pair: "BNB / USDC",
-      action: "short",
-      collateralUsd: 15400,
-      debtUsd: 7850.5,
-      healthFactor: 1.5,
-      tokenType: "vault-share",
-      approvalStatus: "approved",
-      isRescueSource: false,
-    };
+    const mockShortPositions: Position[] = [
+      {
+        id: "pos-mock-morpho-short-1",
+        protocol: "morpho-v2",
+        chain: "base-sepolia",
+        pair: "BNB / USDC",
+        action: "short",
+        collateralUsd: 15400,
+        debtUsd: 7850.5,
+        healthFactor: 2.18,
+        tokenType: "vault-share",
+        approvalStatus: "approved",
+        isRescueSource: false,
+      },
+      {
+        id: "pos-mock-morpho-short-2",
+        protocol: "morpho-v2",
+        chain: "base-sepolia",
+        pair: "WETH / USDC",
+        action: "short",
+        collateralUsd: 22120,
+        debtUsd: 9040.25,
+        healthFactor: 2.46,
+        tokenType: "vault-share",
+        approvalStatus: "approved",
+        isRescueSource: false,
+      },
+      {
+        id: "pos-mock-morpho-short-3",
+        protocol: "morpho-v2",
+        chain: "base-sepolia",
+        pair: "cbBTC / USDC",
+        action: "short",
+        collateralUsd: 30950,
+        debtUsd: 10120.8,
+        healthFactor: 3.05,
+        tokenType: "vault-share",
+        approvalStatus: "approved",
+        isRescueSource: false,
+      },
+    ];
 
-    return [...realPositions, mockMorphoPosition];
+    return [...realPositions, ...mockShortPositions];
   }, [positionsData]);
 
   const totalCollateralUsd = useMemo(
@@ -170,7 +194,7 @@ export function DashboardView() {
             <h1 className="text-2xl font-bold tracking-tight text-white">
               Dashboard
             </h1>
-            <p className="mt-0.5 text-sm text-[#6b8cb0]">
+            <p className="mt-0.5 text-sm text-[#a9b2ab]">
               Cross-protocol risk command center
             </p>
           </div>
@@ -183,7 +207,7 @@ export function DashboardView() {
             action={
               <Button
                 size="sm"
-                className="h-10 rounded-lg bg-[#5a7a9f] px-4 text-sm font-medium text-white hover:bg-[#7a9abf] shadow-sm"
+                className="h-10 rounded-lg bg-[#c7f36b] px-4 text-sm font-medium text-white hover:bg-[#ccd7cf] shadow-sm"
                 onClick={() => connect({ connector: injected() })}
               >
                 Connect Wallet
@@ -197,8 +221,8 @@ export function DashboardView() {
 
   if (loading || isLoadingPositions) {
     return (
-      <div className="flex items-center gap-3 text-sm text-[#6b8cb0]">
-        <span className="size-4 animate-spin rounded-full border-2 border-[#162840] border-t-[#5a7a9f]" />
+      <div className="flex items-center gap-3 text-sm text-[#a9b2ab]">
+        <span className="size-4 animate-spin rounded-full border-2 border-[#2d3932] border-t-[#c7f36b]" />
         Loading dashboard...
       </div>
     );
@@ -210,7 +234,7 @@ export function DashboardView() {
 
   if (!snapshot) {
     return (
-      <p className="text-sm text-[#6b8cb0]">No snapshot data available.</p>
+      <p className="text-sm text-[#a9b2ab]">No snapshot data available.</p>
     );
   }
 
@@ -229,27 +253,27 @@ export function DashboardView() {
           <h1 className="text-2xl font-bold tracking-tight text-white">
             Dashboard
           </h1>
-          <p className="mt-0.5 text-sm text-[#6b8cb0]">
+          <p className="mt-0.5 text-sm text-[#a9b2ab]">
             Cross-protocol risk command center
           </p>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="flex -space-x-2">
-            <div className="size-7 rounded-full border-2 border-[#080f1e] bg-[#080f1e] p-0.5 ring-1 ring-[#5a7a9f]">
+            <div className="size-7 rounded-full border-2 border-[#0b0f0d] bg-[#0b0f0d] p-0.5 ring-1 ring-[#c7f36b]">
               <ProtocolIcon protocol="aave-v4" className="size-full" />
             </div>
-            <div className="size-7 rounded-full border-2 border-[#080f1e] bg-[#080f1e] p-0.5 ring-1 ring-[#5a7a9f]">
+            <div className="size-7 rounded-full border-2 border-[#0b0f0d] bg-[#0b0f0d] p-0.5 ring-1 ring-[#c7f36b]">
               <ProtocolIcon protocol="compound-v3" className="size-full" />
             </div>
-            <div className="size-7 rounded-full border-2 border-[#080f1e] bg-[#080f1e] p-0.5 ring-1 ring-[#5a7a9f]">
+            <div className="size-7 rounded-full border-2 border-[#0b0f0d] bg-[#0b0f0d] p-0.5 ring-1 ring-[#c7f36b]">
               <ProtocolIcon protocol="morpho-v2" className="size-full" />
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="tag">
-              <span className="size-1.5 rounded-full bg-[#94b4d8]" />
+              <span className="size-1.5 rounded-full bg-[#b5e86f]" />
               System Operational
             </span>
             <StatusBadge label="Data Feeds · DON Verified" tone="info" pulse />
@@ -271,14 +295,14 @@ export function DashboardView() {
 
       {/* Portfolio Summary */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="card p-5 border-[#5a7a9f]">
-          <p className="text-sm font-medium text-[#6b8cb0]">Total Collateral</p>
-          <p className="mt-2 text-3xl font-bold tabular-nums text-[#c5daf5]">
+        <div className="card p-5 border-[#c7f36b]">
+          <p className="text-sm font-medium text-[#a9b2ab]">Total Collateral</p>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-[#e7ece6]">
             {formatUsd(totalCollateralUsd)}
           </p>
         </div>
-        <div className="card p-5 border-[#5a7a9f]">
-          <p className="text-sm font-medium text-[#6b8cb0]">Total Debt</p>
+        <div className="card p-5 border-[#c7f36b]">
+          <p className="text-sm font-medium text-[#a9b2ab]">Total Debt</p>
           <p className="mt-2 text-3xl font-bold tabular-nums text-red-400">
             {formatUsd(totalDebtUsd)}
           </p>
@@ -289,14 +313,14 @@ export function DashboardView() {
       <CreWorkflowAnimation />
 
       {/* Main grid */}
-      <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="space-y-3">
         {/* Positions column */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+            <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
               Positions
             </p>
-            <span className="text-xs text-[#4a6a8f]">
+            <span className="text-xs text-[#8c9890]">
               {displayPositions.length} detected
             </span>
           </div>
@@ -307,12 +331,12 @@ export function DashboardView() {
               description="Connect a wallet with active positions on Aave, Compound, or Morpho. Reprieve auto-scans across chains."
             />
           ) : (
-            <div className="grid gap-3 lg:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {displayPositions.map((position) => (
                 <PositionCard
                   key={position.id}
                   position={position}
-                  isSelected={false}
+                  isSelected={position.id === activeSelectedPositionId}
                   rescueRun={rescueRun}
                   onSelect={() => setSelectedPositionId(position.id)}
                   strategyLabel={
@@ -332,27 +356,13 @@ export function DashboardView() {
             </div>
           )}
         </section>
-
-        {/* Side panel column */}
-        {/* <section className="space-y-4">
-          <AggregateGauge
-            aggregateHF={snapshot.aggregateHF}
-            threshold={snapshot.threshold}
-            quantSignals={snapshot.quantSignals}
-          />
-          <ProtectionCard
-            snapshot={snapshot}
-            onTriggerRescue={() => void triggerRescue()}
-            rescueDisabled={Boolean(rescueRun?.active)}
-          />
-        </section> */}
       </div>
 
       {/* Footer proof banner */}
-      <div className="card-inset flex items-start gap-3 p-4 text-xs text-[#6b8cb0]">
-        <DatabaseZap className="mt-0.5 size-4 shrink-0 text-[#7a9abf]" />
+      <div className="card-inset flex items-start gap-3 p-4 text-xs text-[#a9b2ab]">
+        <DatabaseZap className="mt-0.5 size-4 shrink-0 text-[#ccd7cf]" />
         <div>
-          <p className="font-semibold text-[#94b4d8]">Proof, not trust</p>
+          <p className="font-semibold text-[#b5e86f]">Proof, not trust</p>
           <p className="mt-0.5">
             Every rescue action is written to immutable logs and verifiable by
             workflow ID and transaction hash.

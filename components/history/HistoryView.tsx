@@ -14,7 +14,7 @@ const RescueDetailPanel = dynamic(
   {
     ssr: false,
     loading: () => (
-      <p className="text-sm text-[#6b8cb0]">Loading detail panel...</p>
+      <p className="text-sm text-[#a9b2ab]">Loading detail panel...</p>
     ),
   },
 );
@@ -27,8 +27,8 @@ export function HistoryView() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 text-sm text-[#6b8cb0]">
-        <span className="size-4 animate-spin rounded-full border-2 border-[#162840] border-t-[#5a7a9f]" />
+      <div className="flex items-center gap-3 text-sm text-[#a9b2ab]">
+        <span className="size-4 animate-spin rounded-full border-2 border-[#2d3932] border-t-[#c7f36b]" />
         Loading rescue history...
       </div>
     );
@@ -37,7 +37,7 @@ export function HistoryView() {
   if (error) return <p className="text-sm text-red-400">{error}</p>;
 
   if (!snapshot)
-    return <p className="text-sm text-[#6b8cb0]">No snapshot found.</p>;
+    return <p className="text-sm text-[#a9b2ab]">No snapshot found.</p>;
 
   const selectedEntry =
     history.find((entry) => entry.id === selectedHistoryId) ??
@@ -52,7 +52,7 @@ export function HistoryView() {
           <h1 className="text-2xl font-bold tracking-tight text-white">
             Rescue History
           </h1>
-          <p className="mt-0.5 text-sm text-[#6b8cb0]">
+          <p className="mt-0.5 text-sm text-[#a9b2ab]">
             Audit-ready immutable execution records
           </p>
         </div>
@@ -63,7 +63,7 @@ export function HistoryView() {
       <section className="card p-5">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-semibold text-white">Budget Summary</p>
-          <p className="text-xs text-[#6b8cb0]">
+          <p className="text-xs text-[#a9b2ab]">
             {snapshot.budget.rescuesToday} rescues today
           </p>
         </div>
@@ -72,17 +72,17 @@ export function HistoryView() {
           cap={snapshot.budget.capTodayUsd}
           label="Today"
         />
-        <p className="mt-3 text-xs text-[#5a7a9f]">
+        <p className="mt-3 text-xs text-[#c7f36b]">
           All-time:{" "}
-          <span className="text-[#94b4d8]">
+          <span className="text-[#b5e86f]">
             {snapshot.budget.totalRescues} rescues
           </span>
           {" · "}
-          <span className="text-[#94b4d8]">
+          <span className="text-[#b5e86f]">
             ${snapshot.budget.totalSpendUsd.toFixed(2)} spent
           </span>
           {" · "}
-          <span className="text-[#94b4d8]">
+          <span className="text-[#b5e86f]">
             ~${snapshot.budget.estSavedUsd.toFixed(0)} saved
           </span>
         </p>

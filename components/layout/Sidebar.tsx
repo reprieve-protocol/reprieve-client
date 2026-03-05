@@ -20,11 +20,11 @@ export function Sidebar({ navItems }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 border-r border-[#162840] bg-[#080f1e] md:flex md:flex-col">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 border-r border-[#2d3932] bg-[#0b0f0d] md:flex md:flex-col">
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2.5 px-4 border-b border-[#162840]">
-        <div className="flex size-7 items-center justify-center rounded-lg bg-[#5a7a9f]/15 ring-1 ring-[#5a7a9f]/30">
-          <ShieldCheck className="size-4 text-[#7a9abf]" />
+      <div className="flex h-14 items-center gap-2.5 px-4 border-b border-[#2d3932]">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-[#c7f36b]/15 ring-1 ring-[#c7f36b]/30">
+          <ShieldCheck className="size-4 text-[#ccd7cf]" />
         </div>
         <span className="text-[15px] font-semibold tracking-tight text-white">
           {APP_NAME}
@@ -43,8 +43,8 @@ export function Sidebar({ navItems }: SidebarProps) {
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
                 active
-                  ? "bg-[#0f1e38] text-[#e8f0fb] shadow-[inset_2px_0_0_#5a7a9f]"
-                  : "text-[#6b8cb0] hover:bg-[#0f1e38] hover:text-[#c5daf5]",
+                  ? "bg-[#191f1b] text-[#f7faf4] shadow-[inset_2px_0_0_#c7f36b]"
+                  : "text-[#a9b2ab] hover:bg-[#191f1b] hover:text-[#e7ece6]",
               )}
             >
               <Icon className="size-[15px] shrink-0" />
@@ -55,12 +55,12 @@ export function Sidebar({ navItems }: SidebarProps) {
       </nav>
 
       {/* Bottom status */}
-      <div className="border-t border-[#162840] p-3">
-        <div className="rounded-lg border border-[#112236] bg-[#080f1e]/70 flex items-center gap-2 px-3 py-2">
-          <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#5a7a9f]/20 text-[10px] font-semibold text-[#94b4d8]">
+      <div className="border-t border-[#2d3932] p-3">
+        <div className="rounded-lg border border-[#222a25] bg-[#0b0f0d]/70 flex items-center gap-2 px-3 py-2">
+          <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#c7f36b]/20 text-[10px] font-semibold text-[#b5e86f]">
             N
           </div>
-          <span className="text-[11px] text-[#5a7a9f]">
+          <span className="text-[11px] text-[#c7f36b]">
             Base Mainnet · CRE Active
           </span>
         </div>

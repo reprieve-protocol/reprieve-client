@@ -14,10 +14,10 @@ export function StrategyStep({
   return (
     <section className="space-y-3">
       <div className="flex items-center gap-2">
-        <span className="flex size-5 items-center justify-center rounded-full bg-[#5a7a9f]/20 text-[10px] font-bold text-[#7a9abf] ring-1 ring-[#5a7a9f]/30">
+        <span className="flex size-5 items-center justify-center rounded-full bg-[#c7f36b]/20 text-[10px] font-bold text-[#ccd7cf] ring-1 ring-[#c7f36b]/30">
           1
         </span>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-[#5a7a9f]">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-[#c7f36b]">
           Strategy
         </h2>
       </div>
@@ -31,9 +31,9 @@ export function StrategyStep({
               type="button"
               onClick={() => onSelect(preset)}
               className={cn(
-                "card text-left transition-all duration-150 p-4 hover:border-[#5a7a9f]",
+                "card text-left transition-all duration-150 p-4 hover:border-[#c7f36b]",
                 selected &&
-                  "border-[#5a7a9f]/40 bg-[#5a7a9f]/5 shadow-[0_0_20px_-8px_rgba(59,130,246,0.3)]",
+                  "border-[#c7f36b]/40 bg-[#c7f36b]/5 shadow-[0_0_16px_-10px_rgba(199,243,107,0.42)]",
               )}
             >
               <div className="flex items-start justify-between gap-2">
@@ -41,15 +41,15 @@ export function StrategyStep({
                   {preset.label}
                 </p>
                 {selected ? (
-                  <CheckCircle2 className="size-4 shrink-0 text-[#7a9abf]" />
+                  <CheckCircle2 className="size-4 shrink-0 text-[#ccd7cf]" />
                 ) : (
-                  <div className="size-4 shrink-0 rounded-full border border-[#162840]" />
+                  <div className="size-4 shrink-0 rounded-full border border-[#2d3932]" />
                 )}
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-[#6b8cb0]">
+              <p className="mt-2 text-xs leading-relaxed text-[#a9b2ab]">
                 {preset.description}
               </p>
-              <p className="mt-3 text-[11px] text-[#4a6a8f]">
+              <p className="mt-3 text-[11px] text-[#8c9890]">
                 ~{preset.estRescuesPerMonth} rescues/mo ·{" "}
                 {preset.estGasPerMonthEth.toFixed(2)} ETH/mo
               </p>

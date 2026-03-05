@@ -19,45 +19,45 @@ const STAGES = [
     id: 0,
     label: "ETH Sepolia",
     sublabel: "AAVE",
-    color: "#162840",
+    color: "#2d3932",
     icon: Landmark,
     detail:
       "The user's leveraged position lives on AAVE (ETH Sepolia). Reprieve detects the health factor is approaching the liquidation threshold and triggers the rescue workflow.",
     badge: "SOURCE",
-    badgeColor: "#162840",
+    badgeColor: "#2d3932",
   },
   {
     id: 1,
     label: "ETH Sepolia",
     sublabel: "CCIP",
-    color: "#5a7a9f",
+    color: "#c7f36b",
     icon: Link2,
     detail:
       "Reprieve withdraws 1 ETH collateral from AAVE and hands it to the Chainlink CCIP router on ETH Sepolia. The asset is locked and a cross-chain message is dispatched.",
     badge: "CCIP OUT",
-    badgeColor: "#5a7a9f",
+    badgeColor: "#c7f36b",
   },
   {
     id: 2,
     label: "Base Sepolia",
     sublabel: "CCIP",
-    color: "#5a7a9f",
+    color: "#c7f36b",
     icon: ArrowRightLeft,
     detail:
       "Chainlink CCIP delivers 1 ETH on Base Sepolia. The off-chain CRE workflow orchestrates the bridge and validates delivery before proceeding to the deposit step.",
     badge: "CCIP IN",
-    badgeColor: "#5a7a9f",
+    badgeColor: "#c7f36b",
   },
   {
     id: 3,
     label: "Base Sepolia",
     sublabel: "Compound",
-    color: "#94b4d8",
+    color: "#b5e86f",
     icon: TrendingUp,
     detail:
       "1 ETH is deposited into Compound on Base Sepolia, reopening the position on a safer, cheaper chain. The rescue is complete — assets are secured cross-chain.",
     badge: "DESTINATION",
-    badgeColor: "#94b4d8",
+    badgeColor: "#b5e86f",
   },
 ] as const;
 
@@ -66,20 +66,20 @@ const CONNECTORS = [
   {
     label: "withdraw 1 ETH",
     dashed: false,
-    color: "#162840",
-    nextColor: "#5a7a9f",
+    color: "#2d3932",
+    nextColor: "#c7f36b",
   },
   {
     label: "bridge 1 ETH",
     dashed: true, // CCIP cross-chain bridge
-    color: "#5a7a9f",
-    nextColor: "#5a7a9f",
+    color: "#c7f36b",
+    nextColor: "#c7f36b",
   },
   {
     label: "deposit 1 ETH",
     dashed: false,
-    color: "#5a7a9f",
-    nextColor: "#94b4d8",
+    color: "#c7f36b",
+    nextColor: "#b5e86f",
   },
 ] as const;
 
@@ -165,7 +165,7 @@ const StageNode: React.FC<{
         ) : (
           <Icon
             size={20}
-            style={{ color: isActive ? stage.color : "#2a3a4a" }}
+            style={{ color: isActive ? stage.color : "#637267" }}
           />
         )}
 
@@ -184,13 +184,13 @@ const StageNode: React.FC<{
       <div className="mt-2.5 text-center">
         <div
           className="text-[11px] font-bold leading-tight"
-          style={{ color: isActive ? "#dee6f5" : "#2a3a4a" }}
+          style={{ color: isActive ? "#f0f3ee" : "#637267" }}
         >
           {stage.label}
         </div>
         <div
           className="text-[10px] font-semibold leading-tight mt-0.5"
-          style={{ color: isActive ? stage.color : "#192e4c" }}
+          style={{ color: isActive ? stage.color : "#37453e" }}
         >
           {stage.sublabel}
         </div>
@@ -214,7 +214,7 @@ const Connector: React.FC<{
       animate={{ opacity: active ? 1 : 0.2 }}
       transition={{ duration: 0.4 }}
       className="text-[9px] font-medium text-center whitespace-nowrap"
-      style={{ color: active ? color : "#2a3a4a" }}
+      style={{ color: active ? color : "#637267" }}
     >
       {label}
     </motion.span>
@@ -257,7 +257,7 @@ const Connector: React.FC<{
           height: 0,
           borderTop: "4px solid transparent",
           borderBottom: "4px solid transparent",
-          borderLeft: `7px solid ${active ? nextColor : "#13243a"}`,
+          borderLeft: `7px solid ${active ? nextColor : "#252f29"}`,
           filter: active ? `drop-shadow(0 0 3px ${nextColor})` : "none",
         }}
       />
@@ -290,7 +290,7 @@ export const CreWorkflowAnimation: React.FC = () => {
   const progressPct = (activeStep / TOTAL) * 100;
 
   return (
-    <div className="w-full relative rounded-2xl overflow-hidden border border-white/5 bg-[#080f1e]">
+    <div className="w-full relative rounded-2xl overflow-hidden border border-white/5 bg-[#0b0f0d]">
       {/* Header bar */}
       <div
         className="flex items-center justify-between px-5 py-3.5 border-b border-white/5"
@@ -302,7 +302,7 @@ export const CreWorkflowAnimation: React.FC = () => {
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
             <span className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
           </div>
-          <span className="text-[11px] text-[#4a6a8f] font-mono tracking-wider">
+          <span className="text-[11px] text-[#8c9890] font-mono tracking-wider">
             chainlink-cre / rescue-workflow.ts
           </span>
         </div>
@@ -310,11 +310,11 @@ export const CreWorkflowAnimation: React.FC = () => {
         <div className="flex items-center gap-2">
           <div
             className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: isPlaying ? "#94b4d8" : "#2a3a4a" }}
+            style={{ background: isPlaying ? "#b5e86f" : "#637267" }}
           />
           <span
             className="text-[10px] font-mono"
-            style={{ color: isPlaying ? "#94b4d8" : "#3a5a7f" }}
+            style={{ color: isPlaying ? "#b5e86f" : "#69776f" }}
           >
             {isPlaying ? "LIVE" : "PAUSED"}
           </span>
@@ -323,7 +323,7 @@ export const CreWorkflowAnimation: React.FC = () => {
             className="ml-1 px-2 py-0.5 text-[10px] font-bold rounded border transition-colors cursor-pointer"
             style={{
               borderColor: "rgba(255,255,255,0.08)",
-              color: "#5a7a9f",
+              color: "#c7f36b",
               background: "rgba(255,255,255,0.04)",
             }}
           >
@@ -403,16 +403,16 @@ export const CreWorkflowAnimation: React.FC = () => {
                     size={11}
                     style={{ color: currentStage.color }}
                   />
-                  <span className="text-[10px] text-[#4a6a8f]">
+                  <span className="text-[10px] text-[#8c9890]">
                     {currentStage.badge}
                   </span>
                 </div>
-                <p className="text-[12px] leading-relaxed text-[#7a9abf]">
+                <p className="text-[12px] leading-relaxed text-[#ccd7cf]">
                   {currentStage.detail}
                 </p>
               </div>
 
-              <div className="shrink-0 flex items-center gap-1 text-[10px] text-[#3a5a7f] font-mono">
+              <div className="shrink-0 flex items-center gap-1 text-[10px] text-[#69776f] font-mono">
                 <Clock size={10} />
                 {activeStep + 1}/{TOTAL}
               </div>
@@ -434,13 +434,13 @@ export const CreWorkflowAnimation: React.FC = () => {
                   border: "1px solid rgba(182,234,218,0.35)",
                 }}
               >
-                <Zap size={16} style={{ color: "#94b4d8" }} />
+                <Zap size={16} style={{ color: "#b5e86f" }} />
               </div>
               <div>
-                <p className="text-[11px] font-bold text-[#94b4d8] mb-1">
+                <p className="text-[11px] font-bold text-[#b5e86f] mb-1">
                   Rescue Complete ✓
                 </p>
-                <p className="text-[12px] text-[#5a7a9f]">
+                <p className="text-[12px] text-[#c7f36b]">
                   1 ETH withdrawn from AAVE on ETH Sepolia, bridged via
                   Chainlink CCIP, and deposited into Compound on Base Sepolia.
                   Position secured cross-chain.
@@ -458,29 +458,29 @@ export const CreWorkflowAnimation: React.FC = () => {
             label: "Source",
             value: "AAVE",
             sub: "ETH Sepolia",
-            color: "#162840",
+            color: "#2d3932",
           },
           {
             label: "Bridge",
             value: "CCIP",
             sub: "Chainlink",
-            color: "#5a7a9f",
+            color: "#c7f36b",
           },
           {
             label: "Target",
             value: "Compound",
             sub: "Base Sepolia",
-            color: "#94b4d8",
+            color: "#b5e86f",
           },
         ].map((m) => (
           <div key={m.label} className="px-4 py-3 text-center">
-            <div className="text-[9px] uppercase tracking-widest text-[#2a3a4a] mb-1">
+            <div className="text-[9px] uppercase tracking-widest text-[#637267] mb-1">
               {m.label}
             </div>
             <div className="text-[13px] font-bold" style={{ color: m.color }}>
               {m.value}
             </div>
-            <div className="text-[9px] text-[#3a5a7f] mt-0.5">{m.sub}</div>
+            <div className="text-[9px] text-[#69776f] mt-0.5">{m.sub}</div>
           </div>
         ))}
       </div>
@@ -491,7 +491,7 @@ export const CreWorkflowAnimation: React.FC = () => {
           className="h-full"
           style={{
             background:
-              "linear-gradient(90deg, #162840, #5a7a9f, #5a7a9f, #94b4d8)",
+              "linear-gradient(90deg, #2d3932, #c7f36b, #c7f36b, #b5e86f)",
           }}
           animate={{ width: `${progressPct}%` }}
           transition={{ duration: 0.5 }}

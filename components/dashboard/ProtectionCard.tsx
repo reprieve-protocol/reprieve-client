@@ -17,7 +17,7 @@ export function ProtectionCard({
     <section className="card p-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+        <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
           Protection Status
         </p>
         {snapshot.protectionStatus.active ? (
@@ -34,7 +34,7 @@ export function ProtectionCard({
             ? `Workflow ${snapshot.protectionStatus.workflowId ?? "n/a"}`
             : "No workflow deployed"}
         </p>
-        <p className="text-xs text-[#5a7a9f]">
+        <p className="text-xs text-[#c7f36b]">
           Last CRE check: {snapshot.lastCheckSecondsAgo}s ago
         </p>
       </div>
@@ -52,7 +52,7 @@ export function ProtectionCard({
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Link
           href="/setup"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#162840] bg-[#0f1e38] px-3 py-2.5 text-xs font-medium text-[#94b4d8] transition hover:bg-[#112236] hover:border-[#5a7a9f] hover:text-white"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#2d3932] bg-[#191f1b] px-3 py-2.5 text-xs font-medium text-[#b5e86f] transition hover:bg-[#222a25] hover:border-[#c7f36b] hover:text-white"
         >
           <Settings className="size-3.5" />
           {snapshot.protectionStatus.active ? "Edit Strategy" : "Setup Now"}
@@ -61,7 +61,7 @@ export function ProtectionCard({
           type="button"
           onClick={onTriggerRescue}
           disabled={rescueDisabled}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#162840] bg-[#0f1e38] px-3 py-2.5 text-xs font-medium text-[#94b4d8] transition hover:bg-[#112236] hover:border-[#5a7a9f] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#2d3932] bg-[#191f1b] px-3 py-2.5 text-xs font-medium text-[#b5e86f] transition hover:bg-[#222a25] hover:border-[#c7f36b] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Zap className="size-3.5" />
           Simulate Rescue
@@ -71,7 +71,7 @@ export function ProtectionCard({
       {/* Audit link */}
       <Link
         href="/history"
-        className="mt-3 inline-flex items-center gap-1 text-xs text-[#5a7a9f] hover:text-[#94b4d8] transition-colors"
+        className="mt-3 inline-flex items-center gap-1 text-xs text-[#c7f36b] hover:text-[#b5e86f] transition-colors"
       >
         View Rescue Log
         <ArrowRight className="size-3" />

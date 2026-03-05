@@ -44,15 +44,15 @@ export function RescueOverlay() {
       : rescueRun.phase.status === "partial" ||
           rescueRun.phase.status === "ccip-delayed"
         ? "bg-amber-500"
-        : "bg-[#5a7a9f]";
+        : "bg-[#c7f36b]";
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080f1e]/85 p-4 backdrop-blur-md md:p-10">
-      <div className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#162840] bg-[#080f1e] shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-[#0b0f0d]/85 p-4 backdrop-blur-md md:p-10">
+      <div className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#2d3932] bg-[#0b0f0d] shadow-2xl">
         {/* Header */}
-        <header className="flex items-center justify-between border-b border-[#162840] px-6 py-4">
+        <header className="flex items-center justify-between border-b border-[#2d3932] px-6 py-4">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+            <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
               Detect · Evaluate · Simulate · Rescue
             </p>
             <h2 className="mt-1 text-lg font-semibold text-white">{title}</h2>
@@ -67,7 +67,7 @@ export function RescueOverlay() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="text-[#6b8cb0] hover:bg-[#0f1e38] hover:text-white"
+                className="text-[#a9b2ab] hover:bg-[#191f1b] hover:text-white"
                 onClick={dismissRescueRun}
               >
                 <X className="size-4" />
@@ -82,10 +82,10 @@ export function RescueOverlay() {
             {/* Progress panel */}
             <div className="card-inset p-4">
               <div className="mb-3 flex items-center justify-between text-sm">
-                <span className="font-medium text-[#94b4d8]">
+                <span className="font-medium text-[#b5e86f]">
                   Workflow progress
                 </span>
-                <span className="tabular-nums text-[#6b8cb0]">{progress}%</span>
+                <span className="tabular-nums text-[#a9b2ab]">{progress}%</span>
               </div>
               <div className="progress-track">
                 <div
@@ -96,7 +96,7 @@ export function RescueOverlay() {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="mt-3 text-sm text-[#6b8cb0]">
+              <p className="mt-3 text-sm text-[#a9b2ab]">
                 {rescueRun.phase.message}
               </p>
             </div>
@@ -125,7 +125,7 @@ export function RescueOverlay() {
                       tone={phaseTone(phase.status)}
                     />
                   </div>
-                  <p className="mt-1.5 text-xs text-[#6b8cb0]">
+                  <p className="mt-1.5 text-xs text-[#a9b2ab]">
                     {phase.message}
                   </p>
                 </article>
@@ -140,32 +140,32 @@ export function RescueOverlay() {
                 Split-chain rescue map
               </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border border-[#162840] bg-[#080f1e] p-3">
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-[#5a7a9f]">
+                <div className="rounded-lg border border-[#2d3932] bg-[#0b0f0d] p-3">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-[#c7f36b]">
                     Source
                   </p>
                   <p className="mt-1.5 text-sm font-medium text-white">
                     {CHAIN_LABELS["arbitrum-sepolia"]}
                   </p>
-                  <p className="mt-0.5 text-xs text-[#5a7a9f]">
+                  <p className="mt-0.5 text-xs text-[#c7f36b]">
                     Compound withdrawal
                   </p>
                 </div>
-                <div className="rounded-lg border border-[#162840] bg-[#080f1e] p-3">
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-[#5a7a9f]">
+                <div className="rounded-lg border border-[#2d3932] bg-[#0b0f0d] p-3">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-[#c7f36b]">
                     Target
                   </p>
                   <p className="mt-1.5 text-sm font-medium text-white">
                     {CHAIN_LABELS["base-sepolia"]}
                   </p>
-                  <p className="mt-0.5 text-xs text-[#5a7a9f]">
+                  <p className="mt-0.5 text-xs text-[#c7f36b]">
                     Morpho debt repay
                   </p>
                 </div>
               </div>
 
-              <div className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-[#162840] bg-[#080f1e] p-2.5 text-xs text-[#6b8cb0]">
-                <Activity className="size-3.5 animate-pulse text-[#7a9abf]" />
+              <div className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-[#2d3932] bg-[#0b0f0d] p-2.5 text-xs text-[#a9b2ab]">
+                <Activity className="size-3.5 animate-pulse text-[#ccd7cf]" />
                 CCIP bridge
                 <ArrowRight className="size-3.5" />
                 Cross-chain lock active

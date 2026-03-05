@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { injected } from "wagmi/connectors";
-import { Connector } from "wagmi";
 
 interface NavItem {
   href: string;
@@ -27,7 +26,7 @@ interface HeaderProps {
   address?: `0x${string}`;
   isFunding: boolean;
   onFund: () => void;
-  onConnect: (args: { connector: Connector }) => void;
+  onConnect: (args: { connector: ReturnType<typeof injected> }) => void;
   onDisconnect: () => void;
 }
 
@@ -43,47 +42,48 @@ export function Header({
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[#162840] bg-[#080f1e]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 border-b border-[#2d3932] bg-[#0b0f0d]/90 backdrop-blur-xl">
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
         {/* Treasury */}
         <div className="flex items-center gap-3"></div>
 
         {/* Right controls */}
         <div className="flex items-center gap-2">
-          <span className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[#192e4c] bg-[#0c1628] px-2.5 py-1 text-xs font-medium text-[#7a9abf] tracking-wide">
-            <Activity className="size-3 text-[#94b4d8]" />
+          <span className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[#37453e] bg-[#131815] px-2.5 py-1 text-xs font-medium text-[#ccd7cf] tracking-wide">
+            <Activity className="size-3 text-[#b5e86f]" />
             CCIP Online
           </span>
 
           {isConnected ? (
             <>
               <Button
+                variant="default"
                 size="sm"
-                className="h-8 rounded-lg bg-[#94b4d8]/10 text-[#94b4d8] hover:bg-[#94b4d8]/20 border border-[#94b4d8]/20 flex items-center whitespace-nowrap"
+                className="h-8 rounded-lg px-3"
                 onClick={onFund}
                 disabled={isFunding}
               >
                 {isFunding ? (
-                  <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                  <Loader2 className="size-3.5 animate-spin" />
                 ) : (
-                  <Droplets className="size-3.5 mr-1.5" />
+                  <Droplets className="size-3.5" />
                 )}
                 Fund Token
               </Button>
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
-                className="h-8 rounded-lg border border-[#162840] bg-[#0c1628] text-[#94b4d8] hover:bg-[#112236] hover:text-white"
+                className="h-8 rounded-lg"
                 onClick={onDisconnect}
               >
-                <CreditCard className="size-3.5 mr-1.5" />
+                <CreditCard className="size-3.5" />
                 {address?.slice(0, 6)}...{address?.slice(-4)}
               </Button>
             </>
           ) : (
             <Button
               size="sm"
-              className="h-8 rounded-lg bg-[#5a7a9f] px-3 text-white hover:bg-[#7a9abf] shadow-sm"
+              className="h-8 rounded-lg bg-[#c7f36b] px-3 text-[#172010] hover:bg-[#b5e86f] shadow-sm"
               onClick={() => onConnect({ connector: injected() })}
             >
               Connect Wallet
@@ -92,7 +92,7 @@ export function Header({
 
           <button
             type="button"
-            className="hidden size-8 items-center justify-center rounded-lg border border-[#162840] bg-[#0c1628] text-[#6b8cb0] transition hover:text-white md:inline-flex"
+            className="hidden size-8 items-center justify-center rounded-lg border border-[#2d3932] bg-[#131815] text-[#a9b2ab] transition hover:text-white md:inline-flex"
           >
             <ArrowLeftRight className="size-3.5" />
           </button>
@@ -100,7 +100,7 @@ export function Header({
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="flex gap-1.5 overflow-x-auto border-t border-[#162840] px-3 py-2 md:hidden">
+      <nav className="flex gap-1.5 overflow-x-auto border-t border-[#2d3932] px-3 py-2 md:hidden">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -112,8 +112,8 @@ export function Header({
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition",
                 active
-                  ? "border-[#5a7a9f]/40 bg-[#5a7a9f]/10 text-[#94b4d8]"
-                  : "border-[#162840] bg-[#0c1628] text-[#6b8cb0] hover:text-[#c5daf5]",
+                  ? "border-[#c7f36b]/40 bg-[#c7f36b]/10 text-[#b5e86f]"
+                  : "border-[#2d3932] bg-[#131815] text-[#a9b2ab] hover:text-[#e7ece6]",
               )}
             >
               <Icon className="size-3.5" />

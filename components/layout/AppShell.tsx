@@ -88,7 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [address, generateDemoWallet]);
 
   return (
-    <div className="min-h-screen text-[#ffffff]">
+    <div className="min-h-screen text-[#f1f4ef]">
       <Sidebar navItems={navItems} />
 
       <div className="md:pl-56">

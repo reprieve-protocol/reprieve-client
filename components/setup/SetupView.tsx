@@ -11,6 +11,7 @@ import { useAppState } from "@/lib/state/app-context";
 import {
   useCreRegistrationsControllerUpsertRegistration,
   useCreRegistrationsControllerGetRegistration,
+  getCreRegistrationsControllerGetRegistrationQueryKey,
 } from "@/src/services/queries";
 import { UpsertUserCreRegistrationDtoWorkflowId } from "@/src/services/models/upsertUserCreRegistrationDtoWorkflowId";
 import { UpsertUserCreRegistrationDtoQueuePriority } from "@/src/services/models/upsertUserCreRegistrationDtoQueuePriority";
@@ -166,6 +167,7 @@ export function SetupView() {
     refetch: refetchCreRegistration,
   } = useCreRegistrationsControllerGetRegistration(address, {
     query: {
+      queryKey: getCreRegistrationsControllerGetRegistrationQueryKey(address),
       retry: (failureCount, error) => {
         const statusCode = (error as { response?: { status?: number } } | null)
           ?.response?.status;
@@ -200,8 +202,8 @@ export function SetupView() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 text-sm text-[#6b8cb0]">
-        <span className="size-4 animate-spin rounded-full border-2 border-[#162840] border-t-[#5a7a9f]" />
+      <div className="flex items-center gap-3 text-sm text-[#a9b2ab]">
+        <span className="size-4 animate-spin rounded-full border-2 border-[#2d3932] border-t-[#c7f36b]" />
         Loading setup...
       </div>
     );
@@ -211,7 +213,7 @@ export function SetupView() {
 
   if (!setupDefaults || !protectionConfig || !snapshot) {
     return (
-      <p className="text-sm text-[#6b8cb0]">Setup defaults unavailable.</p>
+      <p className="text-sm text-[#a9b2ab]">Setup defaults unavailable.</p>
     );
   }
 
@@ -286,12 +288,12 @@ export function SetupView() {
             <h1 className="text-2xl font-bold tracking-tight text-white">
               Protection Setup
             </h1>
-            <p className="mt-0.5 text-sm text-[#6b8cb0]">
+            <p className="mt-0.5 text-sm text-[#a9b2ab]">
               Deploy your personal CRE workflow in three steps.
             </p>
           </div>
           <span className="tag">
-            <span className="size-1.5 rounded-full bg-[#94b4d8]" />
+            <span className="size-1.5 rounded-full bg-[#b5e86f]" />
             Wizard Mode
           </span>
         </div>
@@ -299,13 +301,13 @@ export function SetupView() {
         {address && (
           <section className="card p-4 space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#5a7a9f]">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#c7f36b]">
                 CRE Workflow Registration
               </p>
               <span className="tag">
                 <span
                   className={`size-1.5 rounded-full ${
-                    hasCreRegistration ? "bg-[#94b4d8]" : "bg-amber-400"
+                    hasCreRegistration ? "bg-[#b5e86f]" : "bg-amber-400"
                   }`}
                 />
                 {hasCreRegistration ? "Registered" : "Not Registered"}
@@ -315,42 +317,22 @@ export function SetupView() {
             {hasCreRegistration ? (
               <>
                 <div className="grid gap-2 sm:grid-cols-2 text-sm">
-                  {creData?.workflowId && (
-                    <div className="card-inset px-3 py-2">
-                      <p className="text-[10px] uppercase tracking-widest text-[#5a7a9f]">
-                        Workflow
-                      </p>
-                      <p className="mt-0.5 font-mono text-xs text-white truncate">
-                        {creData.workflowId}
-                      </p>
-                    </div>
-                  )}
                   {creData?.hfThresholdBps !== undefined && (
                     <div className="card-inset px-3 py-2">
-                      <p className="text-[10px] uppercase tracking-widest text-[#5a7a9f]">
+                      <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
                         HF Threshold
                       </p>
                       <p className="mt-0.5 text-xs text-white">
                         {(creData.hfThresholdBps / 10_000).toFixed(2)}
-                        <span className="ml-1 text-[#6b8cb0]">
+                        <span className="ml-1 text-[#a9b2ab]">
                           ({creData.hfThresholdBps} bps)
                         </span>
                       </p>
                     </div>
                   )}
-                  {creData?.queuePriority && (
-                    <div className="card-inset px-3 py-2">
-                      <p className="text-[10px] uppercase tracking-widest text-[#5a7a9f]">
-                        Queue Priority
-                      </p>
-                      <p className="mt-0.5 text-xs text-white">
-                        {creData.queuePriority}
-                      </p>
-                    </div>
-                  )}
                   {creData?.budgetCapUsd !== undefined && (
                     <div className="card-inset px-3 py-2">
-                      <p className="text-[10px] uppercase tracking-widest text-[#5a7a9f]">
+                      <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
                         Budget Cap
                       </p>
                       <p className="mt-0.5 text-xs text-white">
@@ -360,10 +342,10 @@ export function SetupView() {
                   )}
                   {creData?.updatedAt && (
                     <div className="card-inset px-3 py-2 sm:col-span-2">
-                      <p className="text-[10px] uppercase tracking-widest text-[#5a7a9f]">
+                      <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
                         Last Updated
                       </p>
-                      <p className="mt-0.5 text-xs text-[#94b4d8]">
+                      <p className="mt-0.5 text-xs text-[#b5e86f]">
                         {new Date(creData.updatedAt).toLocaleString()}
                       </p>
                     </div>
@@ -378,21 +360,21 @@ export function SetupView() {
                       setCreUpdateMessage(null);
                     }}
                     disabled={deploying || updatingCre}
-                    className="inline-flex items-center justify-center rounded-lg border border-[#5a7a9f]/30 bg-[#5a7a9f]/10 px-3 py-1.5 text-xs font-semibold text-[#94b4d8] transition hover:bg-[#5a7a9f]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center rounded-lg border border-[#c7f36b]/30 bg-[#c7f36b]/10 px-3 py-1.5 text-xs font-semibold text-[#b5e86f] transition hover:bg-[#c7f36b]/20 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Update CRE
                   </button>
                 </div>
               </>
             ) : (
-              <p className="text-xs text-[#6b8cb0]">
+              <p className="text-xs text-[#a9b2ab]">
                 No CRE workflow registered yet. Configure below and deploy to
                 create one.
               </p>
             )}
 
             {creUpdateMessage && (
-              <p className="text-xs text-[#94b4d8]">{creUpdateMessage}</p>
+              <p className="text-xs text-[#b5e86f]">{creUpdateMessage}</p>
             )}
           </section>
         )}
@@ -435,15 +417,15 @@ export function SetupView() {
           }}
         >
           <section
-            className="flex w-full max-w-5xl max-h-[90vh] flex-col overflow-hidden rounded-xl border border-[#162840] bg-[#0c1628] shadow-2xl"
+            className="flex w-full max-w-5xl max-h-[90vh] flex-col overflow-hidden rounded-xl border border-[#2d3932] bg-[#131815] shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-[#162840] px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[#2d3932] px-5 py-4">
               <div>
                 <h2 className="text-base font-semibold text-white">
                   Update CRE Configuration
                 </h2>
-                <p className="text-xs text-[#6b8cb0]">
+                <p className="text-xs text-[#a9b2ab]">
                   Adjust options and confirm to update this CRE.
                 </p>
               </div>
@@ -454,7 +436,7 @@ export function SetupView() {
                   setCreUpdateMessage(null);
                 }}
                 disabled={updatingCre}
-                className="rounded-lg p-2 text-[#6b8cb0] transition hover:bg-[#162840] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg p-2 text-[#a9b2ab] transition hover:bg-[#2d3932] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <X className="size-4" />
               </button>
@@ -463,7 +445,7 @@ export function SetupView() {
             <div className="overflow-y-auto p-5 space-y-5">
               <div className="card-inset p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-[#94b4d8]">
+                  <p className="text-xs font-semibold text-[#b5e86f]">
                     HF Threshold
                   </p>
                   <p className="text-sm font-bold tabular-nums text-white">
@@ -487,7 +469,7 @@ export function SetupView() {
 
               <div className="card-inset p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-[#94b4d8]">
+                  <p className="text-xs font-semibold text-[#b5e86f]">
                     Daily Cap
                   </p>
                   <p className="text-sm font-bold tabular-nums text-white">
@@ -507,7 +489,7 @@ export function SetupView() {
                   }
                   className="w-full"
                 />
-                <p className="text-[11px] text-[#6b8cb0]">
+                <p className="text-[11px] text-[#a9b2ab]">
                   {ethUsdPrice !== null
                     ? `Budget cap sent to CRE: $${Math.round(
                         protectionConfig.dailyCapEth * ethUsdPrice,
@@ -520,49 +502,9 @@ export function SetupView() {
                   </p>
                 )}
               </div>
-
-              <div className="card-inset p-4 space-y-3">
-                <p className="text-xs font-semibold text-[#94b4d8]">
-                  Queue Priority
-                </p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setProtectionConfig({
-                        ...protectionConfig,
-                        priorityQueue: ["same-chain", "ccip-cross-chain"],
-                      })
-                    }
-                    className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${
-                      protectionConfig.priorityQueue[0] === "same-chain"
-                        ? "border-[#5a7a9f]/40 bg-[#5a7a9f]/10 text-[#94b4d8]"
-                        : "border-[#4a6a8f] bg-[#0f1e38] text-[#8fb3d9] hover:bg-[#13243a]"
-                    }`}
-                  >
-                    Same-chain first
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setProtectionConfig({
-                        ...protectionConfig,
-                        priorityQueue: ["ccip-cross-chain", "same-chain"],
-                      })
-                    }
-                    className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${
-                      protectionConfig.priorityQueue[0] === "ccip-cross-chain"
-                        ? "border-[#5a7a9f]/40 bg-[#5a7a9f]/10 text-[#94b4d8]"
-                        : "border-[#4a6a8f] bg-[#0f1e38] text-[#8fb3d9] hover:bg-[#13243a]"
-                    }`}
-                  >
-                    Cross-chain first
-                  </button>
-                </div>
-              </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 border-t border-[#162840] px-5 py-4">
+            <div className="flex items-center justify-end gap-2 border-t border-[#2d3932] px-5 py-4">
               <button
                 type="button"
                 onClick={() => {
@@ -570,7 +512,7 @@ export function SetupView() {
                   setCreUpdateMessage(null);
                 }}
                 disabled={updatingCre}
-                className="inline-flex items-center justify-center rounded-lg border border-[#4a6a8f] bg-[#0f1e38] px-3 py-1.5 text-xs font-semibold text-[#8fb3d9] transition hover:bg-[#13243a] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-lg border border-[#8c9890] bg-[#191f1b] px-3 py-1.5 text-xs font-semibold text-[#dde6de] transition hover:bg-[#252f29] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -578,7 +520,7 @@ export function SetupView() {
                 type="button"
                 onClick={() => void onConfirmUpdateCre()}
                 disabled={updatingCre || deploying}
-                className="inline-flex items-center justify-center rounded-lg border border-[#5a7a9f]/30 bg-[#5a7a9f]/10 px-3 py-1.5 text-xs font-semibold text-[#94b4d8] transition hover:bg-[#5a7a9f]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-lg border border-[#c7f36b]/30 bg-[#c7f36b]/10 px-3 py-1.5 text-xs font-semibold text-[#b5e86f] transition hover:bg-[#c7f36b]/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {updatingCre ? "Updating CRE..." : "Confirm Update"}
               </button>

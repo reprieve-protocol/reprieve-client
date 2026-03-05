@@ -9,12 +9,12 @@ import type {
 export const APP_NAME = "Reprieve";
 
 export const BRAND = {
-  background: "#0A1628",
-  primary: "#375BD2",
-  success: "#22C55E",
-  warning: "#F59E0B",
-  danger: "#EF4444",
-  text: "#F8FAFC",
+  background: "#0b0f0d",
+  primary: "#c7f36b",
+  success: "#7fdc73",
+  warning: "#f3b347",
+  danger: "#ff6178",
+  text: "#f1f4ef",
 } as const;
 
 export const CHAIN_LABELS: Record<Chain, string> = {
@@ -36,9 +36,9 @@ export const PROTOCOL_LABELS: Record<Protocol, string> = {
 };
 
 export const PROTOCOL_ACCENTS: Record<Protocol, string> = {
-  "aave-v4": "bg-[#071b33] text-sky-300 border-sky-500/35",
-  "compound-v3": "bg-[#2a1808] text-orange-300 border-orange-500/45",
-  "morpho-v2": "bg-[#082317] text-emerald-300 border-emerald-500/45",
+  "aave-v4": "bg-[#1e2f1d] text-sky-300 border-sky-500/35",
+  "compound-v3": "bg-[#3a2a14] text-orange-300 border-orange-500/45",
+  "morpho-v2": "bg-[#0d3526] text-emerald-300 border-emerald-500/45",
 };
 
 export const PROTOCOL_SHORT_LABELS: Record<Protocol, string> = {

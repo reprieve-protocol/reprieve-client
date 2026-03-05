@@ -29,7 +29,7 @@ export function AggregateGauge({
 
   const barColor =
     risk === "safe"
-      ? "bg-[#94b4d8]"
+      ? "bg-[linear-gradient(90deg,#c7f36b_0%,#b5e86f_100%)]"
       : risk === "moderate"
         ? "bg-amber-500"
         : risk === "danger"
@@ -39,7 +39,7 @@ export function AggregateGauge({
   return (
     <section className="card p-5">
       {/* Label */}
-      <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+      <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
         Aggregate Health Factor
       </p>
 
@@ -55,7 +55,7 @@ export function AggregateGauge({
       </div>
 
       {/* Progress bar */}
-      <div className="relative mt-5 h-2 overflow-hidden rounded-full bg-[#0c1628]">
+      <div className="relative mt-5 h-2 overflow-hidden rounded-full bg-[#131815]">
         <div
           className={`h-full ${barColor} transition-all duration-500`}
           style={{ width: `${progress}%` }}
@@ -69,9 +69,9 @@ export function AggregateGauge({
       </div>
 
       {/* Scale labels */}
-      <div className="mt-2 flex items-center justify-between text-[11px] text-[#4a6a8f]">
+      <div className="mt-2 flex items-center justify-between text-[11px] text-[#8c9890]">
         <span>0.00</span>
-        <span className="text-[#6b8cb0]">Threshold {threshold.toFixed(2)}</span>
+        <span className="text-[#a9b2ab]">Threshold {threshold.toFixed(2)}</span>
         <span>{maxHF.toFixed(1)}</span>
       </div>
 

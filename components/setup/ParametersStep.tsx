@@ -1,12 +1,13 @@
-import { estimateRescuesPerDay } from "@/lib/domain/calculations";
+import { estimateRescuesPerDay, formatUsd } from "@/lib/domain/calculations";
+import { ETH_USD_PRICE } from "@/lib/domain/constants";
 import type { Position, ProtectionConfig } from "@/lib/domain/types";
 import { Slider } from "@/components/ui/slider";
 
 function FieldLabel({ title, caption }: { title: string; caption: string }) {
   return (
     <div>
-      <p className="text-xs font-semibold text-[#94b4d8]">{title}</p>
-      <p className="mt-0.5 text-[11px] text-[#5a7a9f]">{caption}</p>
+      <p className="text-xs font-semibold text-[#b5e86f]">{title}</p>
+      <p className="mt-0.5 text-[11px] text-[#c7f36b]">{caption}</p>
     </div>
   );
 }
@@ -26,14 +27,15 @@ export function ParametersStep({
     config.dailyCapEth,
     config.perRescueCapEth,
   );
+  const dailyCapUsd = config.dailyCapEth * ETH_USD_PRICE;
 
   return (
     <section className="card p-5 space-y-5">
       <div className="flex items-center gap-2">
-        <span className="flex size-5 items-center justify-center rounded-full bg-[#5a7a9f]/20 text-[10px] font-bold text-[#7a9abf] ring-1 ring-[#5a7a9f]/30">
+        <span className="flex size-5 items-center justify-center rounded-full bg-[#c7f36b]/20 text-[10px] font-bold text-[#ccd7cf] ring-1 ring-[#c7f36b]/30">
           2
         </span>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-[#5a7a9f]">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-[#c7f36b]">
           Parameters
         </h2>
       </div>
@@ -56,7 +58,7 @@ export function ParametersStep({
             <p className="text-lg font-bold tabular-nums text-white">
               {config.threshold.toFixed(2)}
             </p>
-            <p className="text-xs text-[#6b8cb0]">
+            <p className="text-xs text-[#a9b2ab]">
               {triggeredCount} positions triggered
             </p>
           </div>
@@ -77,13 +79,13 @@ export function ParametersStep({
           />
           <p className="text-lg font-bold tabular-nums text-white">
             {config.perRescueCapEth.toFixed(2)}{" "}
-            <span className="text-sm font-normal text-[#6b8cb0]">ETH</span>
+            <span className="text-sm font-normal text-[#a9b2ab]">ETH</span>
           </p>
         </div>
 
         {/* Daily Cap */}
         <div className="space-y-3">
-          <FieldLabel title="Daily Cap" caption="Max total gas/day" />
+          <FieldLabel title="Daily Cap" caption="Max total gas/day (USD est.)" />
           <Slider
             min={0.05}
             max={1}
@@ -96,10 +98,9 @@ export function ParametersStep({
           />
           <div className="flex items-center justify-between">
             <p className="text-lg font-bold tabular-nums text-white">
-              {config.dailyCapEth.toFixed(2)}{" "}
-              <span className="text-sm font-normal text-[#6b8cb0]">ETH</span>
+              {formatUsd(dailyCapUsd)}
             </p>
-            <p className="text-xs text-[#6b8cb0]">≈ {rescuesPerDay}/day</p>
+            <p className="text-xs text-[#a9b2ab]">≈ {rescuesPerDay}/day</p>
           </div>
         </div>
 
@@ -119,12 +120,12 @@ export function ParametersStep({
             }
             className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition ${
               config.emergencyOverride
-                ? "bg-[#94b4d8]/10 text-[#94b4d8] ring-1 ring-[#94b4d8]/30"
-                : "bg-[#0c1628] text-[#6b8cb0] ring-1 ring-[#162840] hover:ring-[#5a7a9f]"
+                ? "bg-[#b5e86f]/10 text-[#b5e86f] ring-1 ring-[#b5e86f]/30"
+                : "bg-[#131815] text-[#a9b2ab] ring-1 ring-[#2d3932] hover:ring-[#c7f36b]"
             }`}
           >
             <span
-              className={`size-1.5 rounded-full ${config.emergencyOverride ? "bg-[#94b4d8]" : "bg-[#4a6a8f]"}`}
+              className={`size-1.5 rounded-full ${config.emergencyOverride ? "bg-[#b5e86f]" : "bg-[#8c9890]"}`}
             />
             {config.emergencyOverride ? "Enabled" : "Disabled"}
           </button>
@@ -133,15 +134,15 @@ export function ParametersStep({
 
       {/* Info boxes */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="card-inset p-3 text-xs text-[#6b8cb0]">
-          <p className="font-semibold text-[#94b4d8]">Priority queue</p>
+        <div className="card-inset p-3 text-xs text-[#a9b2ab]">
+          <p className="font-semibold text-[#b5e86f]">Priority queue</p>
           <ol className="mt-1.5 space-y-0.5 list-decimal list-inside">
             <li>Same-chain first</li>
             <li>CCIP cross-chain escalation</li>
           </ol>
         </div>
-        <div className="card-inset p-3 text-xs text-[#6b8cb0]">
-          <p className="font-semibold text-[#94b4d8]">Live preview</p>
+        <div className="card-inset p-3 text-xs text-[#a9b2ab]">
+          <p className="font-semibold text-[#b5e86f]">Live preview</p>
           <p className="mt-1.5">
             {positions.filter((p) => p.healthFactor < config.threshold).length}{" "}
             of {positions.length} positions targeted

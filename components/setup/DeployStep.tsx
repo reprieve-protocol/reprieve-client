@@ -1,6 +1,7 @@
 import { CircleCheckBig, Loader2, ShieldCheck } from "lucide-react";
 import { BudgetBar } from "@/components/common/BudgetBar";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { Button } from "@/components/ui/button";
 import { formatLink, formatUsd } from "@/lib/domain/calculations";
 import { LINK_USD_PRICE } from "@/lib/domain/constants";
 import type { SetupDefaults } from "@/lib/domain/types";
@@ -25,10 +26,10 @@ export function DeployStep({
   return (
     <section className="card p-5 space-y-5">
       <div className="flex items-center gap-2">
-        <span className="flex size-5 items-center justify-center rounded-full bg-[#5a7a9f]/20 text-[10px] font-bold text-[#7a9abf] ring-1 ring-[#5a7a9f]/30">
+        <span className="flex size-5 items-center justify-center rounded-full bg-[#c7f36b]/20 text-[10px] font-bold text-[#ccd7cf] ring-1 ring-[#c7f36b]/30">
           3
         </span>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-[#5a7a9f]">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-[#c7f36b]">
           Deploy CRE
         </h2>
       </div>
@@ -36,11 +37,11 @@ export function DeployStep({
       {/* Stats grid */}
       <div className="grid gap-3 md:grid-cols-2">
         <div className="card-inset p-4">
-          <p className="text-[11px] text-[#5a7a9f]">Coverage estimate</p>
+          <p className="text-[11px] text-[#c7f36b]">Coverage estimate</p>
           <p className="mt-1 text-3xl font-bold tabular-nums text-white">
             {coverage}%
           </p>
-          <p className="mt-0.5 text-xs text-[#6b8cb0]">
+          <p className="mt-0.5 text-xs text-[#a9b2ab]">
             for a 20% market drawdown
           </p>
           <div className="mt-3">
@@ -49,14 +50,14 @@ export function DeployStep({
         </div>
 
         <div className="card-inset p-4">
-          <p className="text-[11px] text-[#5a7a9f]">One-time deployment</p>
+          <p className="text-[11px] text-[#c7f36b]">One-time deployment</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-white">
             {formatLink(setupDefaults.linkCost)}
           </p>
-          <p className="mt-0.5 text-xs text-[#6b8cb0]">
+          <p className="mt-0.5 text-xs text-[#a9b2ab]">
             {formatUsd(linkUsd)} at LINK oracle price
           </p>
-          <p className="mt-2 text-xs text-[#6b8cb0]">
+          <p className="mt-2 text-xs text-[#a9b2ab]">
             Capacity: ~{rescuesPerDayEstimate} rescues/day
           </p>
         </div>
@@ -64,7 +65,7 @@ export function DeployStep({
 
       {/* Token approvals */}
       <div className="card-inset p-4 space-y-3">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+        <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
           Token approvals
         </p>
         {setupDefaults.approvals.map((item) => (
@@ -72,7 +73,7 @@ export function DeployStep({
             key={item.label}
             className="flex items-center justify-between gap-2 text-sm"
           >
-            <span className="text-[#94b4d8]">{item.label}</span>
+            <span className="text-[#b5e86f]">{item.label}</span>
             {item.approved ? (
               <StatusBadge label="Approved" tone="success" />
             ) : (
@@ -83,11 +84,12 @@ export function DeployStep({
       </div>
 
       {/* Deploy button */}
-      <button
+      <Button
         type="button"
+        size="lg"
         onClick={onDeploy}
         disabled={deploying}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#5a7a9f] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#5a7a9f]/20 transition hover:bg-[#7a9abf] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-xl text-sm font-semibold"
       >
         {deploying ? (
           <Loader2 className="size-4 animate-spin" />
@@ -97,15 +99,15 @@ export function DeployStep({
         {isActive
           ? "Update Protection"
           : `Deploy Protection — Pay ${setupDefaults.linkCost} LINK`}
-      </button>
+      </Button>
 
       {/* Active confirmation */}
       {isActive ? (
-        <div className="flex items-start gap-3 rounded-xl border border-[#94b4d8]/25 bg-[#94b4d8]/8 p-4 text-sm text-[#94b4d8]">
+        <div className="flex items-start gap-3 rounded-xl border border-[#b5e86f]/25 bg-[#b5e86f]/8 p-4 text-sm text-[#b5e86f]">
           <CircleCheckBig className="mt-0.5 size-4 shrink-0" />
           <div>
             <p className="font-medium">CRE active</p>
-            <p className="mt-0.5 text-xs text-[#94b4d8]/70">
+            <p className="mt-0.5 text-xs text-[#b5e86f]/70">
               Deployed and DON-verified. Unified workflow is active.
             </p>
           </div>

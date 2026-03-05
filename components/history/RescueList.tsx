@@ -26,8 +26,8 @@ export function RescueList({
             className={cn(
               "w-full rounded-xl p-3.5 text-left transition-all duration-150",
               selected
-                ? "bg-[#5a7a9f]/10 ring-1 ring-[#5a7a9f]/30"
-                : "hover:bg-[#0f1e38]",
+                ? "bg-[#c7f36b]/10 ring-1 ring-[#c7f36b]/30"
+                : "hover:bg-[#191f1b]",
             )}
           >
             <div className="flex items-center justify-between gap-2">
@@ -42,20 +42,20 @@ export function RescueList({
               />
             </div>
 
-            <p className="mt-1.5 text-[11px] text-[#5a7a9f]">
+            <p className="mt-1.5 text-[11px] text-[#c7f36b]">
               {new Date(entry.timestampUtc).toUTCString()}
             </p>
 
-            <div className="mt-2 flex items-center gap-2 text-xs font-medium text-[#94b4d8]">
+            <div className="mt-2 flex items-center gap-2 text-xs font-medium text-[#b5e86f]">
               <span>{PROTOCOL_SHORT_LABELS[entry.source.protocol]}</span>
-              <span className="text-[#4a6a8f]">→</span>
+              <span className="text-[#8c9890]">→</span>
               <span>{PROTOCOL_SHORT_LABELS[entry.target.protocol]}</span>
             </div>
 
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#6b8cb0]">
+              <span className="text-[#a9b2ab]">
                 HF {entry.hfBefore.toFixed(2)} →{" "}
-                <span className="text-[#94b4d8]">
+                <span className="text-[#b5e86f]">
                   {entry.hfAfter.toFixed(2)}
                 </span>
               </span>

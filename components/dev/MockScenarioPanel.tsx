@@ -15,7 +15,7 @@ export function MockScenarioPanel() {
 
   return (
     <section className="fo-panel border-dashed p-3">
-      <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-[#8ca8ca]">
+      <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-[#d8e1d9]">
         <Beaker className="size-3.5" />
         Mock Scenario Panel (dev)
       </div>
@@ -27,8 +27,8 @@ export function MockScenarioPanel() {
             onClick={() => void setScenario(id)}
             className={`rounded-full border px-2.5 py-1 text-xs transition ${
               scenario === id
-                ? "border-[#5a7a9f] bg-[#13243a] text-[#d6e6ff]"
-                : "border-[#3a5a7f] bg-[#112236] text-[#89a3c5] hover:bg-[#13243a]"
+                ? "border-[#c7f36b] bg-[#252f29] text-[#edf2eb]"
+                : "border-[#69776f] bg-[#222a25] text-[#d3ddd5] hover:bg-[#252f29]"
             }`}
           >
             {SCENARIO_LABELS[id]}

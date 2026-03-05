@@ -14,7 +14,7 @@ function ActionButton({
   children: React.ReactNode;
 }) {
   const cls =
-    "inline-flex items-center gap-1.5 rounded-lg border border-[#162840] bg-[#0c1628] px-2.5 py-1.5 text-xs font-medium text-[#6b8cb0] transition hover:bg-[#0f1e38] hover:text-white";
+    "inline-flex items-center gap-1.5 rounded-lg border border-[#2d3932] bg-[#131815] px-2.5 py-1.5 text-xs font-medium text-[#a9b2ab] transition hover:bg-[#191f1b] hover:text-white";
 
   if (href) {
     return (
@@ -33,7 +33,7 @@ function ActionButton({
 export function RescueDetailPanel({ entry }: { entry: RescueLogEntry | null }) {
   if (!entry) {
     return (
-      <div className="card flex min-h-48 items-center justify-center border-dashed p-6 text-sm text-[#4a6a8f]">
+      <div className="card flex min-h-48 items-center justify-center border-dashed p-6 text-sm text-[#8c9890]">
         Select a rescue entry to inspect protocol route, cost, and proof links.
       </div>
     );
@@ -58,13 +58,13 @@ export function RescueDetailPanel({ entry }: { entry: RescueLogEntry | null }) {
 
       {/* Route */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+        <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
           Route
         </p>
-        <p className="mt-2 text-sm text-[#94b4d8]">
+        <p className="mt-2 text-sm text-[#b5e86f]">
           {PROTOCOL_LABELS[entry.source.protocol]} (
           {CHAIN_LABELS[entry.source.chain]})
-          <span className="mx-2 text-[#4a6a8f]">→</span>
+          <span className="mx-2 text-[#8c9890]">→</span>
           {PROTOCOL_LABELS[entry.target.protocol]} (
           {CHAIN_LABELS[entry.target.chain]})
         </p>
@@ -73,21 +73,21 @@ export function RescueDetailPanel({ entry }: { entry: RescueLogEntry | null }) {
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
         <div className="card-inset p-3">
-          <p className="text-[11px] text-[#5a7a9f]">Amount moved</p>
+          <p className="text-[11px] text-[#c7f36b]">Amount moved</p>
           <p className="mt-1 text-sm font-medium text-white">
             {entry.amount.quantity} {entry.amount.token}
           </p>
-          <p className="text-xs text-[#6b8cb0]">
+          <p className="text-xs text-[#a9b2ab]">
             {formatUsd(entry.amount.usdValue)}
           </p>
         </div>
         <div className="card-inset p-3">
-          <p className="text-[11px] text-[#5a7a9f]">Gas</p>
+          <p className="text-[11px] text-[#c7f36b]">Gas</p>
           <p className="mt-1 text-sm font-medium text-white">
             {formatEth(entry.gasEth)}
           </p>
           {entry.ccipFeeLink ? (
-            <p className="text-xs text-[#6b8cb0]">
+            <p className="text-xs text-[#a9b2ab]">
               CCIP: {formatLink(entry.ccipFeeLink)}
             </p>
           ) : null}
@@ -96,20 +96,20 @@ export function RescueDetailPanel({ entry }: { entry: RescueLogEntry | null }) {
 
       {/* HF improvement */}
       <div className="card-inset p-4">
-        <p className="text-[11px] text-[#5a7a9f]">HF Before → After</p>
+        <p className="text-[11px] text-[#c7f36b]">HF Before → After</p>
         <p className="mt-2 text-2xl font-bold tabular-nums">
           <span className="text-amber-400">{entry.hfBefore.toFixed(2)}</span>
-          <span className="mx-3 text-[#4a6a8f] text-base">→</span>
-          <span className="text-[#94b4d8]">{entry.hfAfter.toFixed(2)}</span>
+          <span className="mx-3 text-[#8c9890] text-base">→</span>
+          <span className="text-[#b5e86f]">{entry.hfAfter.toFixed(2)}</span>
         </p>
       </div>
 
       {/* Tx Hash */}
       <div className="card-inset p-4 space-y-2">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+        <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
           Tx Hash
         </p>
-        <p className="break-all font-mono text-xs text-[#94b4d8] leading-relaxed">
+        <p className="break-all font-mono text-xs text-[#b5e86f] leading-relaxed">
           {entry.txHash}
         </p>
         <div className="flex items-center gap-2 pt-1">
@@ -128,10 +128,10 @@ export function RescueDetailPanel({ entry }: { entry: RescueLogEntry | null }) {
 
       {/* Workflow ID */}
       <div className="card-inset p-4 space-y-2">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-[#5a7a9f]">
+        <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
           CRE Workflow ID
         </p>
-        <p className="font-mono text-xs text-[#94b4d8]">{entry.workflowId}</p>
+        <p className="font-mono text-xs text-[#b5e86f]">{entry.workflowId}</p>
         <div className="pt-1">
           <ActionButton href="#">
             <Link2 className="size-3" />

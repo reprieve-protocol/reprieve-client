@@ -50,10 +50,10 @@ export function PositionCard({
         ? "text-orange-400"
         : risk === "moderate"
           ? "text-amber-400"
-          : "text-[#94b4d8]";
+          : "text-[#b5e86f]";
 
   const cardBorder = isActiveRescue
-    ? "border-[#5a7a9f]/40 shadow-[0_0_32px_-8px_rgba(59,130,246,0.3)]"
+    ? "border-[#c7f36b]/40 shadow-[0_0_18px_-10px_rgba(199,243,107,0.35)]"
     : RISK_CLASSNAMES[risk];
 
   return (
@@ -67,11 +67,11 @@ export function PositionCard({
         }
       }}
       className={cn(
-        "card p-4 transition-all duration-200 hover:border-[#5a7a9f] cursor-pointer",
+        "card p-4 transition-all duration-200 hover:border-[#c7f36b] cursor-pointer",
         cardBorder,
-        isActiveRescue && "bg-[#5a7a9f]/5",
+        isActiveRescue && "bg-[#c7f36b]/5",
         isSelected &&
-          "!border-[#94b4d8] ring-2 ring-[#5a7a9f]/50 shadow-[0_0_0_1px_rgba(125,211,252,0.45),0_0_36px_-10px_rgba(56,189,248,0.65)]",
+          "!border-[#b5e86f] ring-2 ring-[#c7f36b]/50 shadow-[0_0_0_1px_rgba(199,243,107,0.45),0_0_24px_-12px_rgba(199,243,107,0.4)]",
       )}
     >
       {/* Header */}
@@ -87,7 +87,7 @@ export function PositionCard({
         </span>
         <div className="flex items-center gap-1.5">
           {isSelected ? (
-            <span className="rounded-md border border-[#5a7a9f]/40 bg-[#5a7a9f]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#94b4d8]">
+            <span className="rounded-md border border-[#c7f36b]/40 bg-[#c7f36b]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#b5e86f]">
               Selected
             </span>
           ) : null}
@@ -97,13 +97,13 @@ export function PositionCard({
 
       {/* Pair & Action */}
       <div className="mt-2 flex items-center gap-2">
-        <p className="text-sm font-medium text-[#94b4d8]">{position.pair}</p>
+        <p className="text-sm font-medium text-[#b5e86f]">{position.pair}</p>
         {position.action && (
           <span
             className={cn(
               "rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
               position.action === "long"
-                ? "border border-[#94b4d8]/40 bg-[#94b4d8]/15 text-[#94b4d8]"
+                ? "border border-[#b5e86f]/40 bg-[#b5e86f]/15 text-[#b5e86f]"
                 : "border border-red-500/40 bg-red-500/15 text-red-300",
             )}
           >
@@ -114,7 +114,7 @@ export function PositionCard({
 
       {/* Health Factor */}
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-[#5a7a9f]">Health Factor</span>
+        <span className="text-xs text-[#c7f36b]">Health Factor</span>
         <span className={cn("text-2xl font-bold tabular-nums", hfColor)}>
           {position.healthFactor.toFixed(2)}
         </span>
@@ -141,7 +141,7 @@ export function PositionCard({
             risk === "moderate" &&
               "**:data-[slot=progress-indicator]:bg-amber-500",
             risk === "safe" &&
-              "**:data-[slot=progress-indicator]:bg-[#94b4d8]",
+              "**:data-[slot=progress-indicator]:bg-[#b5e86f]",
           )}
         />
       </div>
@@ -149,14 +149,14 @@ export function PositionCard({
       {/* Collateral / Debt */}
       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
         <div className="card-inset px-3 py-2">
-          <p className="text-[#4a6a8f]">Collateral</p>
-          <p className="mt-0.5 font-medium text-[#c5daf5]">
+          <p className="text-[#8c9890]">Collateral</p>
+          <p className="mt-0.5 font-medium text-[#e7ece6]">
             {formatUsd(position.collateralUsd)}
           </p>
         </div>
         <div className="card-inset px-3 py-2">
-          <p className="text-[#4a6a8f]">Debt</p>
-          <p className="mt-0.5 font-medium text-[#c5daf5]">
+          <p className="text-[#8c9890]">Debt</p>
+          <p className="mt-0.5 font-medium text-[#e7ece6]">
             {formatUsd(position.debtUsd)}
           </p>
         </div>
@@ -175,10 +175,10 @@ export function PositionCard({
           <AlertTriangle className="size-3.5 text-red-400" />
         ) : null}
         {risk === "safe" ? (
-          <CheckCircle2 className="size-3.5 text-[#94b4d8]" />
+          <CheckCircle2 className="size-3.5 text-[#b5e86f]" />
         ) : null}
         {isActiveRescue ? (
-          <Loader2 className="size-3.5 animate-spin text-[#7a9abf]" />
+          <Loader2 className="size-3.5 animate-spin text-[#ccd7cf]" />
         ) : null}
       </div>
     </article>

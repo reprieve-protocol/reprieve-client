@@ -15,8 +15,8 @@ export function BudgetBar({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-xs">
-        <span className="text-[#6b8cb0]">{label ?? "Budget"}</span>
-        <span className="font-medium text-[#94b4d8]">
+        <span className="text-[#a9b2ab]">{label ?? "Budget"}</span>
+        <span className="font-medium text-[#b5e86f]">
           ${used.toFixed(2)} / ${cap.toFixed(2)}
         </span>
       </div>
@@ -24,14 +24,15 @@ export function BudgetBar({
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500",
-            percentage < 50 && "bg-[#94b4d8]",
+            percentage < 50 &&
+              "bg-[linear-gradient(90deg,#c7f36b_0%,#b5e86f_100%)]",
             percentage >= 50 && percentage < 80 && "bg-amber-500",
             percentage >= 80 && "bg-red-500",
           )}
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <p className="text-[11px] text-[#4a6a8f]">
+      <p className="text-[11px] text-[#8c9890]">
         {percentage}% of daily cap used
       </p>
     </div>
