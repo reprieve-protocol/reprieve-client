@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/components/common/EmptyState";
 import { RescueOverlay } from "@/components/rescue/RescueOverlay";
 import {
@@ -25,12 +25,16 @@ import {
   hasDashboardPositions,
 } from "@/components/dashboard/dashboard-view/dashboard-position-utils";
 import { useDemoWallet } from "@/lib/state/demo-wallet-context";
+import { buildRiskSnapshotParams } from "@/lib/api/simulate-api-guard";
+import { fetchOraclePrice, ORACLE_PRICE_TOKENS } from "@/lib/oracle-prices";
 
 const DASHBOARD_LOADING_MESSAGES = [
   "Syncing wallet exposure across protocols",
   "Pulling the latest oracle and risk snapshot",
   "Preparing rescue workflow and position health",
 ] as const;
+
+const PRIMARY_ETH_PRICE_TOKEN = ORACLE_PRICE_TOKENS[0];
 
 function DashboardLoadingState({
   badge,
@@ -138,11 +142,35 @@ export function DashboardView() {
   const queryClient = useQueryClient();
   const { isConnected, isConnecting, isReconnecting, address } = useAccount();
   const { demoWalletAddress, isResolvingDemoWallet } = useDemoWallet();
+  const [isEthPriceShockEnabled, setIsEthPriceShockEnabled] = useState(false);
+  const [simulationRunId, setSimulationRunId] = useState(0);
 
   const { connect } = useConnect();
   const {
     state: { loading, error, snapshot, rescueRun },
   } = useAppState();
+
+  const { data: ethOraclePrice, isLoading: isLoadingEthOraclePrice } =
+    useQuery({
+      queryKey: [
+        "oracle-price-sim",
+        PRIMARY_ETH_PRICE_TOKEN.chainKey,
+        PRIMARY_ETH_PRICE_TOKEN.asset,
+      ],
+      queryFn: () => fetchOraclePrice(PRIMARY_ETH_PRICE_TOKEN),
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    });
+
+  const riskSnapshotParams = useMemo(
+    () =>
+      buildRiskSnapshotParams({
+        currentEthPriceWad: ethOraclePrice?.priceWad ?? null,
+        simulateEthPriceDrop: isEthPriceShockEnabled,
+      }),
+    [ethOraclePrice?.priceWad, isEthPriceShockEnabled],
+  );
 
   const {
     data: positionsData,
@@ -150,14 +178,14 @@ export function DashboardView() {
     refetch: refetchPositions,
   } = usePositionsControllerGetRiskSnapshot(
     demoWalletAddress,
-    { maxAgeSec: 600 },
+    riskSnapshotParams,
     {
       query: {
         refetchInterval: 5000,
         enabled: !!demoWalletAddress,
         queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
           demoWalletAddress,
-          { maxAgeSec: 600 },
+          riskSnapshotParams,
         ),
       },
     },
@@ -239,7 +267,7 @@ export function DashboardView() {
       await queryClient.invalidateQueries({
         queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
           demoWalletAddress,
-          { maxAgeSec: 600 },
+          riskSnapshotParams,
         ),
       });
       const refetchResult = await refetchPositions();
@@ -268,7 +296,7 @@ export function DashboardView() {
       await queryClient.invalidateQueries({
         queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
           demoWalletAddress,
-          { maxAgeSec: 600 },
+          riskSnapshotParams,
         ),
       });
       await refetchPositions();
@@ -278,8 +306,24 @@ export function DashboardView() {
   };
 
   const displayPositions: Position[] = useMemo(() => {
-    return buildDashboardPositions(positionsData);
-  }, [positionsData]);
+    const effectiveEthPriceUsd = isEthPriceShockEnabled
+      ? (ethOraclePrice?.priceUsd ?? PRIMARY_ETH_PRICE_TOKEN.fallbackPriceUsd) *
+        0.6
+      : (ethOraclePrice?.priceUsd ?? PRIMARY_ETH_PRICE_TOKEN.fallbackPriceUsd);
+
+    return buildDashboardPositions(positionsData, effectiveEthPriceUsd);
+  }, [ethOraclePrice?.priceUsd, isEthPriceShockEnabled, positionsData]);
+
+  const simulatedEthPriceUsd = useMemo(() => {
+    if (!isEthPriceShockEnabled) {
+      return null;
+    }
+
+    return (
+      (ethOraclePrice?.priceUsd ?? PRIMARY_ETH_PRICE_TOKEN.fallbackPriceUsd) *
+      0.6
+    );
+  }, [ethOraclePrice?.priceUsd, isEthPriceShockEnabled]);
 
   const totalCollateralUsd = useMemo(
     () => displayPositions.reduce((acc, pos) => acc + pos.collateralUsd, 0),
@@ -371,7 +415,16 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <OraclePricesSection />
+      <OraclePricesSection
+        isEthPriceShockEnabled={isEthPriceShockEnabled}
+        isEthPriceShockPending={isLoadingEthOraclePrice}
+        onStartEthPriceShock={() => {
+          setSimulationRunId((current) => current + 1);
+          setIsEthPriceShockEnabled(true);
+        }}
+        onResetEthPriceShock={() => setIsEthPriceShockEnabled(false)}
+        simulatedEthPriceUsd={simulatedEthPriceUsd}
+      />
       <DashboardStatusHeader isStale={isStale} />
       <DashboardPortfolioSummary
         totalCollateralUsd={totalCollateralUsd}
@@ -388,7 +441,10 @@ export function DashboardView() {
         </div>
         <RescueStepLogger
           address={demoWalletAddress}
+          currentEthPriceWad={ethOraclePrice?.priceWad ?? null}
           lowestHealthFactor={lowestHealthFactor}
+          simulationRunId={simulationRunId}
+          simulateEthPriceDrop={isEthPriceShockEnabled}
         />
       </section>
 

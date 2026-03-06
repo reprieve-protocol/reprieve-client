@@ -85,7 +85,7 @@ function mapHealthFactor(healthFactorWad: string): number {
   return factor > 1000 ? 99.99 : factor;
 }
 
-function mapApiPosition(apiPosition: ApiPosition): Position {
+function mapApiPosition(apiPosition: ApiPosition, ethPriceUsd: number): Position {
   return {
     id: `pos-${apiPosition.id}`,
     protocol: mapProtocol(apiPosition.protocol),
@@ -93,7 +93,7 @@ function mapApiPosition(apiPosition: ApiPosition): Position {
     pair: "ETH / USDC",
     action: "long",
     collateralUsd:
-      (Number(BigInt(apiPosition.collateralAmountRaw)) / 1e18) * ETH_USD_PRICE,
+      (Number(BigInt(apiPosition.collateralAmountRaw)) / 1e18) * ethPriceUsd,
     debtUsd: Number(BigInt(apiPosition.debtAmountRaw)) / 1e6,
     healthFactor: mapHealthFactor(apiPosition.healthFactorWad),
     tokenType: "aToken",
@@ -102,7 +102,10 @@ function mapApiPosition(apiPosition: ApiPosition): Position {
   };
 }
 
-export function buildDashboardPositions(positionsData: unknown): Position[] {
+export function buildDashboardPositions(
+  positionsData: unknown,
+  ethPriceUsd = ETH_USD_PRICE,
+): Position[] {
   const response = positionsData as { positions?: ApiPosition[] } | undefined;
   const apiPositions = response?.positions ?? [];
 
@@ -110,7 +113,10 @@ export function buildDashboardPositions(positionsData: unknown): Position[] {
     return [];
   }
 
-  return [...apiPositions.map(mapApiPosition), ...MOCK_SHORT_POSITIONS];
+  return [
+    ...apiPositions.map((apiPosition) => mapApiPosition(apiPosition, ethPriceUsd)),
+    ...MOCK_SHORT_POSITIONS,
+  ];
 }
 
 export function hasDashboardPositions(positionsData: unknown): boolean {

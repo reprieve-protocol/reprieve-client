@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
+import type { RescueSimulationDecision } from "@/lib/api/simulate-api-guard";
 
 type InputNode = {
   id: "onchain" | "signals" | "price";
@@ -347,12 +348,19 @@ const RiskEngineCard: React.FC<{ isComputing: boolean; isLit: boolean }> = ({
 const DecisionCard: React.FC<{
   active: boolean;
   isRescue?: boolean;
+  decision?: RescueSimulationDecision | string | null;
   lowestHealthFactor?: number | null;
-}> = ({ active, isRescue = false, lowestHealthFactor }) => {
+}> = ({ active, isRescue = false, decision = null, lowestHealthFactor }) => {
   const lowestHealthFactorLabel =
     lowestHealthFactor !== null && lowestHealthFactor !== undefined
       ? lowestHealthFactor.toFixed(2)
       : "?";
+  const rescueActionLabel =
+    decision === "RESCUE_SAME_CHAIN"
+      ? "Action: Rescue Same Chain - Collateral Top-up"
+      : decision === "RESCUE_CROSS_CHAIN"
+        ? "Action: Rescue Cross Chain - Collateral Top-up"
+        : "Action: Rescue - Collateral Top-up";
 
   return (
     <motion.div
@@ -402,7 +410,7 @@ const DecisionCard: React.FC<{
           className="text-[14px] font-semibold leading-tight"
           style={{ color: active ? "#e7efe9" : "#91a59b" }}
         >
-          Action: Rescue Cross Chain - Collateral Top-up
+          {rescueActionLabel}
         </p>
       ) : (
         <div
@@ -478,12 +486,13 @@ const DecisionCard: React.FC<{
 
 type RescueCREWorkflowAnimationProps = {
   isRescue?: boolean;
+  decision?: RescueSimulationDecision | string | null;
   lowestHealthFactor?: number | null;
 };
 
 export const RescueCREWorkflowAnimation: React.FC<
   RescueCREWorkflowAnimationProps
-> = ({ isRescue = false, lowestHealthFactor = null }) => {
+> = ({ isRescue = false, decision = null, lowestHealthFactor = null }) => {
   const [step, setStep] = useState(0);
   const totalSteps = WORKFLOW_STEPS.length;
 
@@ -584,6 +593,7 @@ export const RescueCREWorkflowAnimation: React.FC<
             <DecisionCard
               active={currentStep.type === "decision"}
               isRescue={isRescue}
+              decision={decision}
               lowestHealthFactor={lowestHealthFactor}
             />
           </div>

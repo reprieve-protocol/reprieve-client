@@ -69,4 +69,16 @@ minActionUsd?: number;
  * Allow cross-chain planning
  */
 allowCrossChain?: boolean;
+/**
+ * Optional what-if price overrides in wad, scoped by chain and asset address
+ */
+whatIfPrices?: { [key: string]: unknown };
+/**
+ * GET alias for what-if prices on Ethereum Sepolia
+ */
+'ethereum-sepolia'?: { [key: string]: unknown };
+/**
+ * GET alias for what-if prices on Base Sepolia
+ */
+'base-sepolia'?: { [key: string]: unknown };
 };

@@ -4,9 +4,10 @@ import Link from "next/link";
 import { RescueActionWorkflowAnimation } from "@/components/dashboard/RescueActionWorkflowAnimation";
 import { RescueCREWorkflowAnimation } from "@/components/dashboard/RescueCREWorkflowAnimation";
 import {
+  buildSimulateApiGuardParams,
+  getRescueSimulationDecision,
   getIsRescueFromSimulation,
   getSimulateApiGuardPayload,
-  SIMULATE_API_GUARD_PARAMS,
 } from "@/lib/api/simulate-api-guard";
 import {
   getResponseStatusCode,
@@ -28,9 +29,15 @@ type RescueStepResponse = {
 export function RescueStepLogger({
   address,
   lowestHealthFactor,
+  currentEthPriceWad,
+  simulationRunId,
+  simulateEthPriceDrop,
 }: {
   address: string;
   lowestHealthFactor?: number | null;
+  currentEthPriceWad?: string | null;
+  simulationRunId?: number;
+  simulateEthPriceDrop?: boolean;
 }) {
   const {
     data: creRegistration,
@@ -64,9 +71,15 @@ export function RescueStepLogger({
   const rescueStep = (rescueStepData as RescueStepResponse | undefined)
     ?.rescueStep;
   const currentRescueStep = rescueStep?.currentStep;
+
+  const simulateApiGuardParams = buildSimulateApiGuardParams({
+    currentEthPriceWad,
+    simulateEthPriceDrop,
+  });
+
   const { data: rescueSimulationData } = usePositionsControllerSimulateApiGuard(
     address,
-    SIMULATE_API_GUARD_PARAMS,
+    simulateApiGuardParams,
     {
       query: {
         enabled: !!address && hasCreRegistration,
@@ -74,9 +87,22 @@ export function RescueStepLogger({
       },
     },
   );
+  console.log("rescueSimulationData: ", rescueSimulationData);
   const rescueSimulation = getSimulateApiGuardPayload(rescueSimulationData);
+  const rescueDecision = getRescueSimulationDecision(rescueSimulationData);
   const isRescue = getIsRescueFromSimulation(rescueSimulationData);
   const rescueCollateralAmount = rescueSimulation?.plan?.collateralAmount;
+  const showRescueActionWorkflow =
+    rescueDecision === "RESCUE_SAME_CHAIN" ||
+    rescueDecision === "RESCUE_CROSS_CHAIN";
+  const normalizedRescueStep =
+    typeof currentRescueStep === "number" && !Number.isNaN(currentRescueStep)
+      ? Math.max(currentRescueStep - 1, 0)
+      : 0;
+  const actionWorkflowKey =
+    simulateEthPriceDrop && simulationRunId
+      ? `simulation-${simulationRunId}-${rescueDecision ?? "pending"}`
+      : `live-${rescueDecision ?? "pending"}-${normalizedRescueStep}`;
 
   if (isLoadingCreRegistration && address) {
     return (
@@ -110,12 +136,16 @@ export function RescueStepLogger({
     <>
       <RescueCREWorkflowAnimation
         isRescue={isRescue}
+        decision={rescueDecision}
         lowestHealthFactor={lowestHealthFactor}
       />
 
-      {isRescue && (
+      {showRescueActionWorkflow && (
         <RescueActionWorkflowAnimation
-          currentStep={!rescueStepData ? 1 : currentRescueStep}
+          key={actionWorkflowKey}
+          autoPlaySequence={Boolean(simulateEthPriceDrop && simulationRunId)}
+          decision={rescueDecision}
+          currentStep={simulateEthPriceDrop ? null : normalizedRescueStep}
           collateralAmount={rescueCollateralAmount}
         />
       )}

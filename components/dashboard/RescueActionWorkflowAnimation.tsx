@@ -11,9 +11,45 @@ import {
   ChevronRight,
   Zap,
   Clock,
+  type LucideIcon,
 } from "lucide-react";
 import { formatEther } from "viem";
+import type { RescueSimulationDecision } from "@/lib/api/simulate-api-guard";
+
 const DEFAULT_RESCUE_AMOUNT_LABEL = "1 ETH";
+type RescueWorkflowVariant = "same-chain" | "cross-chain";
+
+type WorkflowStage = {
+  id: number;
+  label: string;
+  sublabel: string;
+  color: string;
+  icon: LucideIcon;
+  detail: string;
+  badge: string;
+  badgeColor: string;
+};
+
+type WorkflowConnector = {
+  label: string;
+  dashed: boolean;
+  color: string;
+  nextColor: string;
+};
+
+type WorkflowMetric = {
+  label: string;
+  value: string;
+  sub: string;
+  color: string;
+};
+
+type WorkflowConfig = {
+  stages: WorkflowStage[];
+  connectors: WorkflowConnector[];
+  completeDetail: string;
+  metrics: WorkflowMetric[];
+};
 
 function formatRescueAmountLabel(collateralAmount?: string) {
   if (!collateralAmount) {
@@ -36,74 +72,152 @@ function formatRescueAmountLabel(collateralAmount?: string) {
   }
 }
 
-function getStages(rescueAmountLabel: string) {
-  return [
-    {
-      id: 0,
-      label: "ETH Sepolia",
-      sublabel: "AAVE",
-      color: "#2d3932",
-      icon: Landmark,
-      detail:
-        "The user's leveraged position lives on AAVE (ETH Sepolia). Reprieve detects the health factor is approaching the liquidation threshold and triggers the rescue workflow.",
-      badge: "SOURCE",
-      badgeColor: "#2d3932",
-    },
-    {
-      id: 1,
-      label: "ETH Sepolia",
-      sublabel: "CCIP",
-      color: "#c7f36b",
-      icon: Link2,
-      detail: `Reprieve withdraws ${rescueAmountLabel} collateral from AAVE and hands it to the Chainlink CCIP router on ETH Sepolia. The asset is locked and a cross-chain message is dispatched.`,
-      badge: "CCIP OUT",
-      badgeColor: "#c7f36b",
-    },
-    {
-      id: 2,
-      label: "Base Sepolia",
-      sublabel: "CCIP",
-      color: "#c7f36b",
-      icon: ArrowRightLeft,
-      detail: `Chainlink CCIP delivers ${rescueAmountLabel} on Base Sepolia. The off-chain CRE workflow orchestrates the bridge and validates delivery before proceeding to the deposit step.`,
-      badge: "CCIP IN",
-      badgeColor: "#c7f36b",
-    },
-    {
-      id: 3,
-      label: "Base Sepolia",
-      sublabel: "Compound",
-      color: "#b5e86f",
-      icon: TrendingUp,
-      detail: `${rescueAmountLabel} is deposited into Compound on Base Sepolia, reopening the position on a safer, cheaper chain. The rescue is complete - assets are secured cross-chain.`,
-      badge: "DESTINATION",
-      badgeColor: "#b5e86f",
-    },
-  ] as const;
-}
+function getWorkflowConfig(
+  variant: RescueWorkflowVariant,
+  rescueAmountLabel: string,
+): WorkflowConfig {
+  if (variant === "same-chain") {
+    return {
+      stages: [
+        {
+          id: 0,
+          label: "ETH Sepolia",
+          sublabel: "AAVE",
+          color: "#2d3932",
+          icon: Landmark,
+          detail: `Reprieve selects a healthy same-chain source position and frees ${rescueAmountLabel} without needing a bridge hop. The rescue stays local for the fastest path to safety.`,
+          badge: "SOURCE",
+          badgeColor: "#2d3932",
+        },
+        {
+          id: 1,
+          label: "ETH Sepolia",
+          sublabel: "Protected Position",
+          color: "#b5e86f",
+          icon: TrendingUp,
+          detail: `${rescueAmountLabel} is routed directly into the at-risk position on the same chain. The health factor is restored locally and the rescue completes without CCIP.`,
+          badge: "DESTINATION",
+          badgeColor: "#b5e86f",
+        },
+      ],
+      connectors: [
+        {
+          label: `direct rescue ${rescueAmountLabel}`,
+          dashed: false,
+          color: "#2d3932",
+          nextColor: "#b5e86f",
+        },
+      ],
+      completeDetail: `${rescueAmountLabel} moved directly on the source chain and restored the position without a cross-chain bridge.`,
+      metrics: [
+        {
+          label: "Source",
+          value: "AAVE",
+          sub: "ETH Sepolia",
+          color: "#2d3932",
+        },
+        {
+          label: "Path",
+          value: "Same Chain",
+          sub: "No bridge hop",
+          color: "#c7f36b",
+        },
+        {
+          label: "Target",
+          value: "Protected",
+          sub: "ETH Sepolia",
+          color: "#b5e86f",
+        },
+      ],
+    };
+  }
 
-// ─── Connectors between nodes ─────────────────────────────────────────────────
-function getConnectors(rescueAmountLabel: string) {
-  return [
-    {
-      label: `withdraw ${rescueAmountLabel}`,
-      dashed: false,
-      color: "#2d3932",
-      nextColor: "#c7f36b",
-    },
-    {
-      label: `bridge ${rescueAmountLabel}`,
-      dashed: true, // CCIP cross-chain bridge
-      color: "#c7f36b",
-      nextColor: "#c7f36b",
-    },
-    {
-      label: `deposit ${rescueAmountLabel}`,
-      dashed: false,
-      color: "#c7f36b",
-      nextColor: "#b5e86f",
-    },
-  ] as const;
+  return {
+    stages: [
+      {
+        id: 0,
+        label: "ETH Sepolia",
+        sublabel: "AAVE",
+        color: "#2d3932",
+        icon: Landmark,
+        detail:
+          "The user's leveraged position lives on AAVE (ETH Sepolia). Reprieve detects the health factor is approaching the liquidation threshold and triggers the rescue workflow.",
+        badge: "SOURCE",
+        badgeColor: "#2d3932",
+      },
+      {
+        id: 1,
+        label: "ETH Sepolia",
+        sublabel: "CCIP",
+        color: "#c7f36b",
+        icon: Link2,
+        detail: `Reprieve withdraws ${rescueAmountLabel} collateral from AAVE and hands it to the Chainlink CCIP router on ETH Sepolia. The asset is locked and a cross-chain message is dispatched.`,
+        badge: "CCIP OUT",
+        badgeColor: "#c7f36b",
+      },
+      {
+        id: 2,
+        label: "Base Sepolia",
+        sublabel: "CCIP",
+        color: "#c7f36b",
+        icon: ArrowRightLeft,
+        detail: `Chainlink CCIP delivers ${rescueAmountLabel} on Base Sepolia. The off-chain CRE workflow orchestrates the bridge and validates delivery before proceeding to the deposit step.`,
+        badge: "CCIP IN",
+        badgeColor: "#c7f36b",
+      },
+      {
+        id: 3,
+        label: "Base Sepolia",
+        sublabel: "Compound",
+        color: "#b5e86f",
+        icon: TrendingUp,
+        detail: `${rescueAmountLabel} is deposited into Compound on Base Sepolia, reopening the position on a safer, cheaper chain. The rescue is complete - assets are secured cross-chain.`,
+        badge: "DESTINATION",
+        badgeColor: "#b5e86f",
+      },
+    ],
+    connectors: [
+      {
+        label: `withdraw ${rescueAmountLabel}`,
+        dashed: false,
+        color: "#2d3932",
+        nextColor: "#c7f36b",
+      },
+      {
+        label: `bridge ${rescueAmountLabel}`,
+        dashed: true,
+        color: "#c7f36b",
+        nextColor: "#c7f36b",
+      },
+      {
+        label: `deposit ${rescueAmountLabel}`,
+        dashed: false,
+        color: "#c7f36b",
+        nextColor: "#b5e86f",
+      },
+    ],
+    completeDetail: `${rescueAmountLabel} withdrawn from AAVE on ETH Sepolia, bridged via Chainlink CCIP, and deposited into Compound on Base Sepolia. Position secured cross-chain.`,
+    metrics: [
+      {
+        label: "Source",
+        value: "AAVE",
+        sub: "ETH Sepolia",
+        color: "#2d3932",
+      },
+      {
+        label: "Bridge",
+        value: "CCIP",
+        sub: "Chainlink",
+        color: "#c7f36b",
+      },
+      {
+        label: "Target",
+        value: "Compound",
+        sub: "Base Sepolia",
+        color: "#b5e86f",
+      },
+    ],
+  };
 }
 
 // ─── Moving Particle ──────────────────────────────────────────────────────────
@@ -128,7 +242,7 @@ const Particle: React.FC<{ color: string; delay?: number }> = ({
 
 // ─── Stage Node ───────────────────────────────────────────────────────────────
 const StageNode: React.FC<{
-  stage: ReturnType<typeof getStages>[number];
+  stage: WorkflowStage;
   isActive: boolean;
   isCurrent: boolean;
   isComplete: boolean;
@@ -297,6 +411,8 @@ const Connector: React.FC<{
 );
 
 type RescueActionWorkflowAnimationProps = {
+  autoPlaySequence?: boolean;
+  decision?: RescueSimulationDecision | string | null;
   currentStep?: number | null;
   collateralAmount?: string;
 };
@@ -305,25 +421,55 @@ function clampStep(step: number, total: number) {
   return Math.min(Math.max(step, 0), total);
 }
 
+function getWorkflowVariant(
+  decision?: RescueSimulationDecision | string | null,
+): RescueWorkflowVariant {
+  if (decision === "RESCUE_SAME_CHAIN") {
+    return "same-chain";
+  }
+
+  return "cross-chain";
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export const RescueActionWorkflowAnimation: React.FC<
   RescueActionWorkflowAnimationProps
-> = ({ currentStep = null, collateralAmount }) => {
+> = ({
+  autoPlaySequence = false,
+  decision = null,
+  currentStep = null,
+  collateralAmount,
+}) => {
   const [step, setStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [rescueAmountLabel, setRescueAmountLabel] = useState(() =>
     formatRescueAmountLabel(collateralAmount),
   );
   const isControlled = currentStep !== null && currentStep !== undefined;
-  const stages = getStages(rescueAmountLabel);
-  const connectors = getConnectors(rescueAmountLabel);
+  const workflowVariant = getWorkflowVariant(decision);
+  const workflow = getWorkflowConfig(workflowVariant, rescueAmountLabel);
+  const { stages, connectors, metrics, completeDetail } = workflow;
   const TOTAL = stages.length;
 
   useEffect(() => {
     if (isControlled || !isPlaying) return;
-    const t = setInterval(() => setStep((p) => (p + 1) % (TOTAL + 1)), 2600);
+    const t = setInterval(
+      () =>
+        setStep((previousStep) => {
+          if (autoPlaySequence) {
+            if (previousStep >= TOTAL) {
+              return TOTAL;
+            }
+
+            return previousStep + 1;
+          }
+
+          return (previousStep + 1) % (TOTAL + 1);
+        }),
+      autoPlaySequence ? 1800 : 2600,
+    );
     return () => clearInterval(t);
-  }, [isControlled, isPlaying, TOTAL]);
+  }, [autoPlaySequence, isControlled, isPlaying, TOTAL]);
 
   useEffect(() => {
     setRescueAmountLabel(formatRescueAmountLabel(collateralAmount));
@@ -349,9 +495,14 @@ export const RescueActionWorkflowAnimation: React.FC<
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
             <span className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
           </div>
-          <span className="text-[11px] text-[#8c9890] font-mono tracking-wider">
-            chainlink-cre / rescue-workflow.ts
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-[#8c9890] font-mono tracking-wider">
+              chainlink-cre / rescue-workflow.ts
+            </span>
+            <span className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] text-[#8c9890]">
+              {workflowVariant === "same-chain" ? "same-chain" : "cross-chain"}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -369,7 +520,7 @@ export const RescueActionWorkflowAnimation: React.FC<
           >
             {isControlled ? "SYNCED" : isPlaying ? "LIVE" : "PAUSED"}
           </span>
-          {!isControlled ? (
+          {!isControlled && !autoPlaySequence ? (
             <button
               onClick={() => setIsPlaying((p) => !p)}
               className="ml-1 px-2 py-0.5 text-[10px] font-bold rounded border transition-colors cursor-pointer"
@@ -499,11 +650,7 @@ export const RescueActionWorkflowAnimation: React.FC<
                 <p className="text-[11px] font-bold text-[#b5e86f] mb-1">
                   Rescue Complete ✓
                 </p>
-                <p className="text-[12px] text-[#c7f36b]">
-                  {rescueAmountLabel} withdrawn from AAVE on ETH Sepolia,
-                  bridged via Chainlink CCIP, and deposited into Compound on
-                  Base Sepolia. Position secured cross-chain.
-                </p>
+                <p className="text-[12px] text-[#c7f36b]">{completeDetail}</p>
               </div>
             </motion.div>
           )}
@@ -512,26 +659,7 @@ export const RescueActionWorkflowAnimation: React.FC<
 
       {/* Metrics footer */}
       <div className="border-t border-white/5 grid grid-cols-3 divide-x divide-white/5">
-        {[
-          {
-            label: "Source",
-            value: "AAVE",
-            sub: "ETH Sepolia",
-            color: "#2d3932",
-          },
-          {
-            label: "Bridge",
-            value: "CCIP",
-            sub: "Chainlink",
-            color: "#c7f36b",
-          },
-          {
-            label: "Target",
-            value: "Compound",
-            sub: "Base Sepolia",
-            color: "#b5e86f",
-          },
-        ].map((m) => (
+        {metrics.map((m) => (
           <div key={m.label} className="px-4 py-3 text-center">
             <div className="text-[9px] uppercase tracking-widest text-[#637267] mb-1">
               {m.label}
@@ -550,7 +678,9 @@ export const RescueActionWorkflowAnimation: React.FC<
           className="h-full"
           style={{
             background:
-              "linear-gradient(90deg, #2d3932, #c7f36b, #c7f36b, #b5e86f)",
+              workflowVariant === "same-chain"
+                ? "linear-gradient(90deg, #2d3932, #b5e86f)"
+                : "linear-gradient(90deg, #2d3932, #c7f36b, #c7f36b, #b5e86f)",
           }}
           animate={{ width: `${progressPct}%` }}
           transition={{ duration: 0.5 }}

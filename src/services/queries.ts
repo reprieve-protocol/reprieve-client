@@ -5,7 +5,10 @@
  * Debug and integration APIs for positions, rescues, and relay history
  * OpenAPI spec version: 0.1.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -18,8 +21,8 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   BootstrapDemoWalletDto,
@@ -33,4090 +36,2619 @@ import type {
   RelayControllerListRelayJobsParams,
   RescuesControllerListRescueWorkflowLogsParams,
   RescuesControllerListRescuesParams,
+  RiskSnapshotQueryDto,
   SimulateApiGuardDto,
   UpsertUserCreRegistrationDto,
-  UpsertUserRescueStepDto,
-} from "./models";
+  UpsertUserRescueStepDto
+} from './models';
 
-import { customClient } from "./custom-client";
-import type { ErrorType, BodyType } from "./custom-client";
+import { customClient } from './custom-client';
+import type { ErrorType , BodyType } from './custom-client';
+
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+const serializeQueryParamValue = (value: unknown): string => {
+  if (value === null) {
+    return 'null';
+  }
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+};
+
+
 
 /**
  * @summary Create or update the active CRE registration for a user
  */
 export type creRegistrationsControllerUpsertRegistrationResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type creRegistrationsControllerUpsertRegistrationResponseSuccess = (creRegistrationsControllerUpsertRegistrationResponse200) & {
+  headers: Headers;
 };
+;
 
-export type creRegistrationsControllerUpsertRegistrationResponseSuccess =
-  creRegistrationsControllerUpsertRegistrationResponse200 & {
-    headers: Headers;
-  };
-export type creRegistrationsControllerUpsertRegistrationResponse =
-  creRegistrationsControllerUpsertRegistrationResponseSuccess;
+export type creRegistrationsControllerUpsertRegistrationResponse = (creRegistrationsControllerUpsertRegistrationResponseSuccess)
 
-export const getCreRegistrationsControllerUpsertRegistrationUrl = (
-  address: string,
-) => {
-  return `/v1/users/${address}/cre-registration`;
-};
+export const getCreRegistrationsControllerUpsertRegistrationUrl = (address: string,) => {
 
-export const creRegistrationsControllerUpsertRegistration = async (
-  address: string,
-  upsertUserCreRegistrationDto: UpsertUserCreRegistrationDto,
-  options?: RequestInit,
-): Promise<creRegistrationsControllerUpsertRegistrationResponse> => {
-  return customClient<creRegistrationsControllerUpsertRegistrationResponse>(
-    getCreRegistrationsControllerUpsertRegistrationUrl(address),
-    {
-      ...options,
-      method: "PUT",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(upsertUserCreRegistrationDto),
-    },
-  );
-};
 
-export const getCreRegistrationsControllerUpsertRegistrationMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>,
-    TError,
-    { address: string; data: BodyType<UpsertUserCreRegistrationDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>,
-  TError,
-  { address: string; data: BodyType<UpsertUserCreRegistrationDto> },
-  TContext
-> => {
-  const mutationKey = ["creRegistrationsControllerUpsertRegistration"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>,
-    { address: string; data: BodyType<UpsertUserCreRegistrationDto> }
-  > = (props) => {
-    const { address, data } = props ?? {};
+  return `/v1/users/${address}/cre-registration`
+}
 
-    return creRegistrationsControllerUpsertRegistration(
-      address,
-      data,
-      requestOptions,
-    );
-  };
+export const creRegistrationsControllerUpsertRegistration = async (address: string,
+    upsertUserCreRegistrationDto: UpsertUserCreRegistrationDto, options?: RequestInit): Promise<creRegistrationsControllerUpsertRegistrationResponse> => {
+  
+  return customClient<creRegistrationsControllerUpsertRegistrationResponse>(getCreRegistrationsControllerUpsertRegistrationUrl(address),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      upsertUserCreRegistrationDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type CreRegistrationsControllerUpsertRegistrationMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>
-  >;
-export type CreRegistrationsControllerUpsertRegistrationMutationBody =
-  BodyType<UpsertUserCreRegistrationDto>;
-export type CreRegistrationsControllerUpsertRegistrationMutationError =
-  ErrorType<unknown>;
 
-/**
+export const getCreRegistrationsControllerUpsertRegistrationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>, TError,{address: string;data: BodyType<UpsertUserCreRegistrationDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>, TError,{address: string;data: BodyType<UpsertUserCreRegistrationDto>}, TContext> => {
+
+const mutationKey = ['creRegistrationsControllerUpsertRegistration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>, {address: string;data: BodyType<UpsertUserCreRegistrationDto>}> = (props) => {
+          const {address,data} = props ?? {};
+
+          return  creRegistrationsControllerUpsertRegistration(address,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreRegistrationsControllerUpsertRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>>
+    export type CreRegistrationsControllerUpsertRegistrationMutationBody = BodyType<UpsertUserCreRegistrationDto>
+    export type CreRegistrationsControllerUpsertRegistrationMutationError = ErrorType<unknown>
+
+    /**
  * @summary Create or update the active CRE registration for a user
  */
-export const useCreRegistrationsControllerUpsertRegistration = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>,
-      TError,
-      { address: string; data: BodyType<UpsertUserCreRegistrationDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>,
-  TError,
-  { address: string; data: BodyType<UpsertUserCreRegistrationDto> },
-  TContext
-> => {
-  return useMutation(
-    getCreRegistrationsControllerUpsertRegistrationMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useCreRegistrationsControllerUpsertRegistration = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>, TError,{address: string;data: BodyType<UpsertUserCreRegistrationDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creRegistrationsControllerUpsertRegistration>>,
+        TError,
+        {address: string;data: BodyType<UpsertUserCreRegistrationDto>},
+        TContext
+      > => {
+      return useMutation(getCreRegistrationsControllerUpsertRegistrationMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary Get active CRE registration for a user
  */
 export type creRegistrationsControllerGetRegistrationResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type creRegistrationsControllerGetRegistrationResponseSuccess = (creRegistrationsControllerGetRegistrationResponse200) & {
+  headers: Headers;
 };
+;
 
-export type creRegistrationsControllerGetRegistrationResponseSuccess =
-  creRegistrationsControllerGetRegistrationResponse200 & {
-    headers: Headers;
-  };
-export type creRegistrationsControllerGetRegistrationResponse =
-  creRegistrationsControllerGetRegistrationResponseSuccess;
+export type creRegistrationsControllerGetRegistrationResponse = (creRegistrationsControllerGetRegistrationResponseSuccess)
 
-export const getCreRegistrationsControllerGetRegistrationUrl = (
-  address: string,
+export const getCreRegistrationsControllerGetRegistrationUrl = (address: string,) => {
+
+
+  
+
+  return `/v1/users/${address}/cre-registration`
+}
+
+export const creRegistrationsControllerGetRegistration = async (address: string, options?: RequestInit): Promise<creRegistrationsControllerGetRegistrationResponse> => {
+  
+  return customClient<creRegistrationsControllerGetRegistrationResponse>(getCreRegistrationsControllerGetRegistrationUrl(address),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getCreRegistrationsControllerGetRegistrationQueryKey = (address: string,) => {
+    return [
+    `/v1/users/${address}/cre-registration`
+    ] as const;
+    }
+
+    
+export const getCreRegistrationsControllerGetRegistrationQueryOptions = <TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError = ErrorType<unknown>>(address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return `/v1/users/${address}/cre-registration`;
-};
 
-export const creRegistrationsControllerGetRegistration = async (
-  address: string,
-  options?: RequestInit,
-): Promise<creRegistrationsControllerGetRegistrationResponse> => {
-  return customClient<creRegistrationsControllerGetRegistrationResponse>(
-    getCreRegistrationsControllerGetRegistrationUrl(address),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-export const getCreRegistrationsControllerGetRegistrationQueryKey = (
-  address: string,
-) => {
-  return [`/v1/users/${address}/cre-registration`] as const;
-};
+  const queryKey =  queryOptions?.queryKey ?? getCreRegistrationsControllerGetRegistrationQueryKey(address);
 
-export const getCreRegistrationsControllerGetRegistrationQueryOptions = <
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getCreRegistrationsControllerGetRegistrationQueryKey(address);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>> = ({ signal }) => creRegistrationsControllerGetRegistration(address, { signal, ...requestOptions });
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>
-  > = ({ signal }) =>
-    creRegistrationsControllerGetRegistration(address, {
-      signal,
-      ...requestOptions,
-    });
+      
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!address,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+      
 
-export type CreRegistrationsControllerGetRegistrationQueryResult = NonNullable<
-  Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>
->;
-export type CreRegistrationsControllerGetRegistrationQueryError =
-  ErrorType<unknown>;
+   return  { queryKey, queryFn, enabled: !!(address), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
-export function useCreRegistrationsControllerGetRegistration<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+export type CreRegistrationsControllerGetRegistrationQueryResult = NonNullable<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>>
+export type CreRegistrationsControllerGetRegistrationQueryError = ErrorType<unknown>
+
+
+export function useCreRegistrationsControllerGetRegistration<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError = ErrorType<unknown>>(
+ address: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
           TError,
           Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreRegistrationsControllerGetRegistration<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCreRegistrationsControllerGetRegistration<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
           TError,
           Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreRegistrationsControllerGetRegistration<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCreRegistrationsControllerGetRegistration<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get active CRE registration for a user
  */
 
-export function useCreRegistrationsControllerGetRegistration<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getCreRegistrationsControllerGetRegistrationQueryOptions(
-    address,
-    options,
-  );
+export function useCreRegistrationsControllerGetRegistration<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRegistration>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getCreRegistrationsControllerGetRegistrationQueryOptions(address,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Manually set current rescue step for a user
  */
 export type creRegistrationsControllerUpsertRescueStepResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type creRegistrationsControllerUpsertRescueStepResponseSuccess = (creRegistrationsControllerUpsertRescueStepResponse200) & {
+  headers: Headers;
 };
+;
 
-export type creRegistrationsControllerUpsertRescueStepResponseSuccess =
-  creRegistrationsControllerUpsertRescueStepResponse200 & {
-    headers: Headers;
-  };
-export type creRegistrationsControllerUpsertRescueStepResponse =
-  creRegistrationsControllerUpsertRescueStepResponseSuccess;
+export type creRegistrationsControllerUpsertRescueStepResponse = (creRegistrationsControllerUpsertRescueStepResponseSuccess)
 
-export const getCreRegistrationsControllerUpsertRescueStepUrl = (
-  address: string,
-) => {
-  return `/v1/users/${address}/rescue-step`;
-};
+export const getCreRegistrationsControllerUpsertRescueStepUrl = (address: string,) => {
 
-export const creRegistrationsControllerUpsertRescueStep = async (
-  address: string,
-  upsertUserRescueStepDto: UpsertUserRescueStepDto,
-  options?: RequestInit,
-): Promise<creRegistrationsControllerUpsertRescueStepResponse> => {
-  return customClient<creRegistrationsControllerUpsertRescueStepResponse>(
-    getCreRegistrationsControllerUpsertRescueStepUrl(address),
-    {
-      ...options,
-      method: "PUT",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(upsertUserRescueStepDto),
-    },
-  );
-};
 
-export const getCreRegistrationsControllerUpsertRescueStepMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>,
-    TError,
-    { address: string; data: BodyType<UpsertUserRescueStepDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>,
-  TError,
-  { address: string; data: BodyType<UpsertUserRescueStepDto> },
-  TContext
-> => {
-  const mutationKey = ["creRegistrationsControllerUpsertRescueStep"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>,
-    { address: string; data: BodyType<UpsertUserRescueStepDto> }
-  > = (props) => {
-    const { address, data } = props ?? {};
+  return `/v1/users/${address}/rescue-step`
+}
 
-    return creRegistrationsControllerUpsertRescueStep(
-      address,
-      data,
-      requestOptions,
-    );
-  };
+export const creRegistrationsControllerUpsertRescueStep = async (address: string,
+    upsertUserRescueStepDto: UpsertUserRescueStepDto, options?: RequestInit): Promise<creRegistrationsControllerUpsertRescueStepResponse> => {
+  
+  return customClient<creRegistrationsControllerUpsertRescueStepResponse>(getCreRegistrationsControllerUpsertRescueStepUrl(address),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      upsertUserRescueStepDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type CreRegistrationsControllerUpsertRescueStepMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>
-  >;
-export type CreRegistrationsControllerUpsertRescueStepMutationBody =
-  BodyType<UpsertUserRescueStepDto>;
-export type CreRegistrationsControllerUpsertRescueStepMutationError =
-  ErrorType<unknown>;
 
-/**
+export const getCreRegistrationsControllerUpsertRescueStepMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>, TError,{address: string;data: BodyType<UpsertUserRescueStepDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>, TError,{address: string;data: BodyType<UpsertUserRescueStepDto>}, TContext> => {
+
+const mutationKey = ['creRegistrationsControllerUpsertRescueStep'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>, {address: string;data: BodyType<UpsertUserRescueStepDto>}> = (props) => {
+          const {address,data} = props ?? {};
+
+          return  creRegistrationsControllerUpsertRescueStep(address,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreRegistrationsControllerUpsertRescueStepMutationResult = NonNullable<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>>
+    export type CreRegistrationsControllerUpsertRescueStepMutationBody = BodyType<UpsertUserRescueStepDto>
+    export type CreRegistrationsControllerUpsertRescueStepMutationError = ErrorType<unknown>
+
+    /**
  * @summary Manually set current rescue step for a user
  */
-export const useCreRegistrationsControllerUpsertRescueStep = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>,
-      TError,
-      { address: string; data: BodyType<UpsertUserRescueStepDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>,
-  TError,
-  { address: string; data: BodyType<UpsertUserRescueStepDto> },
-  TContext
-> => {
-  return useMutation(
-    getCreRegistrationsControllerUpsertRescueStepMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useCreRegistrationsControllerUpsertRescueStep = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>, TError,{address: string;data: BodyType<UpsertUserRescueStepDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creRegistrationsControllerUpsertRescueStep>>,
+        TError,
+        {address: string;data: BodyType<UpsertUserRescueStepDto>},
+        TContext
+      > => {
+      return useMutation(getCreRegistrationsControllerUpsertRescueStepMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary Manually set current rescue step for a user (POST alias)
  */
 export type creRegistrationsControllerPostRescueStepResponse201 = {
-  data: void;
-  status: 201;
+  data: void
+  status: 201
+}
+
+export type creRegistrationsControllerPostRescueStepResponseSuccess = (creRegistrationsControllerPostRescueStepResponse201) & {
+  headers: Headers;
 };
+;
 
-export type creRegistrationsControllerPostRescueStepResponseSuccess =
-  creRegistrationsControllerPostRescueStepResponse201 & {
-    headers: Headers;
-  };
-export type creRegistrationsControllerPostRescueStepResponse =
-  creRegistrationsControllerPostRescueStepResponseSuccess;
+export type creRegistrationsControllerPostRescueStepResponse = (creRegistrationsControllerPostRescueStepResponseSuccess)
 
-export const getCreRegistrationsControllerPostRescueStepUrl = (
-  address: string,
-) => {
-  return `/v1/users/${address}/rescue-step`;
-};
+export const getCreRegistrationsControllerPostRescueStepUrl = (address: string,) => {
 
-export const creRegistrationsControllerPostRescueStep = async (
-  address: string,
-  upsertUserRescueStepDto: UpsertUserRescueStepDto,
-  options?: RequestInit,
-): Promise<creRegistrationsControllerPostRescueStepResponse> => {
-  return customClient<creRegistrationsControllerPostRescueStepResponse>(
-    getCreRegistrationsControllerPostRescueStepUrl(address),
-    {
-      ...options,
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(upsertUserRescueStepDto),
-    },
-  );
-};
 
-export const getCreRegistrationsControllerPostRescueStepMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>,
-    TError,
-    { address: string; data: BodyType<UpsertUserRescueStepDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>,
-  TError,
-  { address: string; data: BodyType<UpsertUserRescueStepDto> },
-  TContext
-> => {
-  const mutationKey = ["creRegistrationsControllerPostRescueStep"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>,
-    { address: string; data: BodyType<UpsertUserRescueStepDto> }
-  > = (props) => {
-    const { address, data } = props ?? {};
+  return `/v1/users/${address}/rescue-step`
+}
 
-    return creRegistrationsControllerPostRescueStep(
-      address,
-      data,
-      requestOptions,
-    );
-  };
+export const creRegistrationsControllerPostRescueStep = async (address: string,
+    upsertUserRescueStepDto: UpsertUserRescueStepDto, options?: RequestInit): Promise<creRegistrationsControllerPostRescueStepResponse> => {
+  
+  return customClient<creRegistrationsControllerPostRescueStepResponse>(getCreRegistrationsControllerPostRescueStepUrl(address),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      upsertUserRescueStepDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type CreRegistrationsControllerPostRescueStepMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>
-  >;
-export type CreRegistrationsControllerPostRescueStepMutationBody =
-  BodyType<UpsertUserRescueStepDto>;
-export type CreRegistrationsControllerPostRescueStepMutationError =
-  ErrorType<unknown>;
 
-/**
+export const getCreRegistrationsControllerPostRescueStepMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>, TError,{address: string;data: BodyType<UpsertUserRescueStepDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>, TError,{address: string;data: BodyType<UpsertUserRescueStepDto>}, TContext> => {
+
+const mutationKey = ['creRegistrationsControllerPostRescueStep'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>, {address: string;data: BodyType<UpsertUserRescueStepDto>}> = (props) => {
+          const {address,data} = props ?? {};
+
+          return  creRegistrationsControllerPostRescueStep(address,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreRegistrationsControllerPostRescueStepMutationResult = NonNullable<Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>>
+    export type CreRegistrationsControllerPostRescueStepMutationBody = BodyType<UpsertUserRescueStepDto>
+    export type CreRegistrationsControllerPostRescueStepMutationError = ErrorType<unknown>
+
+    /**
  * @summary Manually set current rescue step for a user (POST alias)
  */
-export const useCreRegistrationsControllerPostRescueStep = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>,
-      TError,
-      { address: string; data: BodyType<UpsertUserRescueStepDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>,
-  TError,
-  { address: string; data: BodyType<UpsertUserRescueStepDto> },
-  TContext
-> => {
-  return useMutation(
-    getCreRegistrationsControllerPostRescueStepMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useCreRegistrationsControllerPostRescueStep = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>, TError,{address: string;data: BodyType<UpsertUserRescueStepDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creRegistrationsControllerPostRescueStep>>,
+        TError,
+        {address: string;data: BodyType<UpsertUserRescueStepDto>},
+        TContext
+      > => {
+      return useMutation(getCreRegistrationsControllerPostRescueStepMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary Get current rescue step for a user
  */
 export type creRegistrationsControllerGetRescueStepResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type creRegistrationsControllerGetRescueStepResponseSuccess = (creRegistrationsControllerGetRescueStepResponse200) & {
+  headers: Headers;
 };
+;
 
-export type creRegistrationsControllerGetRescueStepResponseSuccess =
-  creRegistrationsControllerGetRescueStepResponse200 & {
-    headers: Headers;
-  };
-export type creRegistrationsControllerGetRescueStepResponse =
-  creRegistrationsControllerGetRescueStepResponseSuccess;
+export type creRegistrationsControllerGetRescueStepResponse = (creRegistrationsControllerGetRescueStepResponseSuccess)
 
-export const getCreRegistrationsControllerGetRescueStepUrl = (
-  address: string,
+export const getCreRegistrationsControllerGetRescueStepUrl = (address: string,) => {
+
+
+  
+
+  return `/v1/users/${address}/rescue-step`
+}
+
+export const creRegistrationsControllerGetRescueStep = async (address: string, options?: RequestInit): Promise<creRegistrationsControllerGetRescueStepResponse> => {
+  
+  return customClient<creRegistrationsControllerGetRescueStepResponse>(getCreRegistrationsControllerGetRescueStepUrl(address),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getCreRegistrationsControllerGetRescueStepQueryKey = (address: string,) => {
+    return [
+    `/v1/users/${address}/rescue-step`
+    ] as const;
+    }
+
+    
+export const getCreRegistrationsControllerGetRescueStepQueryOptions = <TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError = ErrorType<unknown>>(address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return `/v1/users/${address}/rescue-step`;
-};
 
-export const creRegistrationsControllerGetRescueStep = async (
-  address: string,
-  options?: RequestInit,
-): Promise<creRegistrationsControllerGetRescueStepResponse> => {
-  return customClient<creRegistrationsControllerGetRescueStepResponse>(
-    getCreRegistrationsControllerGetRescueStepUrl(address),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-export const getCreRegistrationsControllerGetRescueStepQueryKey = (
-  address: string,
-) => {
-  return [`/v1/users/${address}/rescue-step`] as const;
-};
+  const queryKey =  queryOptions?.queryKey ?? getCreRegistrationsControllerGetRescueStepQueryKey(address);
 
-export const getCreRegistrationsControllerGetRescueStepQueryOptions = <
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getCreRegistrationsControllerGetRescueStepQueryKey(address);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>> = ({ signal }) => creRegistrationsControllerGetRescueStep(address, { signal, ...requestOptions });
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>
-  > = ({ signal }) =>
-    creRegistrationsControllerGetRescueStep(address, {
-      signal,
-      ...requestOptions,
-    });
+      
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!address,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+      
 
-export type CreRegistrationsControllerGetRescueStepQueryResult = NonNullable<
-  Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>
->;
-export type CreRegistrationsControllerGetRescueStepQueryError =
-  ErrorType<unknown>;
+   return  { queryKey, queryFn, enabled: !!(address), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
-export function useCreRegistrationsControllerGetRescueStep<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+export type CreRegistrationsControllerGetRescueStepQueryResult = NonNullable<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>>
+export type CreRegistrationsControllerGetRescueStepQueryError = ErrorType<unknown>
+
+
+export function useCreRegistrationsControllerGetRescueStep<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError = ErrorType<unknown>>(
+ address: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
           TError,
           Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreRegistrationsControllerGetRescueStep<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCreRegistrationsControllerGetRescueStep<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
           TError,
           Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreRegistrationsControllerGetRescueStep<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCreRegistrationsControllerGetRescueStep<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get current rescue step for a user
  */
 
-export function useCreRegistrationsControllerGetRescueStep<
-  TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getCreRegistrationsControllerGetRescueStepQueryOptions(
-    address,
-    options,
-  );
+export function useCreRegistrationsControllerGetRescueStep<TData = Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerGetRescueStep>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getCreRegistrationsControllerGetRescueStepQueryOptions(address,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary List CRE registration revisions for a user
  */
 export type creRegistrationsControllerListRegistrationRevisionsResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type creRegistrationsControllerListRegistrationRevisionsResponseSuccess = (creRegistrationsControllerListRegistrationRevisionsResponse200) & {
+  headers: Headers;
 };
+;
 
-export type creRegistrationsControllerListRegistrationRevisionsResponseSuccess =
-  creRegistrationsControllerListRegistrationRevisionsResponse200 & {
-    headers: Headers;
-  };
-export type creRegistrationsControllerListRegistrationRevisionsResponse =
-  creRegistrationsControllerListRegistrationRevisionsResponseSuccess;
+export type creRegistrationsControllerListRegistrationRevisionsResponse = (creRegistrationsControllerListRegistrationRevisionsResponseSuccess)
 
-export const getCreRegistrationsControllerListRegistrationRevisionsUrl = (
-  address: string,
-  params?: CreRegistrationsControllerListRegistrationRevisionsParams,
-) => {
+export const getCreRegistrationsControllerListRegistrationRevisionsUrl = (address: string,
+    params?: CreRegistrationsControllerListRegistrationRevisionsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
+      normalizedParams.append(key, serializeQueryParamValue(value))
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/v1/users/${address}/cre-registration/revisions?${stringifiedParams}`
-    : `/v1/users/${address}/cre-registration/revisions`;
-};
+  return stringifiedParams.length > 0 ? `/v1/users/${address}/cre-registration/revisions?${stringifiedParams}` : `/v1/users/${address}/cre-registration/revisions`
+}
 
-export const creRegistrationsControllerListRegistrationRevisions = async (
-  address: string,
-  params?: CreRegistrationsControllerListRegistrationRevisionsParams,
-  options?: RequestInit,
-): Promise<creRegistrationsControllerListRegistrationRevisionsResponse> => {
-  return customClient<creRegistrationsControllerListRegistrationRevisionsResponse>(
-    getCreRegistrationsControllerListRegistrationRevisionsUrl(address, params),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const creRegistrationsControllerListRegistrationRevisions = async (address: string,
+    params?: CreRegistrationsControllerListRegistrationRevisionsParams, options?: RequestInit): Promise<creRegistrationsControllerListRegistrationRevisionsResponse> => {
+  
+  return customClient<creRegistrationsControllerListRegistrationRevisionsResponse>(getCreRegistrationsControllerListRegistrationRevisionsUrl(address,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
 
-export const getCreRegistrationsControllerListRegistrationRevisionsQueryKey = (
-  address: string,
-  params?: CreRegistrationsControllerListRegistrationRevisionsParams,
+
+
+
+export const getCreRegistrationsControllerListRegistrationRevisionsQueryKey = (address: string,
+    params?: CreRegistrationsControllerListRegistrationRevisionsParams,) => {
+    return [
+    `/v1/users/${address}/cre-registration/revisions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getCreRegistrationsControllerListRegistrationRevisionsQueryOptions = <TData = Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError = ErrorType<unknown>>(address: string,
+    params?: CreRegistrationsControllerListRegistrationRevisionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return [
-    `/v1/users/${address}/cre-registration/revisions`,
-    ...(params ? [params] : []),
-  ] as const;
-};
 
-export const getCreRegistrationsControllerListRegistrationRevisionsQueryOptions =
-  <
-    TData = Awaited<
-      ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-    >,
-    TError = ErrorType<unknown>,
-  >(
-    address: string,
-    params?: CreRegistrationsControllerListRegistrationRevisionsParams,
-    options?: {
-      query?: Partial<
-        UseQueryOptions<
-          Awaited<
-            ReturnType<
-              typeof creRegistrationsControllerListRegistrationRevisions
-            >
-          >,
-          TError,
-          TData
-        >
-      >;
-      request?: SecondParameter<typeof customClient>;
-    },
-  ) => {
-    const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-    const queryKey =
-      queryOptions?.queryKey ??
-      getCreRegistrationsControllerListRegistrationRevisionsQueryKey(
-        address,
-        params,
-      );
+  const queryKey =  queryOptions?.queryKey ?? getCreRegistrationsControllerListRegistrationRevisionsQueryKey(address,params);
 
-    const queryFn: QueryFunction<
-      Awaited<
-        ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-      >
-    > = ({ signal }) =>
-      creRegistrationsControllerListRegistrationRevisions(address, params, {
-        signal,
-        ...requestOptions,
-      });
+  
 
-    return {
-      queryKey,
-      queryFn,
-      enabled: !!address,
-      ...queryOptions,
-    } as UseQueryOptions<
-      Awaited<
-        ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-      >,
-      TError,
-      TData
-    > & { queryKey: DataTag<QueryKey, TData, TError> };
-  };
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>> = ({ signal }) => creRegistrationsControllerListRegistrationRevisions(address,params, { signal, ...requestOptions });
 
-export type CreRegistrationsControllerListRegistrationRevisionsQueryResult =
-  NonNullable<
-    Awaited<
-      ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-    >
-  >;
-export type CreRegistrationsControllerListRegistrationRevisionsQueryError =
-  ErrorType<unknown>;
+      
 
-export function useCreRegistrationsControllerListRegistrationRevisions<
-  TData = Awaited<
-    ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-  >,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params: undefined | CreRegistrationsControllerListRegistrationRevisionsParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<
-          ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-        >,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+   return  { queryKey, queryFn, enabled: !!(address), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CreRegistrationsControllerListRegistrationRevisionsQueryResult = NonNullable<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>>
+export type CreRegistrationsControllerListRegistrationRevisionsQueryError = ErrorType<unknown>
+
+
+export function useCreRegistrationsControllerListRegistrationRevisions<TData = Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError = ErrorType<unknown>>(
+ address: string,
+    params: undefined |  CreRegistrationsControllerListRegistrationRevisionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<
-            ReturnType<
-              typeof creRegistrationsControllerListRegistrationRevisions
-            >
-          >,
+          Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>,
           TError,
-          Awaited<
-            ReturnType<
-              typeof creRegistrationsControllerListRegistrationRevisions
-            >
-          >
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreRegistrationsControllerListRegistrationRevisions<
-  TData = Awaited<
-    ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-  >,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: CreRegistrationsControllerListRegistrationRevisionsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<
-          ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-        >,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+          Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCreRegistrationsControllerListRegistrationRevisions<TData = Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: CreRegistrationsControllerListRegistrationRevisionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<
-            ReturnType<
-              typeof creRegistrationsControllerListRegistrationRevisions
-            >
-          >,
+          Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>,
           TError,
-          Awaited<
-            ReturnType<
-              typeof creRegistrationsControllerListRegistrationRevisions
-            >
-          >
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreRegistrationsControllerListRegistrationRevisions<
-  TData = Awaited<
-    ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-  >,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: CreRegistrationsControllerListRegistrationRevisionsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<
-          ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-        >,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+          Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCreRegistrationsControllerListRegistrationRevisions<TData = Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: CreRegistrationsControllerListRegistrationRevisionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List CRE registration revisions for a user
  */
 
-export function useCreRegistrationsControllerListRegistrationRevisions<
-  TData = Awaited<
-    ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-  >,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: CreRegistrationsControllerListRegistrationRevisionsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<
-          ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>
-        >,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions =
-    getCreRegistrationsControllerListRegistrationRevisionsQueryOptions(
-      address,
-      params,
-      options,
-    );
+export function useCreRegistrationsControllerListRegistrationRevisions<TData = Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: CreRegistrationsControllerListRegistrationRevisionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof creRegistrationsControllerListRegistrationRevisions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getCreRegistrationsControllerListRegistrationRevisionsQueryOptions(address,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Generate deterministic managed demo wallet from real user address
  */
 export type demoWalletsControllerGenerateResponse201 = {
-  data: void;
-  status: 201;
-};
+  data: void
+  status: 201
+}
 
-export type demoWalletsControllerGenerateResponseSuccess =
-  demoWalletsControllerGenerateResponse201 & {
-    headers: Headers;
-  };
-export type demoWalletsControllerGenerateResponse =
-  demoWalletsControllerGenerateResponseSuccess;
+export type demoWalletsControllerGenerateResponseSuccess = (demoWalletsControllerGenerateResponse201) & {
+  headers: Headers;
+};
+;
+
+export type demoWalletsControllerGenerateResponse = (demoWalletsControllerGenerateResponseSuccess)
 
 export const getDemoWalletsControllerGenerateUrl = () => {
-  return `/v1/demo-wallets/generate`;
-};
 
-export const demoWalletsControllerGenerate = async (
-  generateDemoWalletDto: GenerateDemoWalletDto,
-  options?: RequestInit,
-): Promise<demoWalletsControllerGenerateResponse> => {
-  return customClient<demoWalletsControllerGenerateResponse>(
-    getDemoWalletsControllerGenerateUrl(),
-    {
-      ...options,
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(generateDemoWalletDto),
-    },
-  );
-};
 
-export const getDemoWalletsControllerGenerateMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof demoWalletsControllerGenerate>>,
-    TError,
-    { data: BodyType<GenerateDemoWalletDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof demoWalletsControllerGenerate>>,
-  TError,
-  { data: BodyType<GenerateDemoWalletDto> },
-  TContext
-> => {
-  const mutationKey = ["demoWalletsControllerGenerate"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof demoWalletsControllerGenerate>>,
-    { data: BodyType<GenerateDemoWalletDto> }
-  > = (props) => {
-    const { data } = props ?? {};
+  return `/v1/demo-wallets/generate`
+}
 
-    return demoWalletsControllerGenerate(data, requestOptions);
-  };
+export const demoWalletsControllerGenerate = async (generateDemoWalletDto: GenerateDemoWalletDto, options?: RequestInit): Promise<demoWalletsControllerGenerateResponse> => {
+  
+  return customClient<demoWalletsControllerGenerateResponse>(getDemoWalletsControllerGenerateUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      generateDemoWalletDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type DemoWalletsControllerGenerateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof demoWalletsControllerGenerate>>
->;
-export type DemoWalletsControllerGenerateMutationBody =
-  BodyType<GenerateDemoWalletDto>;
-export type DemoWalletsControllerGenerateMutationError = ErrorType<unknown>;
 
-/**
+export const getDemoWalletsControllerGenerateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerGenerate>>, TError,{data: BodyType<GenerateDemoWalletDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerGenerate>>, TError,{data: BodyType<GenerateDemoWalletDto>}, TContext> => {
+
+const mutationKey = ['demoWalletsControllerGenerate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof demoWalletsControllerGenerate>>, {data: BodyType<GenerateDemoWalletDto>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  demoWalletsControllerGenerate(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DemoWalletsControllerGenerateMutationResult = NonNullable<Awaited<ReturnType<typeof demoWalletsControllerGenerate>>>
+    export type DemoWalletsControllerGenerateMutationBody = BodyType<GenerateDemoWalletDto>
+    export type DemoWalletsControllerGenerateMutationError = ErrorType<unknown>
+
+    /**
  * @summary Generate deterministic managed demo wallet from real user address
  */
-export const useDemoWalletsControllerGenerate = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof demoWalletsControllerGenerate>>,
-      TError,
-      { data: BodyType<GenerateDemoWalletDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof demoWalletsControllerGenerate>>,
-  TError,
-  { data: BodyType<GenerateDemoWalletDto> },
-  TContext
-> => {
-  return useMutation(
-    getDemoWalletsControllerGenerateMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useDemoWalletsControllerGenerate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerGenerate>>, TError,{data: BodyType<GenerateDemoWalletDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof demoWalletsControllerGenerate>>,
+        TError,
+        {data: BodyType<GenerateDemoWalletDto>},
+        TContext
+      > => {
+      return useMutation(getDemoWalletsControllerGenerateMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary Mint demo balances and fund native gas on supported chains
  */
 export type demoWalletsControllerFundResponse201 = {
-  data: void;
-  status: 201;
+  data: void
+  status: 201
+}
+
+export type demoWalletsControllerFundResponseSuccess = (demoWalletsControllerFundResponse201) & {
+  headers: Headers;
 };
+;
 
-export type demoWalletsControllerFundResponseSuccess =
-  demoWalletsControllerFundResponse201 & {
-    headers: Headers;
-  };
-export type demoWalletsControllerFundResponse =
-  demoWalletsControllerFundResponseSuccess;
+export type demoWalletsControllerFundResponse = (demoWalletsControllerFundResponseSuccess)
 
-export const getDemoWalletsControllerFundUrl = (demoWalletAddress: string) => {
-  return `/v1/demo-wallets/${demoWalletAddress}/fund`;
-};
+export const getDemoWalletsControllerFundUrl = (demoWalletAddress: string,) => {
 
-export const demoWalletsControllerFund = async (
-  demoWalletAddress: string,
-  fundDemoWalletDto: FundDemoWalletDto,
-  options?: RequestInit,
-): Promise<demoWalletsControllerFundResponse> => {
-  return customClient<demoWalletsControllerFundResponse>(
-    getDemoWalletsControllerFundUrl(demoWalletAddress),
-    {
-      ...options,
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(fundDemoWalletDto),
-    },
-  );
-};
 
-export const getDemoWalletsControllerFundMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof demoWalletsControllerFund>>,
-    TError,
-    { demoWalletAddress: string; data: BodyType<FundDemoWalletDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof demoWalletsControllerFund>>,
-  TError,
-  { demoWalletAddress: string; data: BodyType<FundDemoWalletDto> },
-  TContext
-> => {
-  const mutationKey = ["demoWalletsControllerFund"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof demoWalletsControllerFund>>,
-    { demoWalletAddress: string; data: BodyType<FundDemoWalletDto> }
-  > = (props) => {
-    const { demoWalletAddress, data } = props ?? {};
+  return `/v1/demo-wallets/${demoWalletAddress}/fund`
+}
 
-    return demoWalletsControllerFund(demoWalletAddress, data, requestOptions);
-  };
+export const demoWalletsControllerFund = async (demoWalletAddress: string,
+    fundDemoWalletDto: FundDemoWalletDto, options?: RequestInit): Promise<demoWalletsControllerFundResponse> => {
+  
+  return customClient<demoWalletsControllerFundResponse>(getDemoWalletsControllerFundUrl(demoWalletAddress),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      fundDemoWalletDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type DemoWalletsControllerFundMutationResult = NonNullable<
-  Awaited<ReturnType<typeof demoWalletsControllerFund>>
->;
-export type DemoWalletsControllerFundMutationBody = BodyType<FundDemoWalletDto>;
-export type DemoWalletsControllerFundMutationError = ErrorType<unknown>;
 
-/**
+export const getDemoWalletsControllerFundMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerFund>>, TError,{demoWalletAddress: string;data: BodyType<FundDemoWalletDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerFund>>, TError,{demoWalletAddress: string;data: BodyType<FundDemoWalletDto>}, TContext> => {
+
+const mutationKey = ['demoWalletsControllerFund'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof demoWalletsControllerFund>>, {demoWalletAddress: string;data: BodyType<FundDemoWalletDto>}> = (props) => {
+          const {demoWalletAddress,data} = props ?? {};
+
+          return  demoWalletsControllerFund(demoWalletAddress,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DemoWalletsControllerFundMutationResult = NonNullable<Awaited<ReturnType<typeof demoWalletsControllerFund>>>
+    export type DemoWalletsControllerFundMutationBody = BodyType<FundDemoWalletDto>
+    export type DemoWalletsControllerFundMutationError = ErrorType<unknown>
+
+    /**
  * @summary Mint demo balances and fund native gas on supported chains
  */
-export const useDemoWalletsControllerFund = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof demoWalletsControllerFund>>,
-      TError,
-      { demoWalletAddress: string; data: BodyType<FundDemoWalletDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof demoWalletsControllerFund>>,
-  TError,
-  { demoWalletAddress: string; data: BodyType<FundDemoWalletDto> },
-  TContext
-> => {
-  return useMutation(
-    getDemoWalletsControllerFundMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useDemoWalletsControllerFund = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerFund>>, TError,{demoWalletAddress: string;data: BodyType<FundDemoWalletDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof demoWalletsControllerFund>>,
+        TError,
+        {demoWalletAddress: string;data: BodyType<FundDemoWalletDto>},
+        TContext
+      > => {
+      return useMutation(getDemoWalletsControllerFundMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary Bootstrap demo wallet positions for rescue scenarios across Ethereum/Base Sepolia
  */
 export type demoWalletsControllerBootstrapPositionsResponse202 = {
-  data: void;
-  status: 202;
+  data: void
+  status: 202
+}
+
+export type demoWalletsControllerBootstrapPositionsResponseSuccess = (demoWalletsControllerBootstrapPositionsResponse202) & {
+  headers: Headers;
 };
+;
 
-export type demoWalletsControllerBootstrapPositionsResponseSuccess =
-  demoWalletsControllerBootstrapPositionsResponse202 & {
-    headers: Headers;
-  };
-export type demoWalletsControllerBootstrapPositionsResponse =
-  demoWalletsControllerBootstrapPositionsResponseSuccess;
+export type demoWalletsControllerBootstrapPositionsResponse = (demoWalletsControllerBootstrapPositionsResponseSuccess)
 
-export const getDemoWalletsControllerBootstrapPositionsUrl = (
-  demoWalletAddress: string,
-) => {
-  return `/v1/demo-wallets/${demoWalletAddress}/bootstrap-positions`;
-};
+export const getDemoWalletsControllerBootstrapPositionsUrl = (demoWalletAddress: string,) => {
 
-export const demoWalletsControllerBootstrapPositions = async (
-  demoWalletAddress: string,
-  bootstrapDemoWalletDto: BootstrapDemoWalletDto,
-  options?: RequestInit,
-): Promise<demoWalletsControllerBootstrapPositionsResponse> => {
-  return customClient<demoWalletsControllerBootstrapPositionsResponse>(
-    getDemoWalletsControllerBootstrapPositionsUrl(demoWalletAddress),
-    {
-      ...options,
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(bootstrapDemoWalletDto),
-    },
-  );
-};
 
-export const getDemoWalletsControllerBootstrapPositionsMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>,
-    TError,
-    { demoWalletAddress: string; data: BodyType<BootstrapDemoWalletDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>,
-  TError,
-  { demoWalletAddress: string; data: BodyType<BootstrapDemoWalletDto> },
-  TContext
-> => {
-  const mutationKey = ["demoWalletsControllerBootstrapPositions"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>,
-    { demoWalletAddress: string; data: BodyType<BootstrapDemoWalletDto> }
-  > = (props) => {
-    const { demoWalletAddress, data } = props ?? {};
+  return `/v1/demo-wallets/${demoWalletAddress}/bootstrap-positions`
+}
 
-    return demoWalletsControllerBootstrapPositions(
-      demoWalletAddress,
-      data,
-      requestOptions,
-    );
-  };
+export const demoWalletsControllerBootstrapPositions = async (demoWalletAddress: string,
+    bootstrapDemoWalletDto: BootstrapDemoWalletDto, options?: RequestInit): Promise<demoWalletsControllerBootstrapPositionsResponse> => {
+  
+  return customClient<demoWalletsControllerBootstrapPositionsResponse>(getDemoWalletsControllerBootstrapPositionsUrl(demoWalletAddress),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      bootstrapDemoWalletDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type DemoWalletsControllerBootstrapPositionsMutationResult = NonNullable<
-  Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>
->;
-export type DemoWalletsControllerBootstrapPositionsMutationBody =
-  BodyType<BootstrapDemoWalletDto>;
-export type DemoWalletsControllerBootstrapPositionsMutationError =
-  ErrorType<unknown>;
 
-/**
+export const getDemoWalletsControllerBootstrapPositionsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>, TError,{demoWalletAddress: string;data: BodyType<BootstrapDemoWalletDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>, TError,{demoWalletAddress: string;data: BodyType<BootstrapDemoWalletDto>}, TContext> => {
+
+const mutationKey = ['demoWalletsControllerBootstrapPositions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>, {demoWalletAddress: string;data: BodyType<BootstrapDemoWalletDto>}> = (props) => {
+          const {demoWalletAddress,data} = props ?? {};
+
+          return  demoWalletsControllerBootstrapPositions(demoWalletAddress,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DemoWalletsControllerBootstrapPositionsMutationResult = NonNullable<Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>>
+    export type DemoWalletsControllerBootstrapPositionsMutationBody = BodyType<BootstrapDemoWalletDto>
+    export type DemoWalletsControllerBootstrapPositionsMutationError = ErrorType<unknown>
+
+    /**
  * @summary Bootstrap demo wallet positions for rescue scenarios across Ethereum/Base Sepolia
  */
-export const useDemoWalletsControllerBootstrapPositions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>,
-      TError,
-      { demoWalletAddress: string; data: BodyType<BootstrapDemoWalletDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>,
-  TError,
-  { demoWalletAddress: string; data: BodyType<BootstrapDemoWalletDto> },
-  TContext
-> => {
-  return useMutation(
-    getDemoWalletsControllerBootstrapPositionsMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useDemoWalletsControllerBootstrapPositions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>, TError,{demoWalletAddress: string;data: BodyType<BootstrapDemoWalletDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof demoWalletsControllerBootstrapPositions>>,
+        TError,
+        {demoWalletAddress: string;data: BodyType<BootstrapDemoWalletDto>},
+        TContext
+      > => {
+      return useMutation(getDemoWalletsControllerBootstrapPositionsMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary Get bootstrap run status/result
  */
 export type demoWalletsControllerGetBootstrapRunResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type demoWalletsControllerGetBootstrapRunResponseSuccess = (demoWalletsControllerGetBootstrapRunResponse200) & {
+  headers: Headers;
 };
+;
 
-export type demoWalletsControllerGetBootstrapRunResponseSuccess =
-  demoWalletsControllerGetBootstrapRunResponse200 & {
-    headers: Headers;
-  };
-export type demoWalletsControllerGetBootstrapRunResponse =
-  demoWalletsControllerGetBootstrapRunResponseSuccess;
+export type demoWalletsControllerGetBootstrapRunResponse = (demoWalletsControllerGetBootstrapRunResponseSuccess)
 
-export const getDemoWalletsControllerGetBootstrapRunUrl = (
-  demoWalletAddress: string,
-  runId: number,
+export const getDemoWalletsControllerGetBootstrapRunUrl = (demoWalletAddress: string,
+    runId: number,) => {
+
+
+  
+
+  return `/v1/demo-wallets/${demoWalletAddress}/bootstrap-positions/runs/${runId}`
+}
+
+export const demoWalletsControllerGetBootstrapRun = async (demoWalletAddress: string,
+    runId: number, options?: RequestInit): Promise<demoWalletsControllerGetBootstrapRunResponse> => {
+  
+  return customClient<demoWalletsControllerGetBootstrapRunResponse>(getDemoWalletsControllerGetBootstrapRunUrl(demoWalletAddress,runId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getDemoWalletsControllerGetBootstrapRunQueryKey = (demoWalletAddress: string,
+    runId: number,) => {
+    return [
+    `/v1/demo-wallets/${demoWalletAddress}/bootstrap-positions/runs/${runId}`
+    ] as const;
+    }
+
+    
+export const getDemoWalletsControllerGetBootstrapRunQueryOptions = <TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError = ErrorType<unknown>>(demoWalletAddress: string,
+    runId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return `/v1/demo-wallets/${demoWalletAddress}/bootstrap-positions/runs/${runId}`;
-};
 
-export const demoWalletsControllerGetBootstrapRun = async (
-  demoWalletAddress: string,
-  runId: number,
-  options?: RequestInit,
-): Promise<demoWalletsControllerGetBootstrapRunResponse> => {
-  return customClient<demoWalletsControllerGetBootstrapRunResponse>(
-    getDemoWalletsControllerGetBootstrapRunUrl(demoWalletAddress, runId),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-export const getDemoWalletsControllerGetBootstrapRunQueryKey = (
-  demoWalletAddress: string,
-  runId: number,
-) => {
-  return [
-    `/v1/demo-wallets/${demoWalletAddress}/bootstrap-positions/runs/${runId}`,
-  ] as const;
-};
+  const queryKey =  queryOptions?.queryKey ?? getDemoWalletsControllerGetBootstrapRunQueryKey(demoWalletAddress,runId);
 
-export const getDemoWalletsControllerGetBootstrapRunQueryOptions = <
-  TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-  TError = ErrorType<unknown>,
->(
-  demoWalletAddress: string,
-  runId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getDemoWalletsControllerGetBootstrapRunQueryKey(demoWalletAddress, runId);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>> = ({ signal }) => demoWalletsControllerGetBootstrapRun(demoWalletAddress,runId, { signal, ...requestOptions });
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>
-  > = ({ signal }) =>
-    demoWalletsControllerGetBootstrapRun(demoWalletAddress, runId, {
-      signal,
-      ...requestOptions,
-    });
+      
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!(demoWalletAddress && runId),
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+      
 
-export type DemoWalletsControllerGetBootstrapRunQueryResult = NonNullable<
-  Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>
->;
-export type DemoWalletsControllerGetBootstrapRunQueryError = ErrorType<unknown>;
+   return  { queryKey, queryFn, enabled: !!(demoWalletAddress && runId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
-export function useDemoWalletsControllerGetBootstrapRun<
-  TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-  TError = ErrorType<unknown>,
->(
-  demoWalletAddress: string,
-  runId: number,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+export type DemoWalletsControllerGetBootstrapRunQueryResult = NonNullable<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>>
+export type DemoWalletsControllerGetBootstrapRunQueryError = ErrorType<unknown>
+
+
+export function useDemoWalletsControllerGetBootstrapRun<TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError = ErrorType<unknown>>(
+ demoWalletAddress: string,
+    runId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
           TError,
           Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useDemoWalletsControllerGetBootstrapRun<
-  TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-  TError = ErrorType<unknown>,
->(
-  demoWalletAddress: string,
-  runId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDemoWalletsControllerGetBootstrapRun<TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError = ErrorType<unknown>>(
+ demoWalletAddress: string,
+    runId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
           TError,
           Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useDemoWalletsControllerGetBootstrapRun<
-  TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-  TError = ErrorType<unknown>,
->(
-  demoWalletAddress: string,
-  runId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDemoWalletsControllerGetBootstrapRun<TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError = ErrorType<unknown>>(
+ demoWalletAddress: string,
+    runId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get bootstrap run status/result
  */
 
-export function useDemoWalletsControllerGetBootstrapRun<
-  TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-  TError = ErrorType<unknown>,
->(
-  demoWalletAddress: string,
-  runId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getDemoWalletsControllerGetBootstrapRunQueryOptions(
-    demoWalletAddress,
-    runId,
-    options,
-  );
+export function useDemoWalletsControllerGetBootstrapRun<TData = Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError = ErrorType<unknown>>(
+ demoWalletAddress: string,
+    runId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof demoWalletsControllerGetBootstrapRun>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getDemoWalletsControllerGetBootstrapRunQueryOptions(demoWalletAddress,runId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Read oracle price for an asset on a supported chain
  */
 export type positionsControllerGetOraclePriceResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type positionsControllerGetOraclePriceResponseSuccess = (positionsControllerGetOraclePriceResponse200) & {
+  headers: Headers;
 };
+;
 
-export type positionsControllerGetOraclePriceResponseSuccess =
-  positionsControllerGetOraclePriceResponse200 & {
-    headers: Headers;
-  };
-export type positionsControllerGetOraclePriceResponse =
-  positionsControllerGetOraclePriceResponseSuccess;
+export type positionsControllerGetOraclePriceResponse = (positionsControllerGetOraclePriceResponseSuccess)
 
-export const getPositionsControllerGetOraclePriceUrl = (
-  params: PositionsControllerGetOraclePriceParams,
-) => {
+export const getPositionsControllerGetOraclePriceUrl = (params: PositionsControllerGetOraclePriceParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
+      normalizedParams.append(key, serializeQueryParamValue(value))
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/v1/positions/oracle-price?${stringifiedParams}`
-    : `/v1/positions/oracle-price`;
-};
+  return stringifiedParams.length > 0 ? `/v1/positions/oracle-price?${stringifiedParams}` : `/v1/positions/oracle-price`
+}
 
-export const positionsControllerGetOraclePrice = async (
-  params: PositionsControllerGetOraclePriceParams,
-  options?: RequestInit,
-): Promise<positionsControllerGetOraclePriceResponse> => {
-  return customClient<positionsControllerGetOraclePriceResponse>(
-    getPositionsControllerGetOraclePriceUrl(params),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const positionsControllerGetOraclePrice = async (params: PositionsControllerGetOraclePriceParams, options?: RequestInit): Promise<positionsControllerGetOraclePriceResponse> => {
+  
+  return customClient<positionsControllerGetOraclePriceResponse>(getPositionsControllerGetOraclePriceUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
 
-export const getPositionsControllerGetOraclePriceQueryKey = (
-  params?: PositionsControllerGetOraclePriceParams,
+
+
+
+export const getPositionsControllerGetOraclePriceQueryKey = (params?: PositionsControllerGetOraclePriceParams,) => {
+    return [
+    `/v1/positions/oracle-price`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getPositionsControllerGetOraclePriceQueryOptions = <TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError = ErrorType<unknown>>(params: PositionsControllerGetOraclePriceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return [`/v1/positions/oracle-price`, ...(params ? [params] : [])] as const;
-};
 
-export const getPositionsControllerGetOraclePriceQueryOptions = <
-  TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-  TError = ErrorType<unknown>,
->(
-  params: PositionsControllerGetOraclePriceParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getPositionsControllerGetOraclePriceQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getPositionsControllerGetOraclePriceQueryKey(params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>
-  > = ({ signal }) =>
-    positionsControllerGetOraclePrice(params, { signal, ...requestOptions });
+  
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>> = ({ signal }) => positionsControllerGetOraclePrice(params, { signal, ...requestOptions });
 
-export type PositionsControllerGetOraclePriceQueryResult = NonNullable<
-  Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>
->;
-export type PositionsControllerGetOraclePriceQueryError = ErrorType<unknown>;
+      
 
-export function usePositionsControllerGetOraclePrice<
-  TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-  TError = ErrorType<unknown>,
->(
-  params: PositionsControllerGetOraclePriceParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PositionsControllerGetOraclePriceQueryResult = NonNullable<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>>
+export type PositionsControllerGetOraclePriceQueryError = ErrorType<unknown>
+
+
+export function usePositionsControllerGetOraclePrice<TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError = ErrorType<unknown>>(
+ params: PositionsControllerGetOraclePriceParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerGetOraclePrice<
-  TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-  TError = ErrorType<unknown>,
->(
-  params: PositionsControllerGetOraclePriceParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerGetOraclePrice<TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError = ErrorType<unknown>>(
+ params: PositionsControllerGetOraclePriceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerGetOraclePrice<
-  TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-  TError = ErrorType<unknown>,
->(
-  params: PositionsControllerGetOraclePriceParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerGetOraclePrice<TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError = ErrorType<unknown>>(
+ params: PositionsControllerGetOraclePriceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Read oracle price for an asset on a supported chain
  */
 
-export function usePositionsControllerGetOraclePrice<
-  TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-  TError = ErrorType<unknown>,
->(
-  params: PositionsControllerGetOraclePriceParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getPositionsControllerGetOraclePriceQueryOptions(
-    params,
-    options,
-  );
+export function usePositionsControllerGetOraclePrice<TData = Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError = ErrorType<unknown>>(
+ params: PositionsControllerGetOraclePriceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetOraclePrice>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getPositionsControllerGetOraclePriceQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Get latest known positions for a wallet address
  */
 export type positionsControllerGetPositionsResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type positionsControllerGetPositionsResponseSuccess = (positionsControllerGetPositionsResponse200) & {
+  headers: Headers;
 };
+;
 
-export type positionsControllerGetPositionsResponseSuccess =
-  positionsControllerGetPositionsResponse200 & {
-    headers: Headers;
-  };
-export type positionsControllerGetPositionsResponse =
-  positionsControllerGetPositionsResponseSuccess;
+export type positionsControllerGetPositionsResponse = (positionsControllerGetPositionsResponseSuccess)
 
-export const getPositionsControllerGetPositionsUrl = (address: string) => {
-  return `/v1/positions/${address}`;
-};
+export const getPositionsControllerGetPositionsUrl = (address: string,) => {
 
-export const positionsControllerGetPositions = async (
-  address: string,
-  options?: RequestInit,
-): Promise<positionsControllerGetPositionsResponse> => {
-  return customClient<positionsControllerGetPositionsResponse>(
-    getPositionsControllerGetPositionsUrl(address),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
 
-export const getPositionsControllerGetPositionsQueryKey = (address: string) => {
-  return [`/v1/positions/${address}`] as const;
-};
+  
 
-export const getPositionsControllerGetPositionsQueryOptions = <
-  TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
+  return `/v1/positions/${address}`
+}
+
+export const positionsControllerGetPositions = async (address: string, options?: RequestInit): Promise<positionsControllerGetPositionsResponse> => {
+  
+  return customClient<positionsControllerGetPositionsResponse>(getPositionsControllerGetPositionsUrl(address),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getPositionsControllerGetPositionsQueryKey = (address: string,) => {
+    return [
+    `/v1/positions/${address}`
+    ] as const;
+    }
+
+    
+export const getPositionsControllerGetPositionsQueryOptions = <TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError = ErrorType<unknown>>(address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getPositionsControllerGetPositionsQueryKey(address);
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof positionsControllerGetPositions>>
-  > = ({ signal }) =>
-    positionsControllerGetPositions(address, { signal, ...requestOptions });
+  const queryKey =  queryOptions?.queryKey ?? getPositionsControllerGetPositionsQueryKey(address);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!address,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type PositionsControllerGetPositionsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof positionsControllerGetPositions>>
->;
-export type PositionsControllerGetPositionsQueryError = ErrorType<unknown>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof positionsControllerGetPositions>>> = ({ signal }) => positionsControllerGetPositions(address, { signal, ...requestOptions });
 
-export function usePositionsControllerGetPositions<
-  TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(address), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PositionsControllerGetPositionsQueryResult = NonNullable<Awaited<ReturnType<typeof positionsControllerGetPositions>>>
+export type PositionsControllerGetPositionsQueryError = ErrorType<unknown>
+
+
+export function usePositionsControllerGetPositions<TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError = ErrorType<unknown>>(
+ address: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerGetPositions>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerGetPositions>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerGetPositions<
-  TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerGetPositions<TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerGetPositions>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerGetPositions>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerGetPositions<
-  TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerGetPositions<TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get latest known positions for a wallet address
  */
 
-export function usePositionsControllerGetPositions<
-  TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetPositions>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getPositionsControllerGetPositionsQueryOptions(
-    address,
-    options,
-  );
+export function usePositionsControllerGetPositions<TData = Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError = ErrorType<unknown>>(
+ address: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetPositions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getPositionsControllerGetPositionsQueryOptions(address,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Get CRE-ready risk snapshot (cross-chain aggregated positions)
  */
 export type positionsControllerGetRiskSnapshotResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type positionsControllerGetRiskSnapshotResponseSuccess = (positionsControllerGetRiskSnapshotResponse200) & {
+  headers: Headers;
 };
+;
 
-export type positionsControllerGetRiskSnapshotResponseSuccess =
-  positionsControllerGetRiskSnapshotResponse200 & {
-    headers: Headers;
-  };
-export type positionsControllerGetRiskSnapshotResponse =
-  positionsControllerGetRiskSnapshotResponseSuccess;
+export type positionsControllerGetRiskSnapshotResponse = (positionsControllerGetRiskSnapshotResponseSuccess)
 
-export const getPositionsControllerGetRiskSnapshotUrl = (
-  address: string,
-  params?: PositionsControllerGetRiskSnapshotParams,
-) => {
+export const getPositionsControllerGetRiskSnapshotUrl = (address: string,
+    params?: PositionsControllerGetRiskSnapshotParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
+      normalizedParams.append(key, serializeQueryParamValue(value))
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/v1/positions/${address}/risk-snapshot?${stringifiedParams}`
-    : `/v1/positions/${address}/risk-snapshot`;
-};
+  return stringifiedParams.length > 0 ? `/v1/positions/${address}/risk-snapshot?${stringifiedParams}` : `/v1/positions/${address}/risk-snapshot`
+}
 
-export const positionsControllerGetRiskSnapshot = async (
-  address: string,
-  params?: PositionsControllerGetRiskSnapshotParams,
-  options?: RequestInit,
-): Promise<positionsControllerGetRiskSnapshotResponse> => {
-  return customClient<positionsControllerGetRiskSnapshotResponse>(
-    getPositionsControllerGetRiskSnapshotUrl(address, params),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const positionsControllerGetRiskSnapshot = async (address: string,
+    params?: PositionsControllerGetRiskSnapshotParams, options?: RequestInit): Promise<positionsControllerGetRiskSnapshotResponse> => {
+  
+  return customClient<positionsControllerGetRiskSnapshotResponse>(getPositionsControllerGetRiskSnapshotUrl(address,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
 
-export const getPositionsControllerGetRiskSnapshotQueryKey = (
-  address: string,
-  params?: PositionsControllerGetRiskSnapshotParams,
+
+
+
+export const getPositionsControllerGetRiskSnapshotQueryKey = (address: string,
+    params?: PositionsControllerGetRiskSnapshotParams,) => {
+    return [
+    `/v1/positions/${address}/risk-snapshot`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getPositionsControllerGetRiskSnapshotQueryOptions = <TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError = ErrorType<unknown>>(address: string,
+    params?: PositionsControllerGetRiskSnapshotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return [
-    `/v1/positions/${address}/risk-snapshot`,
-    ...(params ? [params] : []),
-  ] as const;
-};
 
-export const getPositionsControllerGetRiskSnapshotQueryOptions = <
-  TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerGetRiskSnapshotParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getPositionsControllerGetRiskSnapshotQueryKey(address, params);
+  const queryKey =  queryOptions?.queryKey ?? getPositionsControllerGetRiskSnapshotQueryKey(address,params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>
-  > = ({ signal }) =>
-    positionsControllerGetRiskSnapshot(address, params, {
-      signal,
-      ...requestOptions,
-    });
+  
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!address,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>> = ({ signal }) => positionsControllerGetRiskSnapshot(address,params, { signal, ...requestOptions });
 
-export type PositionsControllerGetRiskSnapshotQueryResult = NonNullable<
-  Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>
->;
-export type PositionsControllerGetRiskSnapshotQueryError = ErrorType<unknown>;
+      
 
-export function usePositionsControllerGetRiskSnapshot<
-  TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params: undefined | PositionsControllerGetRiskSnapshotParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+   return  { queryKey, queryFn, enabled: !!(address), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PositionsControllerGetRiskSnapshotQueryResult = NonNullable<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>>
+export type PositionsControllerGetRiskSnapshotQueryError = ErrorType<unknown>
+
+
+export function usePositionsControllerGetRiskSnapshot<TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError = ErrorType<unknown>>(
+ address: string,
+    params: undefined |  PositionsControllerGetRiskSnapshotParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerGetRiskSnapshot<
-  TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerGetRiskSnapshotParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerGetRiskSnapshot<TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: PositionsControllerGetRiskSnapshotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerGetRiskSnapshot<
-  TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerGetRiskSnapshotParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerGetRiskSnapshot<TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: PositionsControllerGetRiskSnapshotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get CRE-ready risk snapshot (cross-chain aggregated positions)
  */
 
-export function usePositionsControllerGetRiskSnapshot<
-  TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerGetRiskSnapshotParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getPositionsControllerGetRiskSnapshotQueryOptions(
-    address,
-    params,
-    options,
-  );
+export function usePositionsControllerGetRiskSnapshot<TData = Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: PositionsControllerGetRiskSnapshotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshot>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getPositionsControllerGetRiskSnapshotQueryOptions(address,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
+
+
+
+
+/**
+ * @summary Get CRE-ready risk snapshot (cross-chain aggregated positions) with optional what-if prices
+ */
+export type positionsControllerGetRiskSnapshotPostAliasResponse201 = {
+  data: void
+  status: 201
+}
+
+export type positionsControllerGetRiskSnapshotPostAliasResponseSuccess = (positionsControllerGetRiskSnapshotPostAliasResponse201) & {
+  headers: Headers;
+};
+;
+
+export type positionsControllerGetRiskSnapshotPostAliasResponse = (positionsControllerGetRiskSnapshotPostAliasResponseSuccess)
+
+export const getPositionsControllerGetRiskSnapshotPostAliasUrl = (address: string,) => {
+
+
+  
+
+  return `/v1/positions/${address}/risk-snapshot`
+}
+
+export const positionsControllerGetRiskSnapshotPostAlias = async (address: string,
+    riskSnapshotQueryDto: RiskSnapshotQueryDto, options?: RequestInit): Promise<positionsControllerGetRiskSnapshotPostAliasResponse> => {
+  
+  return customClient<positionsControllerGetRiskSnapshotPostAliasResponse>(getPositionsControllerGetRiskSnapshotPostAliasUrl(address),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      riskSnapshotQueryDto,)
+  }
+);}
+  
+
+
+
+export const getPositionsControllerGetRiskSnapshotPostAliasMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshotPostAlias>>, TError,{address: string;data: BodyType<RiskSnapshotQueryDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshotPostAlias>>, TError,{address: string;data: BodyType<RiskSnapshotQueryDto>}, TContext> => {
+
+const mutationKey = ['positionsControllerGetRiskSnapshotPostAlias'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshotPostAlias>>, {address: string;data: BodyType<RiskSnapshotQueryDto>}> = (props) => {
+          const {address,data} = props ?? {};
+
+          return  positionsControllerGetRiskSnapshotPostAlias(address,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PositionsControllerGetRiskSnapshotPostAliasMutationResult = NonNullable<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshotPostAlias>>>
+    export type PositionsControllerGetRiskSnapshotPostAliasMutationBody = BodyType<RiskSnapshotQueryDto>
+    export type PositionsControllerGetRiskSnapshotPostAliasMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Get CRE-ready risk snapshot (cross-chain aggregated positions) with optional what-if prices
+ */
+export const usePositionsControllerGetRiskSnapshotPostAlias = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof positionsControllerGetRiskSnapshotPostAlias>>, TError,{address: string;data: BodyType<RiskSnapshotQueryDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof positionsControllerGetRiskSnapshotPostAlias>>,
+        TError,
+        {address: string;data: BodyType<RiskSnapshotQueryDto>},
+        TContext
+      > => {
+      return useMutation(getPositionsControllerGetRiskSnapshotPostAliasMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary Simulate CHAINLINK_API_GUARD_V1 rescue decision and planned step
  */
 export type positionsControllerSimulateApiGuardResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type positionsControllerSimulateApiGuardResponseSuccess = (positionsControllerSimulateApiGuardResponse200) & {
+  headers: Headers;
 };
+;
 
-export type positionsControllerSimulateApiGuardResponseSuccess =
-  positionsControllerSimulateApiGuardResponse200 & {
-    headers: Headers;
-  };
-export type positionsControllerSimulateApiGuardResponse =
-  positionsControllerSimulateApiGuardResponseSuccess;
+export type positionsControllerSimulateApiGuardResponse = (positionsControllerSimulateApiGuardResponseSuccess)
 
-export const getPositionsControllerSimulateApiGuardUrl = (
-  address: string,
-  params?: PositionsControllerSimulateApiGuardParams,
-) => {
+export const getPositionsControllerSimulateApiGuardUrl = (address: string,
+    params?: PositionsControllerSimulateApiGuardParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
+      normalizedParams.append(key, serializeQueryParamValue(value))
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/v1/positions/${address}/simulate-api-guard?${stringifiedParams}`
-    : `/v1/positions/${address}/simulate-api-guard`;
-};
+  return stringifiedParams.length > 0 ? `/v1/positions/${address}/simulate-api-guard?${stringifiedParams}` : `/v1/positions/${address}/simulate-api-guard`
+}
 
-export const positionsControllerSimulateApiGuard = async (
-  address: string,
-  params?: PositionsControllerSimulateApiGuardParams,
-  options?: RequestInit,
-): Promise<positionsControllerSimulateApiGuardResponse> => {
-  return customClient<positionsControllerSimulateApiGuardResponse>(
-    getPositionsControllerSimulateApiGuardUrl(address, params),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const positionsControllerSimulateApiGuard = async (address: string,
+    params?: PositionsControllerSimulateApiGuardParams, options?: RequestInit): Promise<positionsControllerSimulateApiGuardResponse> => {
+  
+  return customClient<positionsControllerSimulateApiGuardResponse>(getPositionsControllerSimulateApiGuardUrl(address,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
 
-export const getPositionsControllerSimulateApiGuardQueryKey = (
-  address: string,
-  params?: PositionsControllerSimulateApiGuardParams,
+
+
+
+export const getPositionsControllerSimulateApiGuardQueryKey = (address: string,
+    params?: PositionsControllerSimulateApiGuardParams,) => {
+    return [
+    `/v1/positions/${address}/simulate-api-guard`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getPositionsControllerSimulateApiGuardQueryOptions = <TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError = ErrorType<unknown>>(address: string,
+    params?: PositionsControllerSimulateApiGuardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return [
-    `/v1/positions/${address}/simulate-api-guard`,
-    ...(params ? [params] : []),
-  ] as const;
-};
 
-export const getPositionsControllerSimulateApiGuardQueryOptions = <
-  TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerSimulateApiGuardParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getPositionsControllerSimulateApiGuardQueryKey(address, params);
+  const queryKey =  queryOptions?.queryKey ?? getPositionsControllerSimulateApiGuardQueryKey(address,params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>
-  > = ({ signal }) =>
-    positionsControllerSimulateApiGuard(address, params, {
-      signal,
-      ...requestOptions,
-    });
+  
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!address,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>> = ({ signal }) => positionsControllerSimulateApiGuard(address,params, { signal, ...requestOptions });
 
-export type PositionsControllerSimulateApiGuardQueryResult = NonNullable<
-  Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>
->;
-export type PositionsControllerSimulateApiGuardQueryError = ErrorType<unknown>;
+      
 
-export function usePositionsControllerSimulateApiGuard<
-  TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params: undefined | PositionsControllerSimulateApiGuardParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+   return  { queryKey, queryFn, enabled: !!(address), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PositionsControllerSimulateApiGuardQueryResult = NonNullable<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>>
+export type PositionsControllerSimulateApiGuardQueryError = ErrorType<unknown>
+
+
+export function usePositionsControllerSimulateApiGuard<TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError = ErrorType<unknown>>(
+ address: string,
+    params: undefined |  PositionsControllerSimulateApiGuardParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerSimulateApiGuard<
-  TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerSimulateApiGuardParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerSimulateApiGuard<TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: PositionsControllerSimulateApiGuardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
           TError,
           Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePositionsControllerSimulateApiGuard<
-  TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerSimulateApiGuardParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePositionsControllerSimulateApiGuard<TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: PositionsControllerSimulateApiGuardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Simulate CHAINLINK_API_GUARD_V1 rescue decision and planned step
  */
 
-export function usePositionsControllerSimulateApiGuard<
-  TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-  TError = ErrorType<unknown>,
->(
-  address: string,
-  params?: PositionsControllerSimulateApiGuardParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getPositionsControllerSimulateApiGuardQueryOptions(
-    address,
-    params,
-    options,
-  );
+export function usePositionsControllerSimulateApiGuard<TData = Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError = ErrorType<unknown>>(
+ address: string,
+    params?: PositionsControllerSimulateApiGuardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuard>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getPositionsControllerSimulateApiGuardQueryOptions(address,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Simulate CHAINLINK_API_GUARD_V1 rescue decision and planned step (POST alias)
  */
 export type positionsControllerSimulateApiGuardPostAliasResponse201 = {
-  data: void;
-  status: 201;
+  data: void
+  status: 201
+}
+
+export type positionsControllerSimulateApiGuardPostAliasResponseSuccess = (positionsControllerSimulateApiGuardPostAliasResponse201) & {
+  headers: Headers;
 };
+;
 
-export type positionsControllerSimulateApiGuardPostAliasResponseSuccess =
-  positionsControllerSimulateApiGuardPostAliasResponse201 & {
-    headers: Headers;
-  };
-export type positionsControllerSimulateApiGuardPostAliasResponse =
-  positionsControllerSimulateApiGuardPostAliasResponseSuccess;
+export type positionsControllerSimulateApiGuardPostAliasResponse = (positionsControllerSimulateApiGuardPostAliasResponseSuccess)
 
-export const getPositionsControllerSimulateApiGuardPostAliasUrl = (
-  address: string,
-) => {
-  return `/v1/positions/${address}/simulate-api-guard`;
-};
+export const getPositionsControllerSimulateApiGuardPostAliasUrl = (address: string,) => {
 
-export const positionsControllerSimulateApiGuardPostAlias = async (
-  address: string,
-  simulateApiGuardDto: SimulateApiGuardDto,
-  options?: RequestInit,
-): Promise<positionsControllerSimulateApiGuardPostAliasResponse> => {
-  return customClient<positionsControllerSimulateApiGuardPostAliasResponse>(
-    getPositionsControllerSimulateApiGuardPostAliasUrl(address),
-    {
-      ...options,
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(simulateApiGuardDto),
-    },
-  );
-};
 
-export const getPositionsControllerSimulateApiGuardPostAliasMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>,
-    TError,
-    { address: string; data: BodyType<SimulateApiGuardDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>,
-  TError,
-  { address: string; data: BodyType<SimulateApiGuardDto> },
-  TContext
-> => {
-  const mutationKey = ["positionsControllerSimulateApiGuardPostAlias"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>,
-    { address: string; data: BodyType<SimulateApiGuardDto> }
-  > = (props) => {
-    const { address, data } = props ?? {};
+  return `/v1/positions/${address}/simulate-api-guard`
+}
 
-    return positionsControllerSimulateApiGuardPostAlias(
-      address,
-      data,
-      requestOptions,
-    );
-  };
+export const positionsControllerSimulateApiGuardPostAlias = async (address: string,
+    simulateApiGuardDto: SimulateApiGuardDto, options?: RequestInit): Promise<positionsControllerSimulateApiGuardPostAliasResponse> => {
+  
+  return customClient<positionsControllerSimulateApiGuardPostAliasResponse>(getPositionsControllerSimulateApiGuardPostAliasUrl(address),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      simulateApiGuardDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type PositionsControllerSimulateApiGuardPostAliasMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>
-  >;
-export type PositionsControllerSimulateApiGuardPostAliasMutationBody =
-  BodyType<SimulateApiGuardDto>;
-export type PositionsControllerSimulateApiGuardPostAliasMutationError =
-  ErrorType<unknown>;
 
-/**
+export const getPositionsControllerSimulateApiGuardPostAliasMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>, TError,{address: string;data: BodyType<SimulateApiGuardDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>, TError,{address: string;data: BodyType<SimulateApiGuardDto>}, TContext> => {
+
+const mutationKey = ['positionsControllerSimulateApiGuardPostAlias'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>, {address: string;data: BodyType<SimulateApiGuardDto>}> = (props) => {
+          const {address,data} = props ?? {};
+
+          return  positionsControllerSimulateApiGuardPostAlias(address,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PositionsControllerSimulateApiGuardPostAliasMutationResult = NonNullable<Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>>
+    export type PositionsControllerSimulateApiGuardPostAliasMutationBody = BodyType<SimulateApiGuardDto>
+    export type PositionsControllerSimulateApiGuardPostAliasMutationError = ErrorType<unknown>
+
+    /**
  * @summary Simulate CHAINLINK_API_GUARD_V1 rescue decision and planned step (POST alias)
  */
-export const usePositionsControllerSimulateApiGuardPostAlias = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>,
-      TError,
-      { address: string; data: BodyType<SimulateApiGuardDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>,
-  TError,
-  { address: string; data: BodyType<SimulateApiGuardDto> },
-  TContext
-> => {
-  return useMutation(
-    getPositionsControllerSimulateApiGuardPostAliasMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const usePositionsControllerSimulateApiGuardPostAlias = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>, TError,{address: string;data: BodyType<SimulateApiGuardDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof positionsControllerSimulateApiGuardPostAlias>>,
+        TError,
+        {address: string;data: BodyType<SimulateApiGuardDto>},
+        TContext
+      > => {
+      return useMutation(getPositionsControllerSimulateApiGuardPostAliasMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary List relay jobs with filters and pagination
  */
 export type relayControllerListRelayJobsResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type relayControllerListRelayJobsResponseSuccess = (relayControllerListRelayJobsResponse200) & {
+  headers: Headers;
 };
+;
 
-export type relayControllerListRelayJobsResponseSuccess =
-  relayControllerListRelayJobsResponse200 & {
-    headers: Headers;
-  };
-export type relayControllerListRelayJobsResponse =
-  relayControllerListRelayJobsResponseSuccess;
+export type relayControllerListRelayJobsResponse = (relayControllerListRelayJobsResponseSuccess)
 
-export const getRelayControllerListRelayJobsUrl = (
-  params?: RelayControllerListRelayJobsParams,
-) => {
+export const getRelayControllerListRelayJobsUrl = (params?: RelayControllerListRelayJobsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
+      normalizedParams.append(key, serializeQueryParamValue(value))
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/v1/relay/jobs?${stringifiedParams}`
-    : `/v1/relay/jobs`;
-};
+  return stringifiedParams.length > 0 ? `/v1/relay/jobs?${stringifiedParams}` : `/v1/relay/jobs`
+}
 
-export const relayControllerListRelayJobs = async (
-  params?: RelayControllerListRelayJobsParams,
-  options?: RequestInit,
-): Promise<relayControllerListRelayJobsResponse> => {
-  return customClient<relayControllerListRelayJobsResponse>(
-    getRelayControllerListRelayJobsUrl(params),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const relayControllerListRelayJobs = async (params?: RelayControllerListRelayJobsParams, options?: RequestInit): Promise<relayControllerListRelayJobsResponse> => {
+  
+  return customClient<relayControllerListRelayJobsResponse>(getRelayControllerListRelayJobsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
 
-export const getRelayControllerListRelayJobsQueryKey = (
-  params?: RelayControllerListRelayJobsParams,
+
+
+
+export const getRelayControllerListRelayJobsQueryKey = (params?: RelayControllerListRelayJobsParams,) => {
+    return [
+    `/v1/relay/jobs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getRelayControllerListRelayJobsQueryOptions = <TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError = ErrorType<unknown>>(params?: RelayControllerListRelayJobsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return [`/v1/relay/jobs`, ...(params ? [params] : [])] as const;
-};
 
-export const getRelayControllerListRelayJobsQueryOptions = <
-  TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RelayControllerListRelayJobsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getRelayControllerListRelayJobsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getRelayControllerListRelayJobsQueryKey(params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof relayControllerListRelayJobs>>
-  > = ({ signal }) =>
-    relayControllerListRelayJobs(params, { signal, ...requestOptions });
+  
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof relayControllerListRelayJobs>>> = ({ signal }) => relayControllerListRelayJobs(params, { signal, ...requestOptions });
 
-export type RelayControllerListRelayJobsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof relayControllerListRelayJobs>>
->;
-export type RelayControllerListRelayJobsQueryError = ErrorType<unknown>;
+      
 
-export function useRelayControllerListRelayJobs<
-  TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-  TError = ErrorType<unknown>,
->(
-  params: undefined | RelayControllerListRelayJobsParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RelayControllerListRelayJobsQueryResult = NonNullable<Awaited<ReturnType<typeof relayControllerListRelayJobs>>>
+export type RelayControllerListRelayJobsQueryError = ErrorType<unknown>
+
+
+export function useRelayControllerListRelayJobs<TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError = ErrorType<unknown>>(
+ params: undefined |  RelayControllerListRelayJobsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
           TError,
           Awaited<ReturnType<typeof relayControllerListRelayJobs>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRelayControllerListRelayJobs<
-  TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RelayControllerListRelayJobsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRelayControllerListRelayJobs<TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError = ErrorType<unknown>>(
+ params?: RelayControllerListRelayJobsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
           TError,
           Awaited<ReturnType<typeof relayControllerListRelayJobs>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRelayControllerListRelayJobs<
-  TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RelayControllerListRelayJobsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRelayControllerListRelayJobs<TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError = ErrorType<unknown>>(
+ params?: RelayControllerListRelayJobsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List relay jobs with filters and pagination
  */
 
-export function useRelayControllerListRelayJobs<
-  TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RelayControllerListRelayJobsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerListRelayJobs>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getRelayControllerListRelayJobsQueryOptions(
-    params,
-    options,
-  );
+export function useRelayControllerListRelayJobs<TData = Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError = ErrorType<unknown>>(
+ params?: RelayControllerListRelayJobsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerListRelayJobs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getRelayControllerListRelayJobsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Get one relay job by message id
  */
 export type relayControllerGetRelayJobResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type relayControllerGetRelayJobResponseSuccess = (relayControllerGetRelayJobResponse200) & {
+  headers: Headers;
 };
+;
 
-export type relayControllerGetRelayJobResponseSuccess =
-  relayControllerGetRelayJobResponse200 & {
-    headers: Headers;
-  };
-export type relayControllerGetRelayJobResponse =
-  relayControllerGetRelayJobResponseSuccess;
+export type relayControllerGetRelayJobResponse = (relayControllerGetRelayJobResponseSuccess)
 
-export const getRelayControllerGetRelayJobUrl = (messageId: string) => {
-  return `/v1/relay/jobs/${messageId}`;
-};
+export const getRelayControllerGetRelayJobUrl = (messageId: string,) => {
 
-export const relayControllerGetRelayJob = async (
-  messageId: string,
-  options?: RequestInit,
-): Promise<relayControllerGetRelayJobResponse> => {
-  return customClient<relayControllerGetRelayJobResponse>(
-    getRelayControllerGetRelayJobUrl(messageId),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
 
-export const getRelayControllerGetRelayJobQueryKey = (messageId: string) => {
-  return [`/v1/relay/jobs/${messageId}`] as const;
-};
+  
 
-export const getRelayControllerGetRelayJobQueryOptions = <
-  TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-  TError = ErrorType<unknown>,
->(
-  messageId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
+  return `/v1/relay/jobs/${messageId}`
+}
+
+export const relayControllerGetRelayJob = async (messageId: string, options?: RequestInit): Promise<relayControllerGetRelayJobResponse> => {
+  
+  return customClient<relayControllerGetRelayJobResponse>(getRelayControllerGetRelayJobUrl(messageId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getRelayControllerGetRelayJobQueryKey = (messageId: string,) => {
+    return [
+    `/v1/relay/jobs/${messageId}`
+    ] as const;
+    }
+
+    
+export const getRelayControllerGetRelayJobQueryOptions = <TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError = ErrorType<unknown>>(messageId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getRelayControllerGetRelayJobQueryKey(messageId);
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof relayControllerGetRelayJob>>
-  > = ({ signal }) =>
-    relayControllerGetRelayJob(messageId, { signal, ...requestOptions });
+  const queryKey =  queryOptions?.queryKey ?? getRelayControllerGetRelayJobQueryKey(messageId);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!messageId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type RelayControllerGetRelayJobQueryResult = NonNullable<
-  Awaited<ReturnType<typeof relayControllerGetRelayJob>>
->;
-export type RelayControllerGetRelayJobQueryError = ErrorType<unknown>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof relayControllerGetRelayJob>>> = ({ signal }) => relayControllerGetRelayJob(messageId, { signal, ...requestOptions });
 
-export function useRelayControllerGetRelayJob<
-  TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-  TError = ErrorType<unknown>,
->(
-  messageId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(messageId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RelayControllerGetRelayJobQueryResult = NonNullable<Awaited<ReturnType<typeof relayControllerGetRelayJob>>>
+export type RelayControllerGetRelayJobQueryError = ErrorType<unknown>
+
+
+export function useRelayControllerGetRelayJob<TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError = ErrorType<unknown>>(
+ messageId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
           TError,
           Awaited<ReturnType<typeof relayControllerGetRelayJob>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRelayControllerGetRelayJob<
-  TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-  TError = ErrorType<unknown>,
->(
-  messageId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRelayControllerGetRelayJob<TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError = ErrorType<unknown>>(
+ messageId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
           TError,
           Awaited<ReturnType<typeof relayControllerGetRelayJob>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRelayControllerGetRelayJob<
-  TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-  TError = ErrorType<unknown>,
->(
-  messageId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRelayControllerGetRelayJob<TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError = ErrorType<unknown>>(
+ messageId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get one relay job by message id
  */
 
-export function useRelayControllerGetRelayJob<
-  TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-  TError = ErrorType<unknown>,
->(
-  messageId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof relayControllerGetRelayJob>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getRelayControllerGetRelayJobQueryOptions(
-    messageId,
-    options,
-  );
+export function useRelayControllerGetRelayJob<TData = Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError = ErrorType<unknown>>(
+ messageId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relayControllerGetRelayJob>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getRelayControllerGetRelayJobQueryOptions(messageId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Manually retry a relay job (sets status back to pending)
  */
 export type relayControllerRetryRelayJobResponse201 = {
-  data: void;
-  status: 201;
+  data: void
+  status: 201
+}
+
+export type relayControllerRetryRelayJobResponseSuccess = (relayControllerRetryRelayJobResponse201) & {
+  headers: Headers;
 };
+;
 
-export type relayControllerRetryRelayJobResponseSuccess =
-  relayControllerRetryRelayJobResponse201 & {
-    headers: Headers;
-  };
-export type relayControllerRetryRelayJobResponse =
-  relayControllerRetryRelayJobResponseSuccess;
+export type relayControllerRetryRelayJobResponse = (relayControllerRetryRelayJobResponseSuccess)
 
-export const getRelayControllerRetryRelayJobUrl = (messageId: string) => {
-  return `/v1/relay/jobs/${messageId}/retry`;
-};
+export const getRelayControllerRetryRelayJobUrl = (messageId: string,) => {
 
-export const relayControllerRetryRelayJob = async (
-  messageId: string,
-  options?: RequestInit,
-): Promise<relayControllerRetryRelayJobResponse> => {
-  return customClient<relayControllerRetryRelayJobResponse>(
-    getRelayControllerRetryRelayJobUrl(messageId),
-    {
-      ...options,
-      method: "POST",
-    },
-  );
-};
 
-export const getRelayControllerRetryRelayJobMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof relayControllerRetryRelayJob>>,
-    TError,
-    { messageId: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof relayControllerRetryRelayJob>>,
-  TError,
-  { messageId: string },
-  TContext
-> => {
-  const mutationKey = ["relayControllerRetryRelayJob"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof relayControllerRetryRelayJob>>,
-    { messageId: string }
-  > = (props) => {
-    const { messageId } = props ?? {};
+  return `/v1/relay/jobs/${messageId}/retry`
+}
 
-    return relayControllerRetryRelayJob(messageId, requestOptions);
-  };
+export const relayControllerRetryRelayJob = async (messageId: string, options?: RequestInit): Promise<relayControllerRetryRelayJobResponse> => {
+  
+  return customClient<relayControllerRetryRelayJobResponse>(getRelayControllerRetryRelayJobUrl(messageId),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type RelayControllerRetryRelayJobMutationResult = NonNullable<
-  Awaited<ReturnType<typeof relayControllerRetryRelayJob>>
->;
 
-export type RelayControllerRetryRelayJobMutationError = ErrorType<unknown>;
+export const getRelayControllerRetryRelayJobMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof relayControllerRetryRelayJob>>, TError,{messageId: string}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof relayControllerRetryRelayJob>>, TError,{messageId: string}, TContext> => {
 
-/**
+const mutationKey = ['relayControllerRetryRelayJob'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof relayControllerRetryRelayJob>>, {messageId: string}> = (props) => {
+          const {messageId} = props ?? {};
+
+          return  relayControllerRetryRelayJob(messageId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RelayControllerRetryRelayJobMutationResult = NonNullable<Awaited<ReturnType<typeof relayControllerRetryRelayJob>>>
+    
+    export type RelayControllerRetryRelayJobMutationError = ErrorType<unknown>
+
+    /**
  * @summary Manually retry a relay job (sets status back to pending)
  */
-export const useRelayControllerRetryRelayJob = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof relayControllerRetryRelayJob>>,
-      TError,
-      { messageId: string },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof relayControllerRetryRelayJob>>,
-  TError,
-  { messageId: string },
-  TContext
-> => {
-  return useMutation(
-    getRelayControllerRetryRelayJobMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useRelayControllerRetryRelayJob = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof relayControllerRetryRelayJob>>, TError,{messageId: string}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof relayControllerRetryRelayJob>>,
+        TError,
+        {messageId: string},
+        TContext
+      > => {
+      return useMutation(getRelayControllerRetryRelayJobMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary List rescue executions with filters and pagination
  */
 export type rescuesControllerListRescuesResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type rescuesControllerListRescuesResponseSuccess = (rescuesControllerListRescuesResponse200) & {
+  headers: Headers;
 };
+;
 
-export type rescuesControllerListRescuesResponseSuccess =
-  rescuesControllerListRescuesResponse200 & {
-    headers: Headers;
-  };
-export type rescuesControllerListRescuesResponse =
-  rescuesControllerListRescuesResponseSuccess;
+export type rescuesControllerListRescuesResponse = (rescuesControllerListRescuesResponseSuccess)
 
-export const getRescuesControllerListRescuesUrl = (
-  params?: RescuesControllerListRescuesParams,
-) => {
+export const getRescuesControllerListRescuesUrl = (params?: RescuesControllerListRescuesParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
+      normalizedParams.append(key, serializeQueryParamValue(value))
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/v1/rescues?${stringifiedParams}`
-    : `/v1/rescues`;
-};
+  return stringifiedParams.length > 0 ? `/v1/rescues?${stringifiedParams}` : `/v1/rescues`
+}
 
-export const rescuesControllerListRescues = async (
-  params?: RescuesControllerListRescuesParams,
-  options?: RequestInit,
-): Promise<rescuesControllerListRescuesResponse> => {
-  return customClient<rescuesControllerListRescuesResponse>(
-    getRescuesControllerListRescuesUrl(params),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const rescuesControllerListRescues = async (params?: RescuesControllerListRescuesParams, options?: RequestInit): Promise<rescuesControllerListRescuesResponse> => {
+  
+  return customClient<rescuesControllerListRescuesResponse>(getRescuesControllerListRescuesUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
 
-export const getRescuesControllerListRescuesQueryKey = (
-  params?: RescuesControllerListRescuesParams,
+
+
+
+export const getRescuesControllerListRescuesQueryKey = (params?: RescuesControllerListRescuesParams,) => {
+    return [
+    `/v1/rescues`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getRescuesControllerListRescuesQueryOptions = <TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError = ErrorType<unknown>>(params?: RescuesControllerListRescuesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return [`/v1/rescues`, ...(params ? [params] : [])] as const;
-};
 
-export const getRescuesControllerListRescuesQueryOptions = <
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RescuesControllerListRescuesParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getRescuesControllerListRescuesQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getRescuesControllerListRescuesQueryKey(params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof rescuesControllerListRescues>>
-  > = ({ signal }) =>
-    rescuesControllerListRescues(params, { signal, ...requestOptions });
+  
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof rescuesControllerListRescues>>> = ({ signal }) => rescuesControllerListRescues(params, { signal, ...requestOptions });
 
-export type RescuesControllerListRescuesQueryResult = NonNullable<
-  Awaited<ReturnType<typeof rescuesControllerListRescues>>
->;
-export type RescuesControllerListRescuesQueryError = ErrorType<unknown>;
+      
 
-export function useRescuesControllerListRescues<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-  TError = ErrorType<unknown>,
->(
-  params: undefined | RescuesControllerListRescuesParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RescuesControllerListRescuesQueryResult = NonNullable<Awaited<ReturnType<typeof rescuesControllerListRescues>>>
+export type RescuesControllerListRescuesQueryError = ErrorType<unknown>
+
+
+export function useRescuesControllerListRescues<TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError = ErrorType<unknown>>(
+ params: undefined |  RescuesControllerListRescuesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerListRescues>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerListRescues>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerListRescues<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RescuesControllerListRescuesParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerListRescues<TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError = ErrorType<unknown>>(
+ params?: RescuesControllerListRescuesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerListRescues>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerListRescues>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerListRescues<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RescuesControllerListRescuesParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerListRescues<TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError = ErrorType<unknown>>(
+ params?: RescuesControllerListRescuesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List rescue executions with filters and pagination
  */
 
-export function useRescuesControllerListRescues<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-  TError = ErrorType<unknown>,
->(
-  params?: RescuesControllerListRescuesParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescues>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getRescuesControllerListRescuesQueryOptions(
-    params,
-    options,
-  );
+export function useRescuesControllerListRescues<TData = Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError = ErrorType<unknown>>(
+ params?: RescuesControllerListRescuesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescues>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getRescuesControllerListRescuesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Get rescue execution aggregate by execId
  */
 export type rescuesControllerGetRescueResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type rescuesControllerGetRescueResponseSuccess = (rescuesControllerGetRescueResponse200) & {
+  headers: Headers;
 };
+;
 
-export type rescuesControllerGetRescueResponseSuccess =
-  rescuesControllerGetRescueResponse200 & {
-    headers: Headers;
-  };
-export type rescuesControllerGetRescueResponse =
-  rescuesControllerGetRescueResponseSuccess;
+export type rescuesControllerGetRescueResponse = (rescuesControllerGetRescueResponseSuccess)
 
-export const getRescuesControllerGetRescueUrl = (execId: string) => {
-  return `/v1/rescues/${execId}`;
-};
+export const getRescuesControllerGetRescueUrl = (execId: string,) => {
 
-export const rescuesControllerGetRescue = async (
-  execId: string,
-  options?: RequestInit,
-): Promise<rescuesControllerGetRescueResponse> => {
-  return customClient<rescuesControllerGetRescueResponse>(
-    getRescuesControllerGetRescueUrl(execId),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
 
-export const getRescuesControllerGetRescueQueryKey = (execId: string) => {
-  return [`/v1/rescues/${execId}`] as const;
-};
+  
 
-export const getRescuesControllerGetRescueQueryOptions = <
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
+  return `/v1/rescues/${execId}`
+}
+
+export const rescuesControllerGetRescue = async (execId: string, options?: RequestInit): Promise<rescuesControllerGetRescueResponse> => {
+  
+  return customClient<rescuesControllerGetRescueResponse>(getRescuesControllerGetRescueUrl(execId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getRescuesControllerGetRescueQueryKey = (execId: string,) => {
+    return [
+    `/v1/rescues/${execId}`
+    ] as const;
+    }
+
+    
+export const getRescuesControllerGetRescueQueryOptions = <TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError = ErrorType<unknown>>(execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getRescuesControllerGetRescueQueryKey(execId);
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof rescuesControllerGetRescue>>
-  > = ({ signal }) =>
-    rescuesControllerGetRescue(execId, { signal, ...requestOptions });
+  const queryKey =  queryOptions?.queryKey ?? getRescuesControllerGetRescueQueryKey(execId);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!execId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type RescuesControllerGetRescueQueryResult = NonNullable<
-  Awaited<ReturnType<typeof rescuesControllerGetRescue>>
->;
-export type RescuesControllerGetRescueQueryError = ErrorType<unknown>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof rescuesControllerGetRescue>>> = ({ signal }) => rescuesControllerGetRescue(execId, { signal, ...requestOptions });
 
-export function useRescuesControllerGetRescue<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(execId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RescuesControllerGetRescueQueryResult = NonNullable<Awaited<ReturnType<typeof rescuesControllerGetRescue>>>
+export type RescuesControllerGetRescueQueryError = ErrorType<unknown>
+
+
+export function useRescuesControllerGetRescue<TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError = ErrorType<unknown>>(
+ execId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerGetRescue>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerGetRescue<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerGetRescue<TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError = ErrorType<unknown>>(
+ execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerGetRescue>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerGetRescue<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerGetRescue<TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError = ErrorType<unknown>>(
+ execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get rescue execution aggregate by execId
  */
 
-export function useRescuesControllerGetRescue<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescue>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getRescuesControllerGetRescueQueryOptions(
-    execId,
-    options,
-  );
+export function useRescuesControllerGetRescue<TData = Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError = ErrorType<unknown>>(
+ execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescue>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getRescuesControllerGetRescueQueryOptions(execId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Get ordered raw events for a rescue execId
  */
 export type rescuesControllerGetRescueEventsResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type rescuesControllerGetRescueEventsResponseSuccess = (rescuesControllerGetRescueEventsResponse200) & {
+  headers: Headers;
 };
+;
 
-export type rescuesControllerGetRescueEventsResponseSuccess =
-  rescuesControllerGetRescueEventsResponse200 & {
-    headers: Headers;
-  };
-export type rescuesControllerGetRescueEventsResponse =
-  rescuesControllerGetRescueEventsResponseSuccess;
+export type rescuesControllerGetRescueEventsResponse = (rescuesControllerGetRescueEventsResponseSuccess)
 
-export const getRescuesControllerGetRescueEventsUrl = (execId: string) => {
-  return `/v1/rescues/${execId}/events`;
-};
+export const getRescuesControllerGetRescueEventsUrl = (execId: string,) => {
 
-export const rescuesControllerGetRescueEvents = async (
-  execId: string,
-  options?: RequestInit,
-): Promise<rescuesControllerGetRescueEventsResponse> => {
-  return customClient<rescuesControllerGetRescueEventsResponse>(
-    getRescuesControllerGetRescueEventsUrl(execId),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
 
-export const getRescuesControllerGetRescueEventsQueryKey = (execId: string) => {
-  return [`/v1/rescues/${execId}/events`] as const;
-};
+  
 
-export const getRescuesControllerGetRescueEventsQueryOptions = <
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
+  return `/v1/rescues/${execId}/events`
+}
+
+export const rescuesControllerGetRescueEvents = async (execId: string, options?: RequestInit): Promise<rescuesControllerGetRescueEventsResponse> => {
+  
+  return customClient<rescuesControllerGetRescueEventsResponse>(getRescuesControllerGetRescueEventsUrl(execId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getRescuesControllerGetRescueEventsQueryKey = (execId: string,) => {
+    return [
+    `/v1/rescues/${execId}/events`
+    ] as const;
+    }
+
+    
+export const getRescuesControllerGetRescueEventsQueryOptions = <TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError = ErrorType<unknown>>(execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getRescuesControllerGetRescueEventsQueryKey(execId);
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>
-  > = ({ signal }) =>
-    rescuesControllerGetRescueEvents(execId, { signal, ...requestOptions });
+  const queryKey =  queryOptions?.queryKey ?? getRescuesControllerGetRescueEventsQueryKey(execId);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!execId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type RescuesControllerGetRescueEventsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>
->;
-export type RescuesControllerGetRescueEventsQueryError = ErrorType<unknown>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>> = ({ signal }) => rescuesControllerGetRescueEvents(execId, { signal, ...requestOptions });
 
-export function useRescuesControllerGetRescueEvents<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(execId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RescuesControllerGetRescueEventsQueryResult = NonNullable<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>>
+export type RescuesControllerGetRescueEventsQueryError = ErrorType<unknown>
+
+
+export function useRescuesControllerGetRescueEvents<TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError = ErrorType<unknown>>(
+ execId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerGetRescueEvents<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerGetRescueEvents<TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError = ErrorType<unknown>>(
+ execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerGetRescueEvents<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerGetRescueEvents<TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError = ErrorType<unknown>>(
+ execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get ordered raw events for a rescue execId
  */
 
-export function useRescuesControllerGetRescueEvents<
-  TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getRescuesControllerGetRescueEventsQueryOptions(
-    execId,
-    options,
-  );
+export function useRescuesControllerGetRescueEvents<TData = Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError = ErrorType<unknown>>(
+ execId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerGetRescueEvents>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getRescuesControllerGetRescueEventsQueryOptions(execId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Store a CRE workflow log mapped to rescue execution
  */
 export type rescuesControllerCreateRescueWorkflowLogResponse201 = {
-  data: void;
-  status: 201;
+  data: void
+  status: 201
+}
+
+export type rescuesControllerCreateRescueWorkflowLogResponseSuccess = (rescuesControllerCreateRescueWorkflowLogResponse201) & {
+  headers: Headers;
 };
+;
 
-export type rescuesControllerCreateRescueWorkflowLogResponseSuccess =
-  rescuesControllerCreateRescueWorkflowLogResponse201 & {
-    headers: Headers;
-  };
-export type rescuesControllerCreateRescueWorkflowLogResponse =
-  rescuesControllerCreateRescueWorkflowLogResponseSuccess;
+export type rescuesControllerCreateRescueWorkflowLogResponse = (rescuesControllerCreateRescueWorkflowLogResponseSuccess)
 
-export const getRescuesControllerCreateRescueWorkflowLogUrl = (
-  execId: string,
-) => {
-  return `/v1/rescues/${execId}/cre-logs`;
-};
+export const getRescuesControllerCreateRescueWorkflowLogUrl = (execId: string,) => {
 
-export const rescuesControllerCreateRescueWorkflowLog = async (
-  execId: string,
-  createRescueWorkflowLogDto: CreateRescueWorkflowLogDto,
-  options?: RequestInit,
-): Promise<rescuesControllerCreateRescueWorkflowLogResponse> => {
-  return customClient<rescuesControllerCreateRescueWorkflowLogResponse>(
-    getRescuesControllerCreateRescueWorkflowLogUrl(execId),
-    {
-      ...options,
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(createRescueWorkflowLogDto),
-    },
-  );
-};
 
-export const getRescuesControllerCreateRescueWorkflowLogMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>,
-    TError,
-    { execId: string; data: BodyType<CreateRescueWorkflowLogDto> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>,
-  TError,
-  { execId: string; data: BodyType<CreateRescueWorkflowLogDto> },
-  TContext
-> => {
-  const mutationKey = ["rescuesControllerCreateRescueWorkflowLog"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+  
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>,
-    { execId: string; data: BodyType<CreateRescueWorkflowLogDto> }
-  > = (props) => {
-    const { execId, data } = props ?? {};
+  return `/v1/rescues/${execId}/cre-logs`
+}
 
-    return rescuesControllerCreateRescueWorkflowLog(
-      execId,
-      data,
-      requestOptions,
-    );
-  };
+export const rescuesControllerCreateRescueWorkflowLog = async (execId: string,
+    createRescueWorkflowLogDto: CreateRescueWorkflowLogDto, options?: RequestInit): Promise<rescuesControllerCreateRescueWorkflowLogResponse> => {
+  
+  return customClient<rescuesControllerCreateRescueWorkflowLogResponse>(getRescuesControllerCreateRescueWorkflowLogUrl(execId),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createRescueWorkflowLogDto,)
+  }
+);}
+  
 
-  return { mutationFn, ...mutationOptions };
-};
 
-export type RescuesControllerCreateRescueWorkflowLogMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>
-  >;
-export type RescuesControllerCreateRescueWorkflowLogMutationBody =
-  BodyType<CreateRescueWorkflowLogDto>;
-export type RescuesControllerCreateRescueWorkflowLogMutationError =
-  ErrorType<unknown>;
 
-/**
+export const getRescuesControllerCreateRescueWorkflowLogMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>, TError,{execId: string;data: BodyType<CreateRescueWorkflowLogDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>, TError,{execId: string;data: BodyType<CreateRescueWorkflowLogDto>}, TContext> => {
+
+const mutationKey = ['rescuesControllerCreateRescueWorkflowLog'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>, {execId: string;data: BodyType<CreateRescueWorkflowLogDto>}> = (props) => {
+          const {execId,data} = props ?? {};
+
+          return  rescuesControllerCreateRescueWorkflowLog(execId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RescuesControllerCreateRescueWorkflowLogMutationResult = NonNullable<Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>>
+    export type RescuesControllerCreateRescueWorkflowLogMutationBody = BodyType<CreateRescueWorkflowLogDto>
+    export type RescuesControllerCreateRescueWorkflowLogMutationError = ErrorType<unknown>
+
+    /**
  * @summary Store a CRE workflow log mapped to rescue execution
  */
-export const useRescuesControllerCreateRescueWorkflowLog = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>,
-      TError,
-      { execId: string; data: BodyType<CreateRescueWorkflowLogDto> },
-      TContext
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>,
-  TError,
-  { execId: string; data: BodyType<CreateRescueWorkflowLogDto> },
-  TContext
-> => {
-  return useMutation(
-    getRescuesControllerCreateRescueWorkflowLogMutationOptions(options),
-    queryClient,
-  );
-};
-
+export const useRescuesControllerCreateRescueWorkflowLog = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>, TError,{execId: string;data: BodyType<CreateRescueWorkflowLogDto>}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rescuesControllerCreateRescueWorkflowLog>>,
+        TError,
+        {execId: string;data: BodyType<CreateRescueWorkflowLogDto>},
+        TContext
+      > => {
+      return useMutation(getRescuesControllerCreateRescueWorkflowLogMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary List CRE workflow logs for a rescue execution
  */
 export type rescuesControllerListRescueWorkflowLogsResponse200 = {
-  data: void;
-  status: 200;
+  data: void
+  status: 200
+}
+
+export type rescuesControllerListRescueWorkflowLogsResponseSuccess = (rescuesControllerListRescueWorkflowLogsResponse200) & {
+  headers: Headers;
 };
+;
 
-export type rescuesControllerListRescueWorkflowLogsResponseSuccess =
-  rescuesControllerListRescueWorkflowLogsResponse200 & {
-    headers: Headers;
-  };
-export type rescuesControllerListRescueWorkflowLogsResponse =
-  rescuesControllerListRescueWorkflowLogsResponseSuccess;
+export type rescuesControllerListRescueWorkflowLogsResponse = (rescuesControllerListRescueWorkflowLogsResponseSuccess)
 
-export const getRescuesControllerListRescueWorkflowLogsUrl = (
-  execId: string,
-  params?: RescuesControllerListRescueWorkflowLogsParams,
-) => {
+export const getRescuesControllerListRescueWorkflowLogsUrl = (execId: string,
+    params?: RescuesControllerListRescueWorkflowLogsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
+      normalizedParams.append(key, serializeQueryParamValue(value))
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/v1/rescues/${execId}/cre-logs?${stringifiedParams}`
-    : `/v1/rescues/${execId}/cre-logs`;
-};
+  return stringifiedParams.length > 0 ? `/v1/rescues/${execId}/cre-logs?${stringifiedParams}` : `/v1/rescues/${execId}/cre-logs`
+}
 
-export const rescuesControllerListRescueWorkflowLogs = async (
-  execId: string,
-  params?: RescuesControllerListRescueWorkflowLogsParams,
-  options?: RequestInit,
-): Promise<rescuesControllerListRescueWorkflowLogsResponse> => {
-  return customClient<rescuesControllerListRescueWorkflowLogsResponse>(
-    getRescuesControllerListRescueWorkflowLogsUrl(execId, params),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const rescuesControllerListRescueWorkflowLogs = async (execId: string,
+    params?: RescuesControllerListRescueWorkflowLogsParams, options?: RequestInit): Promise<rescuesControllerListRescueWorkflowLogsResponse> => {
+  
+  return customClient<rescuesControllerListRescueWorkflowLogsResponse>(getRescuesControllerListRescueWorkflowLogsUrl(execId,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
 
-export const getRescuesControllerListRescueWorkflowLogsQueryKey = (
-  execId: string,
-  params?: RescuesControllerListRescueWorkflowLogsParams,
+
+
+
+export const getRescuesControllerListRescueWorkflowLogsQueryKey = (execId: string,
+    params?: RescuesControllerListRescueWorkflowLogsParams,) => {
+    return [
+    `/v1/rescues/${execId}/cre-logs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getRescuesControllerListRescueWorkflowLogsQueryOptions = <TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError = ErrorType<unknown>>(execId: string,
+    params?: RescuesControllerListRescueWorkflowLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
-  return [
-    `/v1/rescues/${execId}/cre-logs`,
-    ...(params ? [params] : []),
-  ] as const;
-};
 
-export const getRescuesControllerListRescueWorkflowLogsQueryOptions = <
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  params?: RescuesControllerListRescueWorkflowLogsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getRescuesControllerListRescueWorkflowLogsQueryKey(execId, params);
+  const queryKey =  queryOptions?.queryKey ?? getRescuesControllerListRescueWorkflowLogsQueryKey(execId,params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>
-  > = ({ signal }) =>
-    rescuesControllerListRescueWorkflowLogs(execId, params, {
-      signal,
-      ...requestOptions,
-    });
+  
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!execId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>> = ({ signal }) => rescuesControllerListRescueWorkflowLogs(execId,params, { signal, ...requestOptions });
 
-export type RescuesControllerListRescueWorkflowLogsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>
->;
-export type RescuesControllerListRescueWorkflowLogsQueryError =
-  ErrorType<unknown>;
+      
 
-export function useRescuesControllerListRescueWorkflowLogs<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  params: undefined | RescuesControllerListRescueWorkflowLogsParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+   return  { queryKey, queryFn, enabled: !!(execId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RescuesControllerListRescueWorkflowLogsQueryResult = NonNullable<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>>
+export type RescuesControllerListRescueWorkflowLogsQueryError = ErrorType<unknown>
+
+
+export function useRescuesControllerListRescueWorkflowLogs<TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError = ErrorType<unknown>>(
+ execId: string,
+    params: undefined |  RescuesControllerListRescueWorkflowLogsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerListRescueWorkflowLogs<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  params?: RescuesControllerListRescueWorkflowLogsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerListRescueWorkflowLogs<TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError = ErrorType<unknown>>(
+ execId: string,
+    params?: RescuesControllerListRescueWorkflowLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
           TError,
           Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useRescuesControllerListRescueWorkflowLogs<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  params?: RescuesControllerListRescueWorkflowLogsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRescuesControllerListRescueWorkflowLogs<TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError = ErrorType<unknown>>(
+ execId: string,
+    params?: RescuesControllerListRescueWorkflowLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List CRE workflow logs for a rescue execution
  */
 
-export function useRescuesControllerListRescueWorkflowLogs<
-  TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-  TError = ErrorType<unknown>,
->(
-  execId: string,
-  params?: RescuesControllerListRescueWorkflowLogsParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getRescuesControllerListRescueWorkflowLogsQueryOptions(
-    execId,
-    params,
-    options,
-  );
+export function useRescuesControllerListRescueWorkflowLogs<TData = Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError = ErrorType<unknown>>(
+ execId: string,
+    params?: RescuesControllerListRescueWorkflowLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rescuesControllerListRescueWorkflowLogs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getRescuesControllerListRescueWorkflowLogsQueryOptions(execId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+
 
 /**
  * @summary Health check endpoint
  */
 export type healthControllerGetHealthResponse200 = {
-  data: void;
-  status: 200;
-};
+  data: void
+  status: 200
+}
 
-export type healthControllerGetHealthResponseSuccess =
-  healthControllerGetHealthResponse200 & {
-    headers: Headers;
-  };
-export type healthControllerGetHealthResponse =
-  healthControllerGetHealthResponseSuccess;
+export type healthControllerGetHealthResponseSuccess = (healthControllerGetHealthResponse200) & {
+  headers: Headers;
+};
+;
+
+export type healthControllerGetHealthResponse = (healthControllerGetHealthResponseSuccess)
 
 export const getHealthControllerGetHealthUrl = () => {
-  return `/v1/health`;
-};
 
-export const healthControllerGetHealth = async (
-  options?: RequestInit,
-): Promise<healthControllerGetHealthResponse> => {
-  return customClient<healthControllerGetHealthResponse>(
-    getHealthControllerGetHealthUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+
+  
+
+  return `/v1/health`
+}
+
+export const healthControllerGetHealth = async ( options?: RequestInit): Promise<healthControllerGetHealthResponse> => {
+  
+  return customClient<healthControllerGetHealthResponse>(getHealthControllerGetHealthUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
 
 export const getHealthControllerGetHealthQueryKey = () => {
-  return [`/v1/health`] as const;
-};
+    return [
+    `/v1/health`
+    ] as const;
+    }
 
-export const getHealthControllerGetHealthQueryOptions = <
-  TData = Awaited<ReturnType<typeof healthControllerGetHealth>>,
-  TError = ErrorType<unknown>,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof healthControllerGetHealth>>,
-      TError,
-      TData
-    >
-  >;
-  request?: SecondParameter<typeof customClient>;
-}) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+    
+export const getHealthControllerGetHealthQueryOptions = <TData = Awaited<ReturnType<typeof healthControllerGetHealth>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerGetHealth>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
 
-  const queryKey =
-    queryOptions?.queryKey ?? getHealthControllerGetHealthQueryKey();
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof healthControllerGetHealth>>
-  > = ({ signal }) => healthControllerGetHealth({ signal, ...requestOptions });
+  const queryKey =  queryOptions?.queryKey ?? getHealthControllerGetHealthQueryKey();
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof healthControllerGetHealth>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type HealthControllerGetHealthQueryResult = NonNullable<
-  Awaited<ReturnType<typeof healthControllerGetHealth>>
->;
-export type HealthControllerGetHealthQueryError = ErrorType<unknown>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof healthControllerGetHealth>>> = ({ signal }) => healthControllerGetHealth({ signal, ...requestOptions });
 
-export function useHealthControllerGetHealth<
-  TData = Awaited<ReturnType<typeof healthControllerGetHealth>>,
-  TError = ErrorType<unknown>,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof healthControllerGetHealth>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof healthControllerGetHealth>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HealthControllerGetHealthQueryResult = NonNullable<Awaited<ReturnType<typeof healthControllerGetHealth>>>
+export type HealthControllerGetHealthQueryError = ErrorType<unknown>
+
+
+export function useHealthControllerGetHealth<TData = Awaited<ReturnType<typeof healthControllerGetHealth>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerGetHealth>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerGetHealth>>,
           TError,
           Awaited<ReturnType<typeof healthControllerGetHealth>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useHealthControllerGetHealth<
-  TData = Awaited<ReturnType<typeof healthControllerGetHealth>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof healthControllerGetHealth>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHealthControllerGetHealth<TData = Awaited<ReturnType<typeof healthControllerGetHealth>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerGetHealth>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof healthControllerGetHealth>>,
           TError,
           Awaited<ReturnType<typeof healthControllerGetHealth>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useHealthControllerGetHealth<
-  TData = Awaited<ReturnType<typeof healthControllerGetHealth>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof healthControllerGetHealth>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHealthControllerGetHealth<TData = Awaited<ReturnType<typeof healthControllerGetHealth>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerGetHealth>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Health check endpoint
  */
 
-export function useHealthControllerGetHealth<
-  TData = Awaited<ReturnType<typeof healthControllerGetHealth>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof healthControllerGetHealth>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customClient>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getHealthControllerGetHealthQueryOptions(options);
+export function useHealthControllerGetHealth<TData = Awaited<ReturnType<typeof healthControllerGetHealth>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthControllerGetHealth>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getHealthControllerGetHealthQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+
+
+

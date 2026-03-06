@@ -5,7 +5,10 @@
  * Debug and integration APIs for positions, rescues, and relay history
  * OpenAPI spec version: 0.1.0
  */
+import type { SimulateApiGuardDtoBaseSepolia } from './simulateApiGuardDtoBaseSepolia';
+import type { SimulateApiGuardDtoEthereumSepolia } from './simulateApiGuardDtoEthereumSepolia';
 import type { SimulateApiGuardDtoExecutionChainKey } from './simulateApiGuardDtoExecutionChainKey';
+import type { SimulateApiGuardDtoWhatIfPrices } from './simulateApiGuardDtoWhatIfPrices';
 
 export interface SimulateApiGuardDto {
   /** Execution chain key used by planner for source withdrawal */
@@ -59,4 +62,10 @@ export interface SimulateApiGuardDto {
   minActionUsd?: number;
   /** Allow cross-chain planning */
   allowCrossChain?: boolean;
+  /** Optional what-if price overrides in wad, scoped by chain and asset address */
+  whatIfPrices?: SimulateApiGuardDtoWhatIfPrices;
+  /** GET alias for what-if prices on Ethereum Sepolia */
+  'ethereum-sepolia'?: SimulateApiGuardDtoEthereumSepolia;
+  /** GET alias for what-if prices on Base Sepolia */
+  'base-sepolia'?: SimulateApiGuardDtoBaseSepolia;
 }

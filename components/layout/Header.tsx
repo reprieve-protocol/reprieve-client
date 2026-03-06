@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
-  ArrowLeftRight,
   Check,
   Copy,
   CreditCard,
@@ -149,10 +148,14 @@ export function Header({
                 className="h-8 w-8 rounded-lg p-0"
                 onClick={() => void handleCopyAddress()}
                 aria-label={
-                  copiedAddress ? "Wallet address copied" : "Copy wallet address"
+                  copiedAddress
+                    ? "Wallet address copied"
+                    : "Copy wallet address"
                 }
                 title={
-                  copiedAddress ? "Wallet address copied" : "Copy wallet address"
+                  copiedAddress
+                    ? "Wallet address copied"
+                    : "Copy wallet address"
                 }
               >
                 {copiedAddress ? (

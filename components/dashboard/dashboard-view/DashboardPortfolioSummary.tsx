@@ -42,7 +42,7 @@ export function DashboardPortfolioSummary({
             <Wallet className="size-3.5 text-[#d6f57f]" />
           </span>
           <div className="leading-tight">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-[#7f8b84]">
+            <p className="text-[10px] uppercase tracking-[0.24em] text-[#d8e3db]">
               Your wallet
             </p>
           </div>
