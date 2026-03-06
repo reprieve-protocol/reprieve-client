@@ -65,7 +65,7 @@ export function OnchainRescueDetailView({ execId }: { execId: string }) {
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <Link
-              href="/onchain-log"
+              href="/onchain-logs"
               className="inline-flex items-center gap-2 text-sm text-[#a9b2ab] transition-colors hover:text-white"
             >
               <ArrowLeft className="size-4" />
@@ -75,8 +75,8 @@ export function OnchainRescueDetailView({ execId }: { execId: string }) {
               Rescue details
             </h1>
             <p className="mt-2 text-sm leading-6 text-[#9ba69e]">
-              Full-width execution details, proof references, and ordered onchain
-              event timeline for the selected rescue.
+              Full-width execution details, proof references, and ordered
+              onchain event timeline for the selected rescue.
             </p>
           </div>
 
@@ -117,7 +117,7 @@ export function OnchainRescueDetailView({ execId }: { execId: string }) {
           description="The selected execution may be unavailable or no longer indexed."
           action={
             <Button asChild variant="outline">
-              <Link href="/onchain-log">Back to rescue executions</Link>
+              <Link href="/onchain-logs">Back to rescue executions</Link>
             </Button>
           }
         />
@@ -158,8 +158,11 @@ export function OnchainRescueDetailView({ execId }: { execId: string }) {
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[#7f8a82]">
                   User wallet
                 </p>
-                <p className="mt-2 break-all font-mono text-xs text-white">
-                  {rescue.userAddress}
+                <p
+                  className="mt-2 font-mono text-xs text-white"
+                  title={rescue.userAddress}
+                >
+                  {formatHash(rescue.userAddress, 8, 6)}
                 </p>
                 <div className="mt-3">
                   <CopyButton value={rescue.userAddress} label="Copy wallet" />
@@ -210,7 +213,9 @@ export function OnchainRescueDetailView({ execId }: { execId: string }) {
                 </p>
                 <div className="mt-2 space-y-3">
                   <div>
-                    <p className="text-sm text-white">{rescueEvents.length} events</p>
+                    <p className="text-sm text-white">
+                      {rescueEvents.length} events
+                    </p>
                     <p className="text-xs text-[#8c9890]">
                       Indexed entries currently attached to this execution
                     </p>
@@ -299,11 +304,11 @@ export function OnchainRescueDetailView({ execId }: { execId: string }) {
                               href={explorerUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center justify-center gap-1 rounded-full border border-[#39513d] px-2 py-1 leading-none text-[#c7f36b] transition hover:border-[#c7f36b]/50 hover:text-white"
+                              className="inline-flex items-center gap-1 rounded-full border border-[#39513d] px-2 py-1 text-[#c7f36b] transition hover:border-[#c7f36b]/50 hover:text-white"
                               onClick={(event) => event.stopPropagation()}
                             >
                               Tx {formatHash(event.txHash, 10, 8)}
-                              <ExternalLink className="size-3 shrink-0 self-center" />
+                              <ExternalLink className="size-3" />
                             </a>
                           ) : (
                             <span className="rounded-full border border-[#2f3933] px-2 py-1">

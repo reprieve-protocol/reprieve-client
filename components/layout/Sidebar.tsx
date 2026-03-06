@@ -22,15 +22,17 @@ export function Sidebar({ navItems }: SidebarProps) {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-[#2d3932] bg-[#0b0f0d] md:flex md:flex-col">
       {/* Logo */}
-      <div className="flex min-h-24 items-center gap-3 px-4 py-4 border-b border-[#2d3932]">
-        <Image
-          src="/logo.png"
-          alt="Reprieve"
-          width={100}
-          height={100}
-          unoptimized
-          className="h-[100px] w-[100px] shrink-0 mx-auto"
-        />
+      <div className="flex min-h-24 items-center gap-3 border-b border-[#2d3932] px-4 py-4">
+        <Link href="/" className="mx-auto block">
+          <Image
+            src="/logo_notext.png"
+            alt="Reprieve"
+            width={100}
+            height={100}
+            unoptimized
+            className="h-[100px] w-[100px] shrink-0"
+          />
+        </Link>
       </div>
 
       <nav className="flex-1 px-2 py-3 space-y-0.5">

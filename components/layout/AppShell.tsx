@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { LayoutDashboard, ScrollText, ShieldCheck } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import {
   getResponseStatusCode,
@@ -21,7 +22,7 @@ import {
 } from "@/components/modals/FundLogModal";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   {
     href: "/onchain-logs",
     label: "On-chain Audit Logs",
@@ -31,6 +32,7 @@ const navItems = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
@@ -104,6 +106,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       ).filter((item) => !item.requiresConnection || isConnected),
     [hasCreRegistration, isConnected],
   );
+
+  if (pathname === "/") {
+    return (
+      <>
+        {children}
+
+        <FundLogModal
+          isOpen={isFundLogOpen}
+          onClose={() => setIsFundLogOpen(false)}
+          fundLog={fundLog}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen text-[#f1f4ef]">

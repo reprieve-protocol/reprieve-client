@@ -1,4 +1,4 @@
-import type { PositionsControllerSimulateApiGuardParams } from "@/src/services/queries";
+import type { PositionsControllerSimulateApiGuardParams } from "@/src/services/models";
 
 export const SIMULATE_API_GUARD_PARAMS: PositionsControllerSimulateApiGuardParams =
   {

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Reprieve monitors Aave, Compound, and Morpho positions with deterministic mock rescue flows powered by CRE-style logic.",
   icons: {
-    icon: "/logo.png",
+    icon: "/logo_notext.png",
   },
 };
 

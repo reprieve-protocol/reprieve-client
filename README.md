@@ -40,7 +40,8 @@ bun run build
 
 ## Route Map
 
-- `/` Dashboard
+- `/` Landing page
+- `/dashboard` Dashboard
 - `/setup` Setup protection workflow
 - `/history` Rescue history and audit details
 
