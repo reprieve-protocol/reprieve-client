@@ -22,7 +22,12 @@ import {
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/onchain-log", label: "On-chain Audit Logs", icon: ScrollText },
+  {
+    href: "/onchain-logs",
+    label: "On-chain Audit Logs",
+    icon: ScrollText,
+    requiresConnection: true,
+  },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -90,13 +95,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const visibleNavItems = useMemo(
     () =>
-      hasCreRegistration
+      (hasCreRegistration
         ? [
             ...navItems,
             { href: "/setup", label: "Protection", icon: ShieldCheck },
           ]
-        : navItems,
-    [hasCreRegistration],
+        : navItems
+      ).filter((item) => !item.requiresConnection || isConnected),
+    [hasCreRegistration, isConnected],
   );
 
   return (

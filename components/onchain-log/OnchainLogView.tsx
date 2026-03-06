@@ -211,7 +211,9 @@ export function OnchainLogView() {
                   <tr
                     key={rescue.execId}
                     className="cursor-pointer border-b border-[#1d241f] align-middle transition-colors hover:bg-[#171d19]/90"
-                    onClick={() => router.push(`/onchain-log/${rescue.execId}`)}
+                    onClick={() =>
+                      router.push(`/onchain-logs/${rescue.execId}`)
+                    }
                   >
                     <td className="px-5 py-4 align-middle">
                       <StatusBadge
@@ -259,7 +261,7 @@ export function OnchainLogView() {
                         className="rounded-xl text-[#dfe7df]"
                         onClick={(event) => {
                           event.stopPropagation();
-                          router.push(`/onchain-log/${rescue.execId}`);
+                          router.push(`/onchain-logs/${rescue.execId}`);
                         }}
                       >
                         Open

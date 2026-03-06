@@ -172,7 +172,6 @@ export function SetupView() {
   };
 
   const payCreDeploymentFee = async () => {
-    return;
     if (confirmedFeeTxHash) {
       return confirmedFeeTxHash;
     }

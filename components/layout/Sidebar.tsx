@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LucideIcon } from "lucide-react";
 import Image from "next/image";
-import { APP_NAME } from "@/lib/domain/constants";
 import { cn } from "@/lib/utils";
 
 interface NavItem {

@@ -2,15 +2,18 @@ import { Copy, ExternalLink, Link2 } from "lucide-react";
 import { formatEth, formatLink, formatUsd } from "@/lib/domain/calculations";
 import { CHAIN_LABELS, PROTOCOL_LABELS } from "@/lib/domain/constants";
 import type { RescueLogEntry } from "@/lib/domain/types";
+import { getTxExplorerUrl } from "@/lib/explorer";
 import { StatusBadge } from "@/components/common/StatusBadge";
 
 function ActionButton({
   onClick,
   href,
+  external,
   children,
 }: {
   onClick?: () => void;
   href?: string;
+  external?: boolean;
   children: React.ReactNode;
 }) {
   const cls =
@@ -18,7 +21,13 @@ function ActionButton({
 
   if (href) {
     return (
-      <a className={cls} href={href} onClick={(e) => e.preventDefault()}>
+      <a
+        className={cls}
+        href={href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noreferrer" : undefined}
+        onClick={external ? undefined : (event) => event.preventDefault()}
+      >
         {children}
       </a>
     );
@@ -38,6 +47,8 @@ export function RescueDetailPanel({ entry }: { entry: RescueLogEntry | null }) {
       </div>
     );
   }
+
+  const explorerUrl = getTxExplorerUrl(entry.target.chain, entry.txHash);
 
   return (
     <div className="card p-5 space-y-5">
@@ -109,19 +120,27 @@ export function RescueDetailPanel({ entry }: { entry: RescueLogEntry | null }) {
         <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
           Tx Hash
         </p>
-        <p className="break-all font-mono text-xs text-[#b5e86f] leading-relaxed">
-          {entry.txHash}
-        </p>
+        {explorerUrl ? (
+          <a
+            href={explorerUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 break-all font-mono text-xs leading-relaxed text-[#b5e86f] transition hover:text-white"
+          >
+            <span>{entry.txHash}</span>
+            <ExternalLink className="size-3 shrink-0" />
+          </a>
+        ) : (
+          <p className="break-all font-mono text-xs text-[#b5e86f] leading-relaxed">
+            {entry.txHash}
+          </p>
+        )}
         <div className="flex items-center gap-2 pt-1">
           <ActionButton
             onClick={() => navigator.clipboard.writeText(entry.txHash)}
           >
             <Copy className="size-3" />
             Copy
-          </ActionButton>
-          <ActionButton href="#">
-            <ExternalLink className="size-3" />
-            Verify on-chain
           </ActionButton>
         </div>
       </div>
