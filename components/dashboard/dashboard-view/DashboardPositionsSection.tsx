@@ -7,7 +7,11 @@ import { DemoPositionsLoading } from "@/components/dashboard/DemoPositionsLoadin
 import { PositionCard } from "@/components/dashboard/PositionCard";
 import { Button } from "@/components/ui/button";
 import { STRATEGY_PRESETS } from "@/lib/domain/constants";
-import { type AppSnapshot, type Position, type RescueRunState } from "@/lib/domain/types";
+import {
+  type AppSnapshot,
+  type Position,
+  type RescueRunState,
+} from "@/lib/domain/types";
 
 export function DashboardPositionsSection({
   positions,
@@ -56,7 +60,9 @@ export function DashboardPositionsSection({
           Positions
         </p>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#8c9890]">{positions.length} detected</span>
+          <span className="text-xs text-[#8c9890]">
+            {positions.length} detected
+          </span>
           <Button
             size="sm"
             variant="outline"
@@ -96,8 +102,8 @@ export function DashboardPositionsSection({
                 disabled={isCreatingPosition || isWaitingForCreatedPosition}
               >
                 {isCreatingPosition || isWaitingForCreatedPosition
-                  ? "Creating position..."
-                  : "Create New Position"}
+                  ? "Bootstrapping..."
+                  : "Bootstrap random positions(demo only)"}
               </Button>
               <p className="flex items-center gap-1.5 text-center text-xs text-amber-300/90">
                 <AlertTriangle className="size-3.5 shrink-0 text-amber-300/90" />

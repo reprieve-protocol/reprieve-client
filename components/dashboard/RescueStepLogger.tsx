@@ -4,12 +4,18 @@ import Link from "next/link";
 import { RescueActionWorkflowAnimation } from "@/components/dashboard/RescueActionWorkflowAnimation";
 import { RescueCREWorkflowAnimation } from "@/components/dashboard/RescueCREWorkflowAnimation";
 import {
+  getIsRescueFromSimulation,
+  getSimulateApiGuardPayload,
+  SIMULATE_API_GUARD_PARAMS,
+} from "@/lib/api/simulate-api-guard";
+import {
   getResponseStatusCode,
   normalizeCreRegistration,
 } from "@/lib/cre-registration";
 import {
   getCreRegistrationsControllerGetRegistrationQueryKey,
   useCreRegistrationsControllerGetRegistration,
+  usePositionsControllerSimulateApiGuard,
   useCreRegistrationsControllerGetRescueStep,
 } from "@/src/services/queries";
 
@@ -54,9 +60,23 @@ export function RescueStepLogger({
       },
     },
   );
+  console.log("rescueStepData: ", rescueStepData);
   const rescueStep = (rescueStepData as RescueStepResponse | undefined)
     ?.rescueStep;
   const currentRescueStep = rescueStep?.currentStep;
+  const { data: rescueSimulationData } = usePositionsControllerSimulateApiGuard(
+    address,
+    SIMULATE_API_GUARD_PARAMS,
+    {
+      query: {
+        enabled: !!address && hasCreRegistration,
+        refetchInterval: 5000,
+      },
+    },
+  );
+  const rescueSimulation = getSimulateApiGuardPayload(rescueSimulationData);
+  const isRescue = getIsRescueFromSimulation(rescueSimulationData);
+  const rescueCollateralAmount = rescueSimulation?.plan?.collateralAmount;
 
   if (isLoadingCreRegistration && address) {
     return (
@@ -89,12 +109,15 @@ export function RescueStepLogger({
   return (
     <>
       <RescueCREWorkflowAnimation
-        isRescue={Boolean(rescueStepData)}
+        isRescue={isRescue}
         lowestHealthFactor={lowestHealthFactor}
       />
 
-      {currentRescueStep && (
-        <RescueActionWorkflowAnimation currentStep={currentRescueStep} />
+      {isRescue && (
+        <RescueActionWorkflowAnimation
+          currentStep={!rescueStepData ? 1 : currentRescueStep}
+          collateralAmount={rescueCollateralAmount}
+        />
       )}
     </>
   );

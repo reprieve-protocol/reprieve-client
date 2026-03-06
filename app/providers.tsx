@@ -4,6 +4,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppStateProvider } from "@/lib/state/app-context";
 import { DemoWalletProvider } from "@/lib/state/demo-wallet-context";
+import { ToastProvider } from "@/lib/state/toast-context";
 import { WagmiProvider } from "wagmi";
 import { config } from "@/lib/wagmi";
 
@@ -23,9 +24,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <DemoWalletProvider>
-          <AppStateProvider>{children}</AppStateProvider>
-        </DemoWalletProvider>
+        <ToastProvider>
+          <DemoWalletProvider>
+            <AppStateProvider>{children}</AppStateProvider>
+          </DemoWalletProvider>
+        </ToastProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

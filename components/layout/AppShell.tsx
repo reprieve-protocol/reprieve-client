@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LayoutDashboard, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, ScrollText, ShieldCheck } from "lucide-react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import {
   getResponseStatusCode,
@@ -22,6 +22,7 @@ import {
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/onchain-log", label: "On-chain Audit Logs", icon: ScrollText },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -47,7 +48,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       const res = await fundDemoWallet({
         demoWalletAddress,
         data: {
-          ethereumSepoliaGasEth: "0.0001",
+          ethereumSepoliaGasEth: "0.003",
           baseSepoliaGasEth: "0.0001",
           ethereumSepoliaWethTarget: "80",
           ethereumSepoliaUsdcTarget: "90000",

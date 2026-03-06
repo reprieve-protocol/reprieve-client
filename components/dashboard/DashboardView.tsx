@@ -153,6 +153,7 @@ export function DashboardView() {
     { maxAgeSec: 600 },
     {
       query: {
+        refetchInterval: 5000,
         enabled: !!demoWalletAddress,
         queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
           demoWalletAddress,
