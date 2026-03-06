@@ -1,18 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
   ArrowLeftRight,
+  Check,
+  Copy,
   CreditCard,
-  Loader2,
   Droplets,
   LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { injected } from "wagmi/connectors";
+
+const FUNDING_PHASES = ["Funding", "Broadcasting", "Confirming"] as const;
 
 interface NavItem {
   href: string;
@@ -40,6 +44,40 @@ export function Header({
   onDisconnect,
 }: HeaderProps) {
   const pathname = usePathname();
+  const [fundingPhase, setFundingPhase] = useState(0);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+
+  useEffect(() => {
+    if (!isFunding) return;
+
+    const interval = window.setInterval(() => {
+      setFundingPhase((phase) => (phase + 1) % FUNDING_PHASES.length);
+    }, 900);
+
+    return () => window.clearInterval(interval);
+  }, [isFunding]);
+
+  useEffect(() => {
+    if (!copiedAddress) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setCopiedAddress(false);
+    }, 1500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [copiedAddress]);
+
+  const handleFundClick = () => {
+    setFundingPhase(0);
+    onFund();
+  };
+
+  const handleCopyAddress = async () => {
+    if (!address) return;
+
+    await navigator.clipboard.writeText(address);
+    setCopiedAddress(true);
+  };
 
   return (
     <header className="sticky top-0 z-20 border-b border-[#2d3932] bg-[#0b0f0d]/90 backdrop-blur-xl">
@@ -59,16 +97,42 @@ export function Header({
               <Button
                 variant="default"
                 size="sm"
-                className="h-8 rounded-lg px-3"
-                onClick={onFund}
+                className={cn(
+                  "relative h-8 rounded-lg px-3 overflow-hidden",
+                  isFunding &&
+                    "shadow-[0_0_0_1px_rgba(23,32,16,0.18),0_12px_30px_-20px_rgba(23,32,16,0.75)]",
+                )}
+                onClick={handleFundClick}
                 disabled={isFunding}
               >
+                {isFunding && (
+                  <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(199,243,107,0.16)_0%,rgba(165,205,99,0.04)_35%,rgba(199,243,107,0.16)_100%)] animate-pulse" />
+                )}
                 {isFunding ? (
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <span className="relative flex size-4 items-center justify-center">
+                    <span className="absolute inset-0 rounded-full border border-dashed border-[#172010]/60 animate-[spin_2s_linear_infinite]" />
+                    <span className="absolute inset-[3px] rounded-full border border-transparent border-t-[#172010] border-l-[#172010] animate-[spin_1s_linear_infinite]" />
+                    <span className="absolute -top-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-[#172010]/70 animate-ping" />
+                    <span
+                      className="absolute -right-1.5 top-1/2 size-1 -translate-y-1/2 rounded-full bg-[#172010]/70 animate-bounce"
+                      style={{ animationDelay: "120ms" }}
+                    />
+                    <span
+                      className="absolute -left-1.5 top-1/2 size-1 -translate-y-1/2 rounded-full bg-[#172010]/70 animate-bounce"
+                      style={{ animationDelay: "280ms" }}
+                    />
+                    <Droplets className="size-2.5 text-[#172010] animate-pulse" />
+                  </span>
                 ) : (
                   <Droplets className="size-3.5" />
                 )}
-                Fund Token
+                {isFunding ? (
+                  <span className="relative inline-flex min-w-[90px] items-center justify-start gap-1.5">
+                    {FUNDING_PHASES[fundingPhase]}...
+                  </span>
+                ) : (
+                  "Fund Token"
+                )}
               </Button>
               <Button
                 variant="outline"
@@ -78,6 +142,24 @@ export function Header({
               >
                 <CreditCard className="size-3.5" />
                 {address?.slice(0, 6)}...{address?.slice(-4)}
+              </Button>
+              <Button
+                variant={copiedAddress ? "default" : "outline"}
+                size="sm"
+                className="h-8 w-8 rounded-lg p-0"
+                onClick={() => void handleCopyAddress()}
+                aria-label={
+                  copiedAddress ? "Wallet address copied" : "Copy wallet address"
+                }
+                title={
+                  copiedAddress ? "Wallet address copied" : "Copy wallet address"
+                }
+              >
+                {copiedAddress ? (
+                  <Check className="size-3.5" />
+                ) : (
+                  <Copy className="size-3.5" />
+                )}
               </Button>
             </>
           ) : (
@@ -89,13 +171,6 @@ export function Header({
               Connect Wallet
             </Button>
           )}
-
-          <button
-            type="button"
-            className="hidden size-8 items-center justify-center rounded-lg border border-[#2d3932] bg-[#131815] text-[#a9b2ab] transition hover:text-white md:inline-flex"
-          >
-            <ArrowLeftRight className="size-3.5" />
-          </button>
         </div>
       </div>
 

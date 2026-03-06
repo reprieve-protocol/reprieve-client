@@ -1,167 +1,283 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AlertTriangle, DatabaseZap } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/components/common/EmptyState";
-import { StatusBadge } from "@/components/common/StatusBadge";
-import { PositionCard } from "@/components/dashboard/PositionCard";
-import { ProtocolIcon } from "@/components/common/ProtocolIcon";
 import { RescueOverlay } from "@/components/rescue/RescueOverlay";
-
-import { STRATEGY_PRESETS, ETH_USD_PRICE } from "@/lib/domain/constants";
-import { useAppState } from "@/lib/state/app-context";
-import { type Position } from "@/lib/domain/types";
-import { formatUsd } from "@/lib/domain/calculations";
 import {
   usePositionsControllerGetRiskSnapshot,
   getPositionsControllerGetRiskSnapshotQueryKey,
+  useDemoWalletsControllerBootstrapPositions,
 } from "@/src/services/queries";
+import { useAppState } from "@/lib/state/app-context";
+import { type Position } from "@/lib/domain/types";
 import { useAccount, useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { Button } from "@/components/ui/button";
-import { CreWorkflowAnimation } from "@/components/dashboard/CREWorkflowAnimation";
+import { RescueStepLogger } from "@/components/dashboard/RescueStepLogger";
+import { OraclePricesSection } from "@/components/dashboard/OraclePricesSection";
+import { DashboardPageTitle } from "@/components/dashboard/dashboard-view/DashboardPageTitle";
+import { DashboardPortfolioSummary } from "@/components/dashboard/dashboard-view/DashboardPortfolioSummary";
+import { DashboardPositionsSection } from "@/components/dashboard/dashboard-view/DashboardPositionsSection";
+import { DashboardStatusHeader } from "@/components/dashboard/dashboard-view/DashboardStatusHeader";
+import {
+  buildDashboardPositions,
+  hasDashboardPositions,
+} from "@/components/dashboard/dashboard-view/dashboard-position-utils";
+import { useDemoWallet } from "@/lib/state/demo-wallet-context";
+
+const DASHBOARD_LOADING_MESSAGES = [
+  "Syncing wallet exposure across protocols",
+  "Pulling the latest oracle and risk snapshot",
+  "Preparing rescue workflow and position health",
+] as const;
+
+function DashboardLoadingState({
+  badge,
+  title,
+  message,
+}: {
+  badge: string;
+  title: string;
+  message: string;
+}) {
+  return (
+    <div className="space-y-6 animate-fade-up">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <DashboardPageTitle />
+        <div className="inline-flex items-center gap-2 rounded-full border border-[#314235] bg-[#111a15]/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-[#c7f36b]">
+          <span className="size-2 rounded-full bg-[#c7f36b] animate-pulse" />
+          {badge}
+        </div>
+      </div>
+
+      <section className="overflow-hidden rounded-[28px] border border-[#253128] bg-[radial-gradient(circle_at_top,_rgba(199,243,107,0.16),_transparent_38%),linear-gradient(180deg,_rgba(18,26,21,0.98),_rgba(12,18,14,0.98))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-3">
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#c7f36b]">
+                {title}
+              </p>
+              <div className="h-8 w-56 max-w-full animate-pulse rounded-full bg-[#1b251e]" />
+              <p className="min-h-5 text-sm text-[#a9b2ab]" aria-live="polite">
+                {message}
+              </p>
+            </div>
+
+            <div className="relative flex size-11 shrink-0 items-center justify-center rounded-full border border-[#314235] bg-[#0f1712]">
+              <span className="absolute inset-0 rounded-full border-2 border-transparent border-r-[#86a94d] border-t-[#c7f36b] animate-spin" />
+              <span className="size-2.5 rounded-full bg-[#c7f36b] shadow-[0_0_24px_rgba(199,243,107,0.55)]" />
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="rounded-2xl border border-[#27332b] bg-[#111914]/80 p-4"
+              >
+                <div className="mb-4 h-3 w-20 animate-pulse rounded-full bg-[#202b23]" />
+                <div className="h-8 w-28 animate-pulse rounded-full bg-[#27352b]" />
+                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[#1b251e]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#2d3932] via-[#c7f36b] to-[#2d3932] animate-pulse"
+                    style={{
+                      width: `${58 + index * 12}%`,
+                      animationDelay: `${index * 180}ms`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-[1.6fr_1fr]">
+            <div className="rounded-[24px] border border-[#27332b] bg-[#0f1712]/90 p-4">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="h-4 w-36 animate-pulse rounded-full bg-[#202b23]" />
+                <div className="h-8 w-24 animate-pulse rounded-full bg-[#18211b]" />
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-2xl border border-[#1c261f] bg-[#121a15] px-4 py-3"
+                  >
+                    <div className="space-y-2">
+                      <div className="h-3 w-28 animate-pulse rounded-full bg-[#202b23]" />
+                      <div className="h-3 w-20 animate-pulse rounded-full bg-[#1a231d]" />
+                    </div>
+                    <div className="h-6 w-16 animate-pulse rounded-full bg-[#27352b]" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-[#27332b] bg-[#101712]/90 p-4">
+              <div className="mb-4 h-4 w-32 animate-pulse rounded-full bg-[#202b23]" />
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 rounded-full bg-[#c7f36b] animate-pulse" />
+                      <div className="h-3 w-24 animate-pulse rounded-full bg-[#202b23]" />
+                    </div>
+                    <div className="h-2 w-full animate-pulse rounded-full bg-[#18211b]" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 export function DashboardView() {
-  const { isConnected } = useAccount();
-  const demoWalletAddress =
-    typeof window !== "undefined"
-      ? (localStorage.getItem("demoWalletAddress") ?? "")
-      : "";
+  const queryClient = useQueryClient();
+  const { isConnected, isConnecting, isReconnecting, address } = useAccount();
+  const { demoWalletAddress, isResolvingDemoWallet } = useDemoWallet();
 
   const { connect } = useConnect();
   const {
     state: { loading, error, snapshot, rescueRun },
   } = useAppState();
 
-  const { data: positionsData, isLoading: isLoadingPositions } =
-    usePositionsControllerGetRiskSnapshot(
-      demoWalletAddress,
-      { maxAgeSec: 600 },
-      {
-        query: {
-          enabled: !!demoWalletAddress,
-          queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
-            demoWalletAddress,
-            { maxAgeSec: 600 },
-          ),
-        },
+  const {
+    data: positionsData,
+    isLoading: isLoadingPositions,
+    refetch: refetchPositions,
+  } = usePositionsControllerGetRiskSnapshot(
+    demoWalletAddress,
+    { maxAgeSec: 600 },
+    {
+      query: {
+        enabled: !!demoWalletAddress,
+        queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
+          demoWalletAddress,
+          { maxAgeSec: 600 },
+        ),
       },
-    );
+    },
+  );
+
+  const { mutateAsync: bootstrapPositions, isPending: isCreatingPosition } =
+    useDemoWalletsControllerBootstrapPositions();
+  const [isWaitingForCreatedPosition, setIsWaitingForCreatedPosition] =
+    useState(false);
+  const [isRefreshingPositions, setIsRefreshingPositions] = useState(false);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [createPositionError, setCreatePositionError] = useState<string | null>(
+    null,
+  );
+
+  const hasAnyPositions = useMemo(
+    () => hasDashboardPositions(positionsData),
+    [positionsData],
+  );
+  const shouldPollForCreatedPosition =
+    isWaitingForCreatedPosition && !hasAnyPositions;
+
+  useEffect(() => {
+    if (!shouldPollForCreatedPosition) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refetchPositions().then((result) => {
+        const polledData = result.data as { positions?: unknown[] } | undefined;
+        const polledHasPositions =
+          Array.isArray(polledData?.positions) &&
+          polledData.positions.length > 0;
+        if (polledHasPositions) {
+          setIsWaitingForCreatedPosition(false);
+        }
+      });
+    }, 3000);
+
+    return () => window.clearInterval(intervalId);
+  }, [shouldPollForCreatedPosition, refetchPositions]);
+
+  useEffect(() => {
+    if (!loading && !isLoadingPositions) {
+      setLoadingMessageIndex(0);
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setLoadingMessageIndex(
+        (current) => (current + 1) % DASHBOARD_LOADING_MESSAGES.length,
+      );
+    }, 1800);
+
+    return () => window.clearInterval(intervalId);
+  }, [loading, isLoadingPositions]);
+
+  const onCreatePosition = async () => {
+    if (!demoWalletAddress) {
+      setCreatePositionError(
+        "Demo wallet not ready yet. Reconnect wallet and try again.",
+      );
+      return;
+    }
+
+    setCreatePositionError(null);
+    setIsWaitingForCreatedPosition(true);
+
+    try {
+      await bootstrapPositions({
+        demoWalletAddress,
+        data: {
+          rescueMode: "TOP_UP",
+          force: false,
+          minBorrowUsd: 1000,
+        },
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
+          demoWalletAddress,
+          { maxAgeSec: 600 },
+        ),
+      });
+      const refetchResult = await refetchPositions();
+      const latestData = refetchResult.data as
+        | { positions?: unknown[] }
+        | undefined;
+      const latestHasPositions =
+        Array.isArray(latestData?.positions) && latestData.positions.length > 0;
+      if (latestHasPositions) {
+        setIsWaitingForCreatedPosition(false);
+      }
+    } catch (error) {
+      console.error("Failed to bootstrap positions:", error);
+      setCreatePositionError(
+        "Failed to create new position. Please try again.",
+      );
+      setIsWaitingForCreatedPosition(false);
+    }
+  };
+
+  const onRefreshPositions = async () => {
+    if (!demoWalletAddress) return;
+
+    setIsRefreshingPositions(true);
+    try {
+      await queryClient.invalidateQueries({
+        queryKey: getPositionsControllerGetRiskSnapshotQueryKey(
+          demoWalletAddress,
+          { maxAgeSec: 600 },
+        ),
+      });
+      await refetchPositions();
+    } finally {
+      setIsRefreshingPositions(false);
+    }
+  };
 
   const displayPositions: Position[] = useMemo(() => {
-    const defaultData = positionsData as {
-      positions?: Array<{
-        id: number;
-        userAddress: string;
-        chainId: number;
-        protocol: string;
-        adapterAddress: string;
-        collateralAsset: string;
-        debtAsset: string;
-        collateralAmountRaw: string;
-        debtAmountRaw: string;
-        healthFactorWad: string;
-        ltvBps: number;
-        maxLtvBps: number;
-        liquidationThresholdBps: number;
-        syncedAt: string;
-        createdAt: string;
-        updatedAt: string;
-      }>;
-    };
-
-    const apiPositionsRaw = defaultData?.positions ?? [];
-    console.log("apiPositionsRaw123: ", apiPositionsRaw);
-
-    if (!apiPositionsRaw.length) {
-      return [];
-    }
-    const realPositions = apiPositionsRaw.map((apiPos) => {
-      const protocol =
-        apiPos.protocol === "AAVE"
-          ? ("aave-v4" as const)
-          : apiPos.protocol === "COMPOUND"
-            ? ("compound-v3" as const)
-            : ("morpho-v2" as const);
-
-      const chain =
-        apiPos.chainId === 11155111
-          ? ("ethereum-sepolia" as const)
-          : apiPos.chainId === 421614
-            ? ("arbitrum-sepolia" as const)
-            : ("base-sepolia" as const);
-
-      let healthFactor = 99.99;
-      if (apiPos.healthFactorWad) {
-        const factor = Number(BigInt(apiPos.healthFactorWad)) / 1e18;
-        if (factor > 1000)
-          healthFactor = 99.99; // infinite or very large
-        else healthFactor = factor;
-        console.log("factor: ", factor);
-      }
-
-      const collateralUsd =
-        (Number(BigInt(apiPos.collateralAmountRaw)) / 1e18) * ETH_USD_PRICE;
-      const debtUsd = Number(BigInt(apiPos.debtAmountRaw)) / 1e6; // assuming USDC 6 decimals
-
-      return {
-        id: `pos-${apiPos.id}`,
-        protocol,
-        chain,
-        pair: "ETH / USDC", // Fixed based on collateral/debt tokens for demo
-        action: "long" as const,
-        collateralUsd,
-        debtUsd,
-        healthFactor,
-        tokenType: "aToken" as const,
-        approvalStatus: "approved" as const,
-        isRescueSource: false,
-      };
-    });
-
-    const mockShortPositions: Position[] = [
-      {
-        id: "pos-mock-morpho-short-1",
-        protocol: "morpho-v2",
-        chain: "base-sepolia",
-        pair: "BNB / USDC",
-        action: "short",
-        collateralUsd: 15400,
-        debtUsd: 7850.5,
-        healthFactor: 2.18,
-        tokenType: "vault-share",
-        approvalStatus: "approved",
-        isRescueSource: false,
-      },
-      {
-        id: "pos-mock-morpho-short-2",
-        protocol: "morpho-v2",
-        chain: "base-sepolia",
-        pair: "WETH / USDC",
-        action: "short",
-        collateralUsd: 22120,
-        debtUsd: 9040.25,
-        healthFactor: 2.46,
-        tokenType: "vault-share",
-        approvalStatus: "approved",
-        isRescueSource: false,
-      },
-      {
-        id: "pos-mock-morpho-short-3",
-        protocol: "morpho-v2",
-        chain: "base-sepolia",
-        pair: "cbBTC / USDC",
-        action: "short",
-        collateralUsd: 30950,
-        debtUsd: 10120.8,
-        healthFactor: 3.05,
-        tokenType: "vault-share",
-        approvalStatus: "approved",
-        isRescueSource: false,
-      },
-    ];
-
-    return [...realPositions, ...mockShortPositions];
+    return buildDashboardPositions(positionsData);
   }, [positionsData]);
 
   const totalCollateralUsd = useMemo(
@@ -173,31 +289,32 @@ export function DashboardView() {
     () => displayPositions.reduce((acc, pos) => acc + pos.debtUsd, 0),
     [displayPositions],
   );
+  const lowestHealthFactor = useMemo(() => {
+    if (displayPositions.length === 0) {
+      return null;
+    }
 
-  const [selectedPositionId, setSelectedPositionId] = useState<string | null>(
-    null,
-  );
-  const [positionStrategies, setPositionStrategies] = useState<
-    Record<string, string>
-  >({});
-  const strategyOptions = useMemo(
-    () => [...STRATEGY_PRESETS.map((preset) => preset.label), "Custom"],
-    [],
-  );
+    return Math.min(
+      ...displayPositions.map((position) => position.healthFactor),
+    );
+  }, [displayPositions]);
+  const isResolvingWalletConnection = isConnecting || isReconnecting;
+
+  if (isResolvingWalletConnection) {
+    return (
+      <DashboardLoadingState
+        badge="Connecting wallet"
+        title="Restoring session"
+        message="Checking your connected wallet and restoring the last active session."
+      />
+    );
+  }
 
   if (!isConnected) {
     return (
       <div className="space-y-6 animate-fade-up">
-        {/* Page header */}
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">
-              Dashboard
-            </h1>
-            <p className="mt-0.5 text-sm text-[#a9b2ab]">
-              Cross-protocol risk command center
-            </p>
-          </div>
+          <DashboardPageTitle />
         </div>
 
         <section>
@@ -207,7 +324,7 @@ export function DashboardView() {
             action={
               <Button
                 size="sm"
-                className="h-10 rounded-lg bg-[#c7f36b] px-4 text-sm font-medium text-white hover:bg-[#ccd7cf] shadow-sm"
+                className="h-10 rounded-lg bg-[#c7f36b] px-4 text-sm font-medium text-[#172010] hover:bg-[#ccd7cf] shadow-sm"
                 onClick={() => connect({ connector: injected() })}
               >
                 Connect Wallet
@@ -219,12 +336,23 @@ export function DashboardView() {
     );
   }
 
+  if (isResolvingDemoWallet) {
+    return (
+      <DashboardLoadingState
+        badge="Preparing demo wallet"
+        title="Generating workspace"
+        message="Creating a fresh managed demo wallet and reloading every dependent dashboard API."
+      />
+    );
+  }
+
   if (loading || isLoadingPositions) {
     return (
-      <div className="flex items-center gap-3 text-sm text-[#a9b2ab]">
-        <span className="size-4 animate-spin rounded-full border-2 border-[#2d3932] border-t-[#c7f36b]" />
-        Loading dashboard...
-      </div>
+      <DashboardLoadingState
+        badge="Building live dashboard"
+        title="Initializing"
+        message={DASHBOARD_LOADING_MESSAGES[loadingMessageIndex]}
+      />
     );
   }
 
@@ -239,135 +367,45 @@ export function DashboardView() {
   }
 
   const isStale = snapshot.lastCheckSecondsAgo > 1800;
-  const activeSelectedPositionId = displayPositions.some(
-    (position) => position.id === selectedPositionId,
-  )
-    ? selectedPositionId
-    : (displayPositions[0]?.id ?? null);
 
   return (
     <div className="space-y-6 animate-fade-up">
-      {/* Page header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Dashboard
-          </h1>
-          <p className="mt-0.5 text-sm text-[#a9b2ab]">
-            Cross-protocol risk command center
-          </p>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex -space-x-2">
-            <div className="size-7 rounded-full border-2 border-[#0b0f0d] bg-[#0b0f0d] p-0.5 ring-1 ring-[#c7f36b]">
-              <ProtocolIcon protocol="aave-v4" className="size-full" />
-            </div>
-            <div className="size-7 rounded-full border-2 border-[#0b0f0d] bg-[#0b0f0d] p-0.5 ring-1 ring-[#c7f36b]">
-              <ProtocolIcon protocol="compound-v3" className="size-full" />
-            </div>
-            <div className="size-7 rounded-full border-2 border-[#0b0f0d] bg-[#0b0f0d] p-0.5 ring-1 ring-[#c7f36b]">
-              <ProtocolIcon protocol="morpho-v2" className="size-full" />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="tag">
-              <span className="size-1.5 rounded-full bg-[#b5e86f]" />
-              System Operational
-            </span>
-            <StatusBadge label="Data Feeds · DON Verified" tone="info" pulse />
-            {isStale ? <StatusBadge label="Stale data" tone="warning" /> : null}
-          </div>
-        </div>
-      </div>
-
-      {/* Stale warning */}
-      {isStale ? (
-        <div className="card-inset flex items-start gap-3 p-4 text-sm text-amber-300">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
-          <span>
-            Data may be stale. Last update was more than 30 minutes ago. Rescue
-            triggers are held for safety.
-          </span>
-        </div>
-      ) : null}
-
-      {/* Portfolio Summary */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="card p-5 border-[#c7f36b]">
-          <p className="text-sm font-medium text-[#a9b2ab]">Total Collateral</p>
-          <p className="mt-2 text-3xl font-bold tabular-nums text-[#e7ece6]">
-            {formatUsd(totalCollateralUsd)}
-          </p>
-        </div>
-        <div className="card p-5 border-[#c7f36b]">
-          <p className="text-sm font-medium text-[#a9b2ab]">Total Debt</p>
-          <p className="mt-2 text-3xl font-bold tabular-nums text-red-400">
-            {formatUsd(totalDebtUsd)}
-          </p>
-        </div>
-      </div>
+      <OraclePricesSection />
+      <DashboardStatusHeader isStale={isStale} />
+      <DashboardPortfolioSummary
+        totalCollateralUsd={totalCollateralUsd}
+        totalDebtUsd={totalDebtUsd}
+        walletAddress={demoWalletAddress || address || null}
+      />
 
       {/* CRE Workflow Animation */}
-      <CreWorkflowAnimation />
+      <section className="space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
+            CRE Workflow
+          </p>
+        </div>
+        <RescueStepLogger
+          address={demoWalletAddress}
+          lowestHealthFactor={lowestHealthFactor}
+        />
+      </section>
 
       {/* Main grid */}
       <div className="space-y-3">
         {/* Positions column */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
-              Positions
-            </p>
-            <span className="text-xs text-[#8c9890]">
-              {displayPositions.length} detected
-            </span>
-          </div>
-
-          {displayPositions.length === 0 ? (
-            <EmptyState
-              title="No positions detected"
-              description="Connect a wallet with active positions on Aave, Compound, or Morpho. Reprieve auto-scans across chains."
-            />
-          ) : (
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {displayPositions.map((position) => (
-                <PositionCard
-                  key={position.id}
-                  position={position}
-                  isSelected={position.id === activeSelectedPositionId}
-                  rescueRun={rescueRun}
-                  onSelect={() => setSelectedPositionId(position.id)}
-                  strategyLabel={
-                    positionStrategies[position.id] ??
-                    snapshot.protectionStatus.strategyLabel ??
-                    "Balanced"
-                  }
-                  strategyOptions={strategyOptions}
-                  onStrategyChange={(nextStrategy) =>
-                    setPositionStrategies((previous) => ({
-                      ...previous,
-                      [position.id]: nextStrategy,
-                    }))
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-
-      {/* Footer proof banner */}
-      <div className="card-inset flex items-start gap-3 p-4 text-xs text-[#a9b2ab]">
-        <DatabaseZap className="mt-0.5 size-4 shrink-0 text-[#ccd7cf]" />
-        <div>
-          <p className="font-semibold text-[#b5e86f]">Proof, not trust</p>
-          <p className="mt-0.5">
-            Every rescue action is written to immutable logs and verifiable by
-            workflow ID and transaction hash.
-          </p>
-        </div>
+        <DashboardPositionsSection
+          positions={displayPositions}
+          snapshot={snapshot}
+          rescueRun={rescueRun}
+          createPositionError={createPositionError}
+          demoWalletAddress={demoWalletAddress}
+          isCreatingPosition={isCreatingPosition}
+          isRefreshingPositions={isRefreshingPositions}
+          isWaitingForCreatedPosition={shouldPollForCreatedPosition}
+          onCreatePosition={onCreatePosition}
+          onRefreshPositions={onRefreshPositions}
+        />
       </div>
 
       <RescueOverlay />

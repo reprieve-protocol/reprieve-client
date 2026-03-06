@@ -1,4 +1,3 @@
-import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { classifyRiskLevel, formatUsd } from "@/lib/domain/calculations";
 import {
   PROTOCOL_ACCENTS,
@@ -7,23 +6,14 @@ import {
 } from "@/lib/domain/constants";
 import type { Position, RescueRunState } from "@/lib/domain/types";
 import { ChainBadge } from "@/components/common/ChainBadge";
-import { StatusBadge } from "@/components/common/StatusBadge";
 import { ProtocolIcon } from "@/components/common/ProtocolIcon";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
-function approvalLabel(status: Position["approvalStatus"]) {
-  return status === "approved" ? "Approved" : "Needs approval";
-}
-
 export function PositionCard({
   position,
   rescueRun,
-  isSelected,
   onSelect,
-  strategyLabel,
-  strategyOptions,
-  onStrategyChange,
 }: {
   position: Position;
   rescueRun: RescueRunState | null;
@@ -33,7 +23,6 @@ export function PositionCard({
   strategyOptions: string[];
   onStrategyChange: (nextStrategy: string) => void;
 }) {
-  console.log("position: ", position);
   const risk = classifyRiskLevel(position.healthFactor);
   const isActiveRescue =
     rescueRun?.active &&
@@ -70,8 +59,6 @@ export function PositionCard({
         "card p-4 transition-all duration-200 hover:border-[#c7f36b] cursor-pointer",
         cardBorder,
         isActiveRescue && "bg-[#c7f36b]/5",
-        isSelected &&
-          "!border-[#b5e86f] ring-2 ring-[#c7f36b]/50 shadow-[0_0_0_1px_rgba(199,243,107,0.45),0_0_24px_-12px_rgba(199,243,107,0.4)]",
       )}
     >
       {/* Header */}
@@ -86,11 +73,6 @@ export function PositionCard({
           {PROTOCOL_LABELS[position.protocol]}
         </span>
         <div className="flex items-center gap-1.5">
-          {isSelected ? (
-            <span className="rounded-md border border-[#c7f36b]/40 bg-[#c7f36b]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#b5e86f]">
-              Selected
-            </span>
-          ) : null}
           <ChainBadge chain={position.chain} />
         </div>
       </div>
@@ -140,8 +122,7 @@ export function PositionCard({
               "**:data-[slot=progress-indicator]:bg-orange-500",
             risk === "moderate" &&
               "**:data-[slot=progress-indicator]:bg-amber-500",
-            risk === "safe" &&
-              "**:data-[slot=progress-indicator]:bg-[#b5e86f]",
+            risk === "safe" && "**:data-[slot=progress-indicator]:bg-[#b5e86f]",
           )}
         />
       </div>
@@ -160,26 +141,6 @@ export function PositionCard({
             {formatUsd(position.debtUsd)}
           </p>
         </div>
-      </div>
-
-      {/* Footer badges */}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        <StatusBadge
-          label={approvalLabel(position.approvalStatus)}
-          tone={position.approvalStatus === "approved" ? "success" : "warning"}
-        />
-        {position.isRescueSource ? (
-          <StatusBadge label="Rescue source" tone="info" />
-        ) : null}
-        {risk === "critical" ? (
-          <AlertTriangle className="size-3.5 text-red-400" />
-        ) : null}
-        {risk === "safe" ? (
-          <CheckCircle2 className="size-3.5 text-[#b5e86f]" />
-        ) : null}
-        {isActiveRescue ? (
-          <Loader2 className="size-3.5 animate-spin text-[#ccd7cf]" />
-        ) : null}
       </div>
     </article>
   );

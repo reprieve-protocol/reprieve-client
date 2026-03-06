@@ -15,16 +15,27 @@ Performance-first Next.js frontend for Reprieve with deterministic rescue simula
 ## Run
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 Open `http://localhost:3000`.
 
+## API Client Generation
+
+```bash
+bun run api:generate
+```
+
+Optional environment variables:
+
+- `NEXT_PUBLIC_API_BASE_URL`: runtime base URL used by the generated Axios client.
+- `ORVAL_INPUT`: OpenAPI spec URL used by Orval during generation. Defaults to `https://api-finance-os-dev.nysm.work/swagger/json`.
+
 ## Build and Lint
 
 ```bash
-npm run lint
-npm run build
+bun run lint
+bun run build
 ```
 
 ## Route Map

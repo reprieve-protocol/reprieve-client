@@ -23,7 +23,7 @@ import {
   triggerDeterministicRescue,
   updateProtection,
 } from "@/lib/api/mockClient";
-import { computeCoverage, estimateRescuesPerDay, positionsTriggeredAtThreshold } from "@/lib/domain/calculations";
+import { computeCoverage, positionsTriggeredAtThreshold } from "@/lib/domain/calculations";
 import { CRE_CHECK_INTERVAL_MS, STORAGE_KEY } from "@/lib/domain/constants";
 import type {
   AppState,
@@ -148,7 +148,6 @@ interface AppContextValue {
   selectHistory: (id: string) => void;
   triggeredPositionsCount: number;
   coverage: number;
-  rescuesPerDayEstimate: number;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -540,14 +539,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     return computeCoverage(state.snapshot.positions, state.protectionConfig);
   }, [state.protectionConfig, state.snapshot]);
 
-  const rescuesPerDayEstimate = useMemo(() => {
-    if (!state.protectionConfig) {
-      return 0;
-    }
-
-    return estimateRescuesPerDay(state.protectionConfig.dailyCapEth, state.protectionConfig.perRescueCapEth);
-  }, [state.protectionConfig]);
-
   const value = useMemo<AppContextValue>(
     () => ({
       state,
@@ -564,7 +555,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       selectHistory,
       triggeredPositionsCount,
       coverage,
-      rescuesPerDayEstimate,
     }),
     [
       state,
@@ -581,7 +571,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       selectHistory,
       triggeredPositionsCount,
       coverage,
-      rescuesPerDayEstimate,
     ],
   );
 

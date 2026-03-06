@@ -112,12 +112,11 @@
 .card {
   @apply rounded-2xl border;
   border-color: rgba(74, 87, 78, 0.46);
-  background:
-    linear-gradient(
-      160deg,
-      rgba(25, 31, 27, 0.95) 0%,
-      rgba(18, 23, 20, 0.96) 100%
-    );
+  background: linear-gradient(
+    160deg,
+    rgba(25, 31, 27, 0.95) 0%,
+    rgba(18, 23, 20, 0.96) 100%
+  );
   box-shadow:
     0 26px 38px -34px rgba(0, 0, 0, 0.72),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -201,6 +200,20 @@
   100% {
     left: 88%;
     opacity: 0;
+  }
+}
+
+.ticker-track {
+  animation: tickerScroll 55s linear infinite;
+  will-change: transform;
+}
+
+@keyframes tickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck, LucideIcon } from "lucide-react";
+import { LucideIcon } from "lucide-react";
+import Image from "next/image";
 import { APP_NAME } from "@/lib/domain/constants";
 import { cn } from "@/lib/utils";
 
@@ -20,15 +21,17 @@ export function Sidebar({ navItems }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 border-r border-[#2d3932] bg-[#0b0f0d] md:flex md:flex-col">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-[#2d3932] bg-[#0b0f0d] md:flex md:flex-col">
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2.5 px-4 border-b border-[#2d3932]">
-        <div className="flex size-7 items-center justify-center rounded-lg bg-[#c7f36b]/15 ring-1 ring-[#c7f36b]/30">
-          <ShieldCheck className="size-4 text-[#ccd7cf]" />
-        </div>
-        <span className="text-[15px] font-semibold tracking-tight text-white">
-          {APP_NAME}
-        </span>
+      <div className="flex min-h-24 items-center gap-3 px-4 py-4 border-b border-[#2d3932]">
+        <Image
+          src="/logo.png"
+          alt="Reprieve"
+          width={100}
+          height={100}
+          unoptimized
+          className="h-[100px] w-[100px] shrink-0 mx-auto"
+        />
       </div>
 
       <nav className="flex-1 px-2 py-3 space-y-0.5">
@@ -61,7 +64,7 @@ export function Sidebar({ navItems }: SidebarProps) {
             N
           </div>
           <span className="text-[11px] text-[#c7f36b]">
-            Base Mainnet · CRE Active
+            Ethereum Sepolia · CRE Active
           </span>
         </div>
       </div>

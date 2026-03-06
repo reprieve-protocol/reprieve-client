@@ -66,6 +66,10 @@ export function DemoPositionsLoading() {
           <span className="size-2 bg-blue-400 rounded-full animate-ping" />
           Provisioning Environment
         </h3>
+        <p className="mb-4 text-xs text-[#8fa195]">
+          This action can take about 2 minutes. Please keep this screen open
+          while the demo positions are being prepared.
+        </p>
 
         {/* Step text animation */}
         <div className="h-6 overflow-hidden relative w-full text-center">

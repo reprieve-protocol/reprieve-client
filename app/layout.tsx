@@ -7,9 +7,14 @@ export const metadata: Metadata = {
   title: "Reprieve · Cross-Protocol Protection",
   description:
     "Reprieve monitors Aave, Compound, and Morpho positions with deterministic mock rescue flows powered by CRE-style logic.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body className="antialiased">

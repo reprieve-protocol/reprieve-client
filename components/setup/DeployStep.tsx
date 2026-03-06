@@ -1,9 +1,6 @@
 import { CircleCheckBig, Loader2, ShieldCheck } from "lucide-react";
 import { BudgetBar } from "@/components/common/BudgetBar";
-import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { formatLink, formatUsd } from "@/lib/domain/calculations";
-import { LINK_USD_PRICE } from "@/lib/domain/constants";
 import type { SetupDefaults } from "@/lib/domain/types";
 
 export function DeployStep({
@@ -12,17 +9,13 @@ export function DeployStep({
   deploying,
   onDeploy,
   isActive,
-  rescuesPerDayEstimate,
 }: {
   setupDefaults: SetupDefaults;
   coverage: number;
   deploying: boolean;
   onDeploy: () => void;
   isActive: boolean;
-  rescuesPerDayEstimate: number;
 }) {
-  const linkUsd = setupDefaults.linkCost * LINK_USD_PRICE;
-
   return (
     <section className="card p-5 space-y-5">
       <div className="flex items-center gap-2">
@@ -48,39 +41,6 @@ export function DeployStep({
             <BudgetBar used={coverage} cap={100} label="Coverage" />
           </div>
         </div>
-
-        <div className="card-inset p-4">
-          <p className="text-[11px] text-[#c7f36b]">One-time deployment</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-white">
-            {formatLink(setupDefaults.linkCost)}
-          </p>
-          <p className="mt-0.5 text-xs text-[#a9b2ab]">
-            {formatUsd(linkUsd)} at LINK oracle price
-          </p>
-          <p className="mt-2 text-xs text-[#a9b2ab]">
-            Capacity: ~{rescuesPerDayEstimate} rescues/day
-          </p>
-        </div>
-      </div>
-
-      {/* Token approvals */}
-      <div className="card-inset p-4 space-y-3">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-[#c7f36b]">
-          Token approvals
-        </p>
-        {setupDefaults.approvals.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center justify-between gap-2 text-sm"
-          >
-            <span className="text-[#b5e86f]">{item.label}</span>
-            {item.approved ? (
-              <StatusBadge label="Approved" tone="success" />
-            ) : (
-              <StatusBadge label="Needs approval" tone="warning" />
-            )}
-          </div>
-        ))}
       </div>
 
       {/* Deploy button */}

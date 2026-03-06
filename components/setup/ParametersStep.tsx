@@ -1,7 +1,17 @@
-import { estimateRescuesPerDay, formatUsd } from "@/lib/domain/calculations";
-import { ETH_USD_PRICE } from "@/lib/domain/constants";
-import type { Position, ProtectionConfig } from "@/lib/domain/types";
+import { formatUsd } from "@/lib/domain/calculations";
+import type { ProtectionConfig } from "@/lib/domain/types";
 import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  UpsertUserCreRegistrationDtoQueuePriority,
+  type UpsertUserCreRegistrationDtoQueuePriority as QueuePriority,
+} from "@/src/services/models/upsertUserCreRegistrationDtoQueuePriority";
 
 function FieldLabel({ title, caption }: { title: string; caption: string }) {
   return (
@@ -15,35 +25,35 @@ function FieldLabel({ title, caption }: { title: string; caption: string }) {
 export function ParametersStep({
   config,
   onChange,
-  triggeredCount,
-  positions,
+  budgetCapUsd,
+  onBudgetCapUsdChange,
+  queuePriority,
+  onQueuePriorityChange,
 }: {
   config: ProtectionConfig;
   onChange: (next: ProtectionConfig) => void;
-  triggeredCount: number;
-  positions: Position[];
+  budgetCapUsd: number;
+  onBudgetCapUsdChange: (next: number) => void;
+  queuePriority: QueuePriority;
+  onQueuePriorityChange: (next: QueuePriority) => void;
 }) {
-  const rescuesPerDay = estimateRescuesPerDay(
-    config.dailyCapEth,
-    config.perRescueCapEth,
-  );
-  const dailyCapUsd = config.dailyCapEth * ETH_USD_PRICE;
+  const cappedDailyCapUsd = Math.min(20_000, Math.max(1_000, budgetCapUsd));
 
   return (
     <section className="card p-5 space-y-5">
-      <div className="flex items-center gap-2">
-        <span className="flex size-5 items-center justify-center rounded-full bg-[#c7f36b]/20 text-[10px] font-bold text-[#ccd7cf] ring-1 ring-[#c7f36b]/30">
-          2
-        </span>
+      <div>
         <h2 className="text-xs font-semibold uppercase tracking-widest text-[#c7f36b]">
           Parameters
         </h2>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-3">
         {/* HF Threshold */}
         <div className="space-y-3">
-          <FieldLabel title="HF Threshold" caption="Range 1.05 – 2.00" />
+          <FieldLabel
+            title="HF Threshold"
+            caption="Trigger rescue when health factor falls below this value."
+          />
           <Slider
             min={1.05}
             max={2}
@@ -54,98 +64,60 @@ export function ParametersStep({
             }
             className="w-full"
           />
-          <div className="flex items-center justify-between">
-            <p className="text-lg font-bold tabular-nums text-white">
-              {config.threshold.toFixed(2)}
-            </p>
-            <p className="text-xs text-[#a9b2ab]">
-              {triggeredCount} positions triggered
-            </p>
-          </div>
-        </div>
-
-        {/* Per-Rescue Cap */}
-        <div className="space-y-3">
-          <FieldLabel title="Per-Rescue Cap" caption="Max gas per rescue" />
-          <Slider
-            min={0.01}
-            max={0.2}
-            step={0.01}
-            value={[config.perRescueCapEth]}
-            onValueChange={(vals) =>
-              onChange({ ...config, perRescueCapEth: vals[0] })
-            }
-            className="w-full"
-          />
           <p className="text-lg font-bold tabular-nums text-white">
-            {config.perRescueCapEth.toFixed(2)}{" "}
-            <span className="text-sm font-normal text-[#a9b2ab]">ETH</span>
+            {config.threshold.toFixed(2)}
           </p>
+          <p className="text-[11px] text-[#a9b2ab]">Range 1.05 - 2.00</p>
         </div>
 
         {/* Daily Cap */}
         <div className="space-y-3">
-          <FieldLabel title="Daily Cap" caption="Max total gas/day (USD est.)" />
+          <FieldLabel title="Daily Cap" caption="Max total budget/day (USD)" />
           <Slider
-            min={0.05}
-            max={1}
-            step={0.01}
-            value={[config.dailyCapEth]}
-            onValueChange={(vals) =>
-              onChange({ ...config, dailyCapEth: vals[0] })
-            }
+            min={1_000}
+            max={20_000}
+            step={500}
+            value={[cappedDailyCapUsd]}
+            onValueChange={(vals) => onBudgetCapUsdChange(vals[0])}
             className="w-full"
           />
-          <div className="flex items-center justify-between">
-            <p className="text-lg font-bold tabular-nums text-white">
-              {formatUsd(dailyCapUsd)}
-            </p>
-            <p className="text-xs text-[#a9b2ab]">≈ {rescuesPerDay}/day</p>
-          </div>
+          <p className="text-lg font-bold tabular-nums text-white">
+            {formatUsd(cappedDailyCapUsd)}
+          </p>
         </div>
 
-        {/* Emergency Override */}
         <div className="space-y-3">
           <FieldLabel
-            title="Emergency Override"
-            caption="Force rescue when any HF < 1.10"
+            title="Queue Priority"
+            caption="Choose which route CRE should prefer first."
           />
-          <button
-            type="button"
-            onClick={() =>
-              onChange({
-                ...config,
-                emergencyOverride: !config.emergencyOverride,
-              })
-            }
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition ${
-              config.emergencyOverride
-                ? "bg-[#b5e86f]/10 text-[#b5e86f] ring-1 ring-[#b5e86f]/30"
-                : "bg-[#131815] text-[#a9b2ab] ring-1 ring-[#2d3932] hover:ring-[#c7f36b]"
-            }`}
+          <Select
+            value={queuePriority}
+            onValueChange={(value) => onQueuePriorityChange(value as QueuePriority)}
           >
-            <span
-              className={`size-1.5 rounded-full ${config.emergencyOverride ? "bg-[#b5e86f]" : "bg-[#8c9890]"}`}
-            />
-            {config.emergencyOverride ? "Enabled" : "Disabled"}
-          </button>
-        </div>
-      </div>
-
-      {/* Info boxes */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="card-inset p-3 text-xs text-[#a9b2ab]">
-          <p className="font-semibold text-[#b5e86f]">Priority queue</p>
-          <ol className="mt-1.5 space-y-0.5 list-decimal list-inside">
-            <li>Same-chain first</li>
-            <li>CCIP cross-chain escalation</li>
-          </ol>
-        </div>
-        <div className="card-inset p-3 text-xs text-[#a9b2ab]">
-          <p className="font-semibold text-[#b5e86f]">Live preview</p>
-          <p className="mt-1.5">
-            {positions.filter((p) => p.healthFactor < config.threshold).length}{" "}
-            of {positions.length} positions targeted
+            <SelectTrigger>
+              <SelectValue placeholder="Select queue priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                value={UpsertUserCreRegistrationDtoQueuePriority.SAME_CHAIN_FIRST}
+              >
+                Same-chain first
+              </SelectItem>
+              <SelectItem
+                value={
+                  UpsertUserCreRegistrationDtoQueuePriority.CROSS_CHAIN_FIRST
+                }
+              >
+                Cross-chain first
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-[11px] text-[#a9b2ab]">
+            {queuePriority ===
+            UpsertUserCreRegistrationDtoQueuePriority.SAME_CHAIN_FIRST
+              ? "Prefer same-chain execution before cross-chain routes."
+              : "Prefer cross-chain execution before same-chain routes."}
           </p>
         </div>
       </div>

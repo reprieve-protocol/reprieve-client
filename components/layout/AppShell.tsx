@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { LayoutDashboard, ReceiptText, ShieldCheck } from "lucide-react";
+import { useMemo, useState } from "react";
+import { LayoutDashboard, ShieldCheck } from "lucide-react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import {
-  useDemoWalletsControllerGenerate,
+  getResponseStatusCode,
+  normalizeCreRegistration,
+} from "@/lib/cre-registration";
+import { useDemoWallet } from "@/lib/state/demo-wallet-context";
+import {
   useDemoWalletsControllerFund,
+  useCreRegistrationsControllerGetRegistration,
+  getCreRegistrationsControllerGetRegistrationQueryKey,
 } from "@/src/services/queries";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
@@ -16,13 +22,13 @@ import {
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/setup", label: "Protection", icon: ShieldCheck },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const { demoWalletAddress } = useDemoWallet();
 
   const [isFundLogOpen, setIsFundLogOpen] = useState(false);
   const [fundLog, setFundLog] = useState<FundLogResponse | null>(null);
@@ -32,7 +38,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const handleFund = async () => {
     try {
-      const demoWalletAddress = localStorage.getItem("demoWalletAddress");
       if (!demoWalletAddress) {
         alert("No demo wallet found. Please wait until it is generated.");
         return;
@@ -42,8 +47,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       const res = await fundDemoWallet({
         demoWalletAddress,
         data: {
-          ethereumSepoliaGasEth: "0.0002",
-          baseSepoliaGasEth: "0.0002",
+          ethereumSepoliaGasEth: "0.0001",
+          baseSepoliaGasEth: "0.0001",
           ethereumSepoliaWethTarget: "80",
           ethereumSepoliaUsdcTarget: "90000",
           baseSepoliaWethTarget: "50",
@@ -57,43 +62,49 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const { mutate: generateDemoWallet } = useDemoWalletsControllerGenerate({
-    mutation: {
-      onSuccess: (res: unknown) => {
-        const responseData = res as {
-          data?: { demoWalletAddress?: string };
-          demoWalletAddress?: string;
-        };
-        const demoAddress =
-          responseData?.demoWalletAddress ||
-          responseData?.data?.demoWalletAddress;
-        if (demoAddress) {
-          localStorage.setItem("demoWalletAddress", demoAddress);
-        }
+  const { data: creRegistration, error: creRegistrationError } =
+    useCreRegistrationsControllerGetRegistration(demoWalletAddress, {
+      query: {
+        enabled: !!demoWalletAddress,
+        queryKey:
+          getCreRegistrationsControllerGetRegistrationQueryKey(
+            demoWalletAddress,
+          ),
+        retry: (failureCount, error) => {
+          const statusCode = getResponseStatusCode(error);
+          if (statusCode === 404) return false;
+          return failureCount < 2;
+        },
       },
-      onError: (error) => {
-        console.error("Failed to generate demo wallet:", error);
-      },
-    },
-  });
+    });
 
-  useEffect(() => {
-    if (address) {
-      localStorage.setItem("wallet-address", address);
-      generateDemoWallet({ data: { realUserAddress: address } });
-    } else {
-      localStorage.removeItem("wallet-address");
-      localStorage.removeItem("demoWalletAddress");
+  const hasCreRegistration = useMemo(() => {
+    const statusCode = getResponseStatusCode(creRegistrationError);
+    if (statusCode === 404) {
+      return false;
     }
-  }, [address, generateDemoWallet]);
+
+    return Boolean(normalizeCreRegistration(creRegistration));
+  }, [creRegistration, creRegistrationError]);
+
+  const visibleNavItems = useMemo(
+    () =>
+      hasCreRegistration
+        ? [
+            ...navItems,
+            { href: "/setup", label: "Protection", icon: ShieldCheck },
+          ]
+        : navItems,
+    [hasCreRegistration],
+  );
 
   return (
     <div className="min-h-screen text-[#f1f4ef]">
-      <Sidebar navItems={navItems} />
+      <Sidebar navItems={visibleNavItems} />
 
-      <div className="md:pl-56">
+      <div className="md:pl-64">
         <Header
-          navItems={navItems}
+          navItems={visibleNavItems}
           isConnected={isConnected}
           address={address}
           isFunding={isFunding}

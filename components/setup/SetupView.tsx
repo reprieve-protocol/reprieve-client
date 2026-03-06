@@ -1,13 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
-import { DeployStep } from "@/components/setup/DeployStep";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { Check, Copy, X } from "lucide-react";
+import { erc20Abi, parseUnits } from "viem";
 import { ParametersStep } from "@/components/setup/ParametersStep";
-import { StrategyStep } from "@/components/setup/StrategyStep";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import {
+  getResponseStatusCode,
+  normalizeCreRegistration,
+} from "@/lib/cre-registration";
+import { useDemoWallet } from "@/lib/state/demo-wallet-context";
 import { useAppState } from "@/lib/state/app-context";
+import { config as wagmiConfig } from "@/lib/wagmi";
 import {
   useCreRegistrationsControllerUpsertRegistration,
   useCreRegistrationsControllerGetRegistration,
@@ -15,151 +28,49 @@ import {
 } from "@/src/services/queries";
 import { UpsertUserCreRegistrationDtoWorkflowId } from "@/src/services/models/upsertUserCreRegistrationDtoWorkflowId";
 import { UpsertUserCreRegistrationDtoQueuePriority } from "@/src/services/models/upsertUserCreRegistrationDtoQueuePriority";
+import { useAccount, useSwitchChain, useWriteContract } from "wagmi";
+import { sepolia } from "wagmi/chains";
 
-interface CreRegistrationData {
-  workflowId?: string;
-  hfThresholdBps?: number;
-  queuePriority?: string;
-  budgetCapUsd?: number;
-  updatedAt?: string;
-}
+const CRE_DEPLOY_FEE_LINK = "0.5";
+const LINK_TOKEN_ADDRESS =
+  "0x779877a7b0d9e8603169ddbd7836e478b4624789" as const;
+const CRE_FEE_RECEIVER = "0x28b94B571f8F3FEB444075B65054FFba4e10D49a" as const;
+const CRE_DEPLOY_FEE_AMOUNT = parseUnits(CRE_DEPLOY_FEE_LINK, 18);
+const DEFAULT_QUEUE_PRIORITY =
+  UpsertUserCreRegistrationDtoQueuePriority.SAME_CHAIN_FIRST;
 
-const ETH_PRICE_API_URL =
-  "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd";
+type CreateCreStage = "fee" | "register" | null;
 
-async function fetchEthUsdPrice(): Promise<number> {
-  const response = await fetch(ETH_PRICE_API_URL, { cache: "no-store" });
-  console.log("response: ", response);
-  if (!response.ok) {
-    throw new Error("Failed to fetch ETH price.");
-  }
-
-  const payload = (await response.json()) as {
-    ethereum?: { usd?: number };
-  };
-  console.log("payload123: ", payload);
-  const nextPrice = Number(payload?.ethereum?.usd);
-  if (!Number.isFinite(nextPrice) || nextPrice <= 0) {
-    throw new Error("Invalid ETH price response.");
-  }
-
-  return nextPrice;
-}
-
-function normalizeCreRegistration(
-  payload: unknown,
-): CreRegistrationData | null {
-  if (!payload || typeof payload !== "object") return null;
-
-  const asRecord = (value: unknown): Record<string, unknown> | null =>
-    value && typeof value === "object"
-      ? (value as Record<string, unknown>)
-      : null;
-
-  const toNumber = (value: unknown): number | undefined => {
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-    if (typeof value === "string") {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : undefined;
-    }
-    return undefined;
-  };
-
-  const root = asRecord(payload);
-  if (!root) return null;
-
-  const candidates: unknown[] = [root];
-  if (root.data !== undefined) candidates.push(root.data);
-  if (root.registration !== undefined) candidates.push(root.registration);
-
-  const rootData = asRecord(root.data);
-  if (rootData) {
-    if (rootData.registration !== undefined)
-      candidates.push(rootData.registration);
-    if (rootData.result !== undefined) candidates.push(rootData.result);
-  }
-
-  for (const candidate of candidates) {
-    const record = asRecord(candidate);
-    if (!record) continue;
-
-    const normalized: CreRegistrationData = {
-      workflowId:
-        (record.workflowId as string | undefined) ??
-        (record.workflow_id as string | undefined),
-      hfThresholdBps:
-        toNumber(record.hfThresholdBps) ?? toNumber(record.hf_threshold_bps),
-      queuePriority:
-        (record.queuePriority as string | undefined) ??
-        (record.queue_priority as string | undefined),
-      budgetCapUsd:
-        toNumber(record.budgetCapUsd) ?? toNumber(record.budget_cap_usd),
-      updatedAt:
-        (record.updatedAt as string | undefined) ??
-        (record.updated_at as string | undefined),
-    };
-
-    const hasKnownField =
-      normalized.workflowId !== undefined ||
-      normalized.hfThresholdBps !== undefined ||
-      normalized.queuePriority !== undefined ||
-      normalized.budgetCapUsd !== undefined ||
-      normalized.updatedAt !== undefined;
-
-    if (hasKnownField) return normalized;
-  }
-
-  return null;
+function formatQueuePriority(
+  value: string | undefined,
+): "Same-chain first" | "Cross-chain first" {
+  return value === UpsertUserCreRegistrationDtoQueuePriority.CROSS_CHAIN_FIRST
+    ? "Cross-chain first"
+    : "Same-chain first";
 }
 
 export function SetupView() {
-  const router = useRouter();
   const {
-    state: { loading, error, setupDefaults, protectionConfig, snapshot },
+    state: { loading, error, protectionConfig, snapshot },
     setProtectionConfig,
-    applyPreset,
-    deploy,
-    triggeredPositionsCount,
-    coverage,
-    rescuesPerDayEstimate,
   } = useAppState();
+  const { address: connectedAddress, chainId } = useAccount();
+  const { demoWalletAddress: address, isResolvingDemoWallet } = useDemoWallet();
+  const { switchChainAsync } = useSwitchChain();
+  const { writeContractAsync } = useWriteContract();
 
-  const [deploying, setDeploying] = useState(false);
   const [updatingCre, setUpdatingCre] = useState(false);
+  const [creatingCre, setCreatingCre] = useState(false);
   const [editingCre, setEditingCre] = useState(false);
+  const [createCreStage, setCreateCreStage] = useState<CreateCreStage>(null);
   const [creUpdateMessage, setCreUpdateMessage] = useState<string | null>(null);
-  const [ethUsdPrice, setEthUsdPrice] = useState<number | null>(null);
-  const [ethUsdPriceError, setEthUsdPriceError] = useState<string | null>(null);
-
-  const [address, setAddress] = useState("");
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setAddress(localStorage.getItem("demoWalletAddress") ?? "");
-    }
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    const loadEthPrice = async () => {
-      try {
-        const nextPrice = await fetchEthUsdPrice();
-
-        if (!active) return;
-        setEthUsdPrice(nextPrice);
-        setEthUsdPriceError(null);
-      } catch {
-        if (!active) return;
-        setEthUsdPriceError("Unable to fetch ETH price.");
-      }
-    };
-
-    void loadEthPrice();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const [copiedTokenAddress, setCopiedTokenAddress] = useState(false);
+  const [budgetCapUsd, setBudgetCapUsd] = useState(20_000);
+  const [queuePriority, setQueuePriority] =
+    useState<UpsertUserCreRegistrationDtoQueuePriority>(DEFAULT_QUEUE_PRIORITY);
+  const [confirmedFeeTxHash, setConfirmedFeeTxHash] = useState<
+    `0x${string}` | null
+  >(null);
 
   const {
     data: creRegistration,
@@ -169,17 +80,14 @@ export function SetupView() {
     query: {
       queryKey: getCreRegistrationsControllerGetRegistrationQueryKey(address),
       retry: (failureCount, error) => {
-        const statusCode = (error as { response?: { status?: number } } | null)
-          ?.response?.status;
+        const statusCode = getResponseStatusCode(error);
         if (statusCode === 404) return false;
         return failureCount < 2;
       },
     },
   });
 
-  const creRegistrationStatusCode = (
-    creRegistrationError as { response?: { status?: number } } | null
-  )?.response?.status;
+  const creRegistrationStatusCode = getResponseStatusCode(creRegistrationError);
   const creRegistrationMissing = creRegistrationStatusCode === 404;
   const creData = useMemo(
     () =>
@@ -188,30 +96,53 @@ export function SetupView() {
   );
   const hasCreRegistration = Boolean(creData);
 
+  useEffect(() => {
+    if (creData?.budgetCapUsd === undefined) return;
+    const cappedBudget = Math.min(20_000, Math.max(1, creData.budgetCapUsd));
+    setBudgetCapUsd(cappedBudget);
+  }, [creData?.budgetCapUsd]);
+
+  useEffect(() => {
+    setQueuePriority(
+      creData?.queuePriority ===
+        UpsertUserCreRegistrationDtoQueuePriority.CROSS_CHAIN_FIRST
+        ? UpsertUserCreRegistrationDtoQueuePriority.CROSS_CHAIN_FIRST
+        : DEFAULT_QUEUE_PRIORITY,
+    );
+  }, [creData?.queuePriority]);
+
   const { mutateAsync: upsertCreRegistration } =
     useCreRegistrationsControllerUpsertRegistration();
 
-  const selectedPresetId = useMemo(() => {
-    if (!setupDefaults || !protectionConfig) return "balanced";
-    const matched = setupDefaults.presets.find(
-      (preset) =>
-        Math.abs(preset.threshold - protectionConfig.threshold) < 0.001,
-    );
-    return matched?.id ?? "balanced";
-  }, [protectionConfig, setupDefaults]);
+  useEffect(() => {
+    if (hasCreRegistration) {
+      setConfirmedFeeTxHash(null);
+      setCreateCreStage(null);
+    }
+  }, [hasCreRegistration]);
 
-  if (loading) {
+  useEffect(() => {
+    if (!copiedTokenAddress) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setCopiedTokenAddress(false);
+    }, 1500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [copiedTokenAddress]);
+
+  if (loading || (Boolean(connectedAddress) && isResolvingDemoWallet)) {
     return (
       <div className="flex items-center gap-3 text-sm text-[#a9b2ab]">
         <span className="size-4 animate-spin rounded-full border-2 border-[#2d3932] border-t-[#c7f36b]" />
-        Loading setup...
+        {isResolvingDemoWallet ? "Syncing demo wallet..." : "Loading setup..."}
       </div>
     );
   }
 
   if (error) return <p className="text-sm text-red-400">{error}</p>;
 
-  if (!setupDefaults || !protectionConfig || !snapshot) {
+  if (!protectionConfig || !snapshot) {
     return (
       <p className="text-sm text-[#a9b2ab]">Setup defaults unavailable.</p>
     );
@@ -220,20 +151,9 @@ export function SetupView() {
   const syncCreRegistration = async (action: "create" | "update") => {
     if (!address || !protectionConfig) return;
 
-    const isCrossChainFirst =
-      protectionConfig.priorityQueue[0] === "ccip-cross-chain";
-    let latestEthUsdPrice = ethUsdPrice;
-
-    try {
-      const parsedPrice = await fetchEthUsdPrice();
-
-      latestEthUsdPrice = parsedPrice;
-      setEthUsdPrice(parsedPrice);
-      setEthUsdPriceError(null);
-    } catch {
-      setEthUsdPriceError("Unable to fetch ETH price.");
-      throw new Error("Unable to fetch ETH price.");
-    }
+    const cappedBudgetCapUsd = Math.round(
+      Math.min(20_000, Math.max(1, budgetCapUsd)),
+    );
 
     await upsertCreRegistration({
       address,
@@ -241,18 +161,54 @@ export function SetupView() {
         workflowId:
           UpsertUserCreRegistrationDtoWorkflowId.CHAINLINK_API_GUARD_V1,
         hfThresholdBps: Math.round(protectionConfig.threshold * 10_000),
-        queuePriority: isCrossChainFirst
-          ? UpsertUserCreRegistrationDtoQueuePriority.CROSS_CHAIN_FIRST
-          : UpsertUserCreRegistrationDtoQueuePriority.SAME_CHAIN_FIRST,
-        budgetCapUsd: Math.round(
-          protectionConfig.dailyCapEth * (latestEthUsdPrice ?? 0),
-        ),
+        queuePriority,
+        budgetCapUsd: cappedBudgetCapUsd,
         source: `reprieve-fe:${action}`,
         updatedBy: address,
       },
     });
 
     await refetchCreRegistration();
+  };
+
+  const payCreDeploymentFee = async () => {
+    if (confirmedFeeTxHash) {
+      return confirmedFeeTxHash;
+    }
+
+    if (!connectedAddress) {
+      throw new Error("Connect your wallet to pay the LINK fee.");
+    }
+
+    if (chainId !== sepolia.id) {
+      await switchChainAsync({ chainId: sepolia.id });
+    }
+
+    const hash = await writeContractAsync({
+      address: LINK_TOKEN_ADDRESS,
+      abi: erc20Abi,
+      functionName: "transfer",
+      args: [CRE_FEE_RECEIVER, CRE_DEPLOY_FEE_AMOUNT],
+      chainId: sepolia.id,
+    });
+
+    const receipt = await waitForTransactionReceipt(wagmiConfig, {
+      chainId: sepolia.id,
+      hash,
+    });
+
+    if (receipt.status !== "success") {
+      throw new Error("LINK fee transfer was not confirmed.");
+    }
+
+    setConfirmedFeeTxHash(hash);
+
+    return hash;
+  };
+
+  const copyLinkTokenAddress = async () => {
+    await navigator.clipboard.writeText(LINK_TOKEN_ADDRESS);
+    setCopiedTokenAddress(true);
   };
 
   async function onConfirmUpdateCre() {
@@ -269,14 +225,32 @@ export function SetupView() {
     }
   }
 
-  async function onDeploy() {
-    setDeploying(true);
+  async function onCreateCre() {
+    setCreatingCre(true);
+    setCreateCreStage("fee");
+    setCreUpdateMessage(null);
+    let feeHash = confirmedFeeTxHash;
+
     try {
-      await syncCreRegistration(hasCreRegistration ? "update" : "create");
-      await deploy();
-      router.push("/");
+      setCreUpdateMessage(
+        "Confirm the Sepolia LINK fee transfer in your wallet.",
+      );
+      feeHash = await payCreDeploymentFee();
+      setCreateCreStage("register");
+      setCreUpdateMessage("Sepolia LINK fee confirmed. Creating CRE...");
+      await syncCreRegistration("create");
+      setCreUpdateMessage("Sepolia LINK fee confirmed. CRE created.");
+      setConfirmedFeeTxHash(null);
+    } catch (error) {
+      console.error("Failed to create CRE:", error);
+      setCreUpdateMessage(
+        feeHash
+          ? "LINK fee confirmed, but CRE creation failed. Retry Create CRE to reuse the confirmed fee."
+          : "Failed to pay the LINK fee or create CRE.",
+      );
     } finally {
-      setDeploying(false);
+      setCreateCreStage(null);
+      setCreatingCre(false);
     }
   }
 
@@ -289,7 +263,8 @@ export function SetupView() {
               Protection Setup
             </h1>
             <p className="mt-0.5 text-sm text-[#a9b2ab]">
-              Deploy your personal CRE workflow in three steps.
+              Tune protection parameters, pay the on-chain LINK fee, then create
+              your off-chain CRE workflow.
             </p>
           </div>
           <span className="tag">
@@ -340,6 +315,16 @@ export function SetupView() {
                       </p>
                     </div>
                   )}
+                  {creData?.queuePriority && (
+                    <div className="card-inset px-3 py-2">
+                      <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
+                        Queue Priority
+                      </p>
+                      <p className="mt-0.5 text-xs text-white">
+                        {formatQueuePriority(creData.queuePriority)}
+                      </p>
+                    </div>
+                  )}
                   {creData?.updatedAt && (
                     <div className="card-inset px-3 py-2 sm:col-span-2">
                       <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
@@ -359,7 +344,7 @@ export function SetupView() {
                       setEditingCre(true);
                       setCreUpdateMessage(null);
                     }}
-                    disabled={deploying || updatingCre}
+                    disabled={updatingCre || creatingCre}
                     className="inline-flex items-center justify-center rounded-lg border border-[#c7f36b]/30 bg-[#c7f36b]/10 px-3 py-1.5 text-xs font-semibold text-[#b5e86f] transition hover:bg-[#c7f36b]/20 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Update CRE
@@ -367,13 +352,66 @@ export function SetupView() {
                 </div>
               </>
             ) : (
-              <p className="text-xs text-[#a9b2ab]">
-                No CRE workflow registered yet. Configure below and deploy to
-                create one.
-              </p>
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-white">
+                  No CRE workflow registered yet.
+                </p>
+                <p className="text-xs text-[#a9b2ab]">
+                  Complete these steps to create a new CRE workflow.
+                </p>
+                <ol className="list-decimal list-inside space-y-1 text-xs text-[#c7f36b]">
+                  <li>Review and tune your protection parameters.</li>
+                  <li>
+                    Deposit 0.5 LINK as the on-chain fee to deploy CRE. Use the{" "}
+                    Sepolia LINK token at{" "}
+                    <span className="inline-flex max-w-full items-center gap-2 align-middle">
+                      <code className="max-w-[min(56vw,520px)] overflow-hidden text-ellipsis whitespace-nowrap rounded-md bg-[#191f1b] px-2 py-1 font-mono text-[11px] text-[#f1f4ef] sm:text-xs">
+                        {LINK_TOKEN_ADDRESS}
+                      </code>
+                      <Button
+                        type="button"
+                        variant={copiedTokenAddress ? "default" : "outline"}
+                        size="xs"
+                        onClick={() => void copyLinkTokenAddress()}
+                        aria-label={
+                          copiedTokenAddress
+                            ? "LINK token address copied"
+                            : "Copy LINK token address"
+                        }
+                        title={
+                          copiedTokenAddress
+                            ? "LINK token address copied"
+                            : "Copy LINK token address"
+                        }
+                        className={
+                          copiedTokenAddress
+                            ? "shrink-0 min-w-[84px]"
+                            : "shrink-0 min-w-[84px] border-[#3d4d43] bg-[#171d19] text-[#eef5df] hover:bg-[#202722]"
+                        }
+                      >
+                        {copiedTokenAddress ? (
+                          <>
+                            <Check className="size-3.5" />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="size-3.5" />
+                            Copy
+                          </>
+                        )}
+                      </Button>
+                    </span>
+                  </li>
+                  <li>
+                    Click <code>Create CRE</code> to submit and create the
+                    off-chain workflow.
+                  </li>
+                </ol>
+              </div>
             )}
 
-            {creUpdateMessage && (
+            {creUpdateMessage && hasCreRegistration && (
               <p className="text-xs text-[#b5e86f]">{creUpdateMessage}</p>
             )}
           </section>
@@ -381,27 +419,110 @@ export function SetupView() {
 
         {!hasCreRegistration && (
           <>
-            <StrategyStep
-              presets={setupDefaults.presets}
-              selectedPresetId={selectedPresetId}
-              onSelect={applyPreset}
-            />
-
             <ParametersStep
               config={protectionConfig}
               onChange={setProtectionConfig}
-              triggeredCount={triggeredPositionsCount}
-              positions={snapshot.positions}
+              budgetCapUsd={budgetCapUsd}
+              onBudgetCapUsdChange={setBudgetCapUsd}
+              queuePriority={queuePriority}
+              onQueuePriorityChange={setQueuePriority}
             />
 
-            <DeployStep
-              setupDefaults={setupDefaults}
-              coverage={coverage}
-              deploying={deploying}
-              onDeploy={() => void onDeploy()}
-              isActive={snapshot.protectionStatus.active}
-              rescuesPerDayEstimate={rescuesPerDayEstimate}
-            />
+            <section className="card p-4 space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-[#c7f36b]">
+                    Create CRE Workflow
+                  </p>
+                  <p className="mt-1 text-xs text-[#a9b2ab]">
+                    Use the tuned protection parameters, confirm the 0.5 LINK
+                    on-chain fee payment, then create your first off-chain CRE
+                    workflow registration.
+                  </p>
+                </div>
+                <span className="tag">Draft</span>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="card-inset px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
+                    HF Threshold
+                  </p>
+                  <p className="mt-0.5 text-xs text-white">
+                    {protectionConfig.threshold.toFixed(2)}
+                  </p>
+                </div>
+                <div className="card-inset px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
+                    Daily Cap
+                  </p>
+                  <p className="mt-0.5 text-xs text-white">
+                    ${Math.round(budgetCapUsd).toLocaleString()} USD
+                  </p>
+                  <p className="text-[10px] text-[#a9b2ab]">
+                    Max $20,000 / day
+                  </p>
+                </div>
+                <div className="card-inset px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
+                    Queue Priority
+                  </p>
+                  <p className="mt-0.5 text-xs text-white">
+                    {formatQueuePriority(queuePriority)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="card-inset px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
+                    LINK Token (Sepolia)
+                  </p>
+                  <p className="mt-0.5 text-xs text-white">
+                    {CRE_DEPLOY_FEE_LINK} LINK
+                  </p>
+                  <p className="mt-1 text-[10px] text-[#a9b2ab] break-all">
+                    {LINK_TOKEN_ADDRESS}
+                  </p>
+                </div>
+                <div className="card-inset px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-widest text-[#c7f36b]">
+                    Fee Receiver
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-white break-all">
+                    0x28b94B571f8F3FEB444075B65054FFba4e10D49a
+                  </p>
+                  <p className="mt-1 text-[10px] text-[#a9b2ab]">
+                    Pay on-chain first, then create the off-chain CRE.
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-[#a9b2ab]">
+                Budget cap sent to CRE: $
+                {Math.round(budgetCapUsd).toLocaleString()} USD
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void onCreateCre()}
+                  disabled={
+                    creatingCre || updatingCre || !address || !connectedAddress
+                  }
+                  className="inline-flex items-center justify-center rounded-lg border border-[#c7f36b]/30 bg-[#c7f36b]/10 px-3 py-1.5 text-xs font-semibold text-[#b5e86f] transition hover:bg-[#c7f36b]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {creatingCre
+                    ? createCreStage === "fee"
+                      ? "Paying LINK Fee..."
+                      : "Creating CRE..."
+                    : "Create CRE Workflow"}
+                </button>
+                {creUpdateMessage && (
+                  <p className="text-xs text-[#b5e86f]">{creUpdateMessage}</p>
+                )}
+              </div>
+            </section>
           </>
         )}
       </div>
@@ -470,37 +591,68 @@ export function SetupView() {
               <div className="card-inset p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-semibold text-[#b5e86f]">
-                    Daily Cap
+                    Daily Cap (USD)
                   </p>
                   <p className="text-sm font-bold tabular-nums text-white">
-                    {protectionConfig.dailyCapEth.toFixed(2)} ETH
+                    ${Math.round(budgetCapUsd).toLocaleString()}
                   </p>
                 </div>
                 <Slider
-                  min={0.05}
-                  max={1}
-                  step={0.01}
-                  value={[protectionConfig.dailyCapEth]}
-                  onValueChange={(vals) =>
-                    setProtectionConfig({
-                      ...protectionConfig,
-                      dailyCapEth: vals[0],
-                    })
-                  }
+                  min={1_000}
+                  max={20_000}
+                  step={500}
+                  value={[budgetCapUsd]}
+                  onValueChange={(vals) => setBudgetCapUsd(vals[0])}
                   className="w-full"
                 />
                 <p className="text-[11px] text-[#a9b2ab]">
-                  {ethUsdPrice !== null
-                    ? `Budget cap sent to CRE: $${Math.round(
-                        protectionConfig.dailyCapEth * ethUsdPrice,
-                      ).toLocaleString()} (ETH: $${ethUsdPrice.toLocaleString()})`
-                    : "Budget cap sent to CRE: waiting for ETH/USD price..."}
+                  Max allowed daily budget is $20,000.
                 </p>
-                {ethUsdPriceError && (
-                  <p className="text-[11px] text-amber-300">
-                    {ethUsdPriceError}
+              </div>
+
+              <div className="card-inset p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold text-[#b5e86f]">
+                    Queue Priority
                   </p>
-                )}
+                  <p className="text-sm font-bold text-white">
+                    {formatQueuePriority(queuePriority)}
+                  </p>
+                </div>
+                <Select
+                  value={queuePriority}
+                  onValueChange={(value) =>
+                    setQueuePriority(
+                      value as UpsertUserCreRegistrationDtoQueuePriority,
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select queue priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      value={
+                        UpsertUserCreRegistrationDtoQueuePriority.SAME_CHAIN_FIRST
+                      }
+                    >
+                      Same-chain first
+                    </SelectItem>
+                    <SelectItem
+                      value={
+                        UpsertUserCreRegistrationDtoQueuePriority.CROSS_CHAIN_FIRST
+                      }
+                    >
+                      Cross-chain first
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-[#a9b2ab]">
+                  {queuePriority ===
+                  UpsertUserCreRegistrationDtoQueuePriority.SAME_CHAIN_FIRST
+                    ? "Prefer same-chain execution before cross-chain routes."
+                    : "Prefer cross-chain execution before same-chain routes."}
+                </p>
               </div>
             </div>
 
@@ -519,7 +671,7 @@ export function SetupView() {
               <button
                 type="button"
                 onClick={() => void onConfirmUpdateCre()}
-                disabled={updatingCre || deploying}
+                disabled={updatingCre || creatingCre}
                 className="inline-flex items-center justify-center rounded-lg border border-[#c7f36b]/30 bg-[#c7f36b]/10 px-3 py-1.5 text-xs font-semibold text-[#b5e86f] transition hover:bg-[#c7f36b]/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {updatingCre ? "Updating CRE..." : "Confirm Update"}

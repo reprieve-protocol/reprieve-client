@@ -1,11 +1,22 @@
 import Axios, { AxiosError } from "axios";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api-reprieve-dev.nysm.work";
+
+const getStorageItem = (key: string) => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return window.localStorage.getItem(key);
+};
+
 export const AXIOS_INSTANCE = Axios.create({
-  baseURL: "https://api-reprieve-dev.nysm.work",
+  baseURL: API_BASE_URL,
 });
 
 AXIOS_INSTANCE.interceptors.request.use((config) => {
-  const storageAddress = localStorage.getItem("wallet-address");
+  const storageAddress = getStorageItem("wallet-address");
   if (storageAddress) {
     config.headers["wallet-address"] = storageAddress;
   }
@@ -14,7 +25,7 @@ AXIOS_INSTANCE.interceptors.request.use((config) => {
 });
 
 AXIOS_INSTANCE.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = getStorageItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,20 +33,13 @@ AXIOS_INSTANCE.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor to handle 401 unauthorized
 AXIOS_INSTANCE.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Check if response status is 401
-    if (error.response?.status === 401) {
-      // Clear authentication data from localStorage
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        localStorage.removeItem("wallet-address");
-
-        // Dispatch custom event for components to handle logout
-        window.dispatchEvent(new CustomEvent("auth:logout"));
-      }
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      window.localStorage.removeItem("token");
+      window.localStorage.removeItem("wallet-address");
+      window.dispatchEvent(new CustomEvent("auth:logout"));
     }
 
     return Promise.reject(error);
@@ -64,7 +68,6 @@ export const customClient = <T>(
   return promise;
 };
 
-// In some case with react-query and swr you want to be able to override the return error type so you can also do it here like this
 export type ErrorType<Error> = AxiosError<Error>;
 
 export type BodyType<BodyData> = BodyData;
