@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, RefreshCcw } from "lucide-react";
-import { EmptyState } from "@/components/common/EmptyState";
+import { RefreshCcw } from "lucide-react";
 import { DemoPositionsLoading } from "@/components/dashboard/DemoPositionsLoading";
 import { PositionCard } from "@/components/dashboard/PositionCard";
 import { Button } from "@/components/ui/button";
@@ -90,28 +89,37 @@ export function DashboardPositionsSection({
       {isCreatingPosition || isWaitingForCreatedPosition ? (
         <DemoPositionsLoading />
       ) : positions.length === 0 ? (
-        <EmptyState
-          title="No positions detected"
-          description="Connect a wallet with active positions on Aave, Compound, or Morpho. Reprieve auto-scans across chains."
-          action={
-            <div className="flex max-w-md flex-col items-center gap-2">
-              <Button
-                size="sm"
-                className="h-10 rounded-lg bg-[#c7f36b] px-4 text-sm font-medium text-[#172010] shadow-sm hover:bg-[#b5e86f]"
-                onClick={() => void onCreatePosition()}
-                disabled={isCreatingPosition || isWaitingForCreatedPosition}
-              >
-                {isCreatingPosition || isWaitingForCreatedPosition
-                  ? "Bootstrapping..."
-                  : "Bootstrap random positions(demo only)"}
-              </Button>
-              <p className="flex items-center gap-1.5 text-center text-xs text-amber-300/90">
-                <AlertTriangle className="size-3.5 shrink-0 text-amber-300/90" />
-                Run `Fund Token` in the top bar before creating a new position.
+        <div className="relative overflow-hidden rounded-[28px] border border-[#2d3932] bg-[radial-gradient(circle_at_top,rgba(199,243,107,0.13),transparent_38%),linear-gradient(180deg,rgba(15,21,17,0.98),rgba(10,15,12,0.98))] px-6 py-12 text-center shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]">
+          <div className="absolute left-1/2 top-0 h-28 w-28 -translate-x-1/2 rounded-full bg-[#c7f36b]/10 blur-3xl" />
+          <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#344238] bg-[#131a15] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d9ef9d]">
+              Demo bootstrap
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+                No positions found
+              </h3>
+              <p className="mx-auto max-w-xl text-base leading-7 text-[#b7c1ba] md:text-lg">
+                For easy test, generate a demo account. We&apos;ll fund it and
+                bootstrap random positions for you.
               </p>
             </div>
-          }
-        />
+            <Button
+              size="lg"
+              className="h-14 rounded-2xl bg-[#c7f36b] px-8 text-base font-semibold text-[#172010] shadow-[0_18px_40px_-20px_rgba(199,243,107,0.7)] hover:bg-[#d6f57f]"
+              onClick={() => void onCreatePosition()}
+              disabled={isCreatingPosition || isWaitingForCreatedPosition}
+            >
+              {isCreatingPosition || isWaitingForCreatedPosition
+                ? "Generating demo account..."
+                : "Generate Demo Account"}
+            </Button>
+            <p className="text-sm text-[#8f9b92]">
+              Funding and position bootstrap start automatically after the demo
+              wallet is ready.
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {positions.map((position) => (

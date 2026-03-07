@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { LayoutDashboard, ScrollText, ShieldCheck } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
@@ -10,16 +10,11 @@ import {
 } from "@/lib/cre-registration";
 import { useDemoWallet } from "@/lib/state/demo-wallet-context";
 import {
-  useDemoWalletsControllerFund,
   useCreRegistrationsControllerGetRegistration,
   getCreRegistrationsControllerGetRegistrationQueryKey,
 } from "@/src/services/queries";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
-import {
-  FundLogModal,
-  FundLogResponse,
-} from "@/components/modals/FundLogModal";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -33,42 +28,10 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const { demoWalletAddress } = useDemoWallet();
-
-  const [isFundLogOpen, setIsFundLogOpen] = useState(false);
-  const [fundLog, setFundLog] = useState<FundLogResponse | null>(null);
-
-  const { mutateAsync: fundDemoWallet, isPending: isFunding } =
-    useDemoWalletsControllerFund();
-
-  const handleFund = async () => {
-    try {
-      if (!demoWalletAddress) {
-        alert("No demo wallet found. Please wait until it is generated.");
-        return;
-      }
-      setIsFundLogOpen(true);
-      setFundLog(null);
-      const res = await fundDemoWallet({
-        demoWalletAddress,
-        data: {
-          ethereumSepoliaGasEth: "0.003",
-          baseSepoliaGasEth: "0.0001",
-          ethereumSepoliaWethTarget: "80",
-          ethereumSepoliaUsdcTarget: "90000",
-          baseSepoliaWethTarget: "50",
-          baseSepoliaUsdcTarget: "90000",
-        },
-      });
-      setFundLog(res as unknown as FundLogResponse);
-    } catch (error) {
-      console.error(error);
-      setFundLog({ error: String(error) });
-    }
-  };
 
   const { data: creRegistration, error: creRegistrationError } =
     useCreRegistrationsControllerGetRegistration(demoWalletAddress, {
@@ -108,17 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   if (pathname === "/") {
-    return (
-      <>
-        {children}
-
-        <FundLogModal
-          isOpen={isFundLogOpen}
-          onClose={() => setIsFundLogOpen(false)}
-          fundLog={fundLog}
-        />
-      </>
-    );
+    return children;
   }
 
   return (
@@ -129,21 +82,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Header
           navItems={visibleNavItems}
           isConnected={isConnected}
-          address={address}
-          isFunding={isFunding}
-          onFund={handleFund}
+          address={demoWalletAddress}
+          isDemoMode={Boolean(demoWalletAddress)}
           onConnect={connect}
           onDisconnect={() => disconnect()}
         />
 
         <main className="px-4 py-6 md:px-6 md:py-7">{children}</main>
       </div>
-
-      <FundLogModal
-        isOpen={isFundLogOpen}
-        onClose={() => setIsFundLogOpen(false)}
-        fundLog={fundLog}
-      />
     </div>
   );
 }

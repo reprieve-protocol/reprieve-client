@@ -3,19 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Activity,
-  Check,
-  Copy,
-  CreditCard,
-  Droplets,
-  LucideIcon,
-} from "lucide-react";
+import { Activity, Check, Copy, CreditCard, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { injected } from "wagmi/connectors";
-
-const FUNDING_PHASES = ["Funding", "Broadcasting", "Confirming"] as const;
 
 interface NavItem {
   href: string;
@@ -26,9 +17,8 @@ interface NavItem {
 interface HeaderProps {
   navItems: NavItem[];
   isConnected: boolean;
-  address?: `0x${string}`;
-  isFunding: boolean;
-  onFund: () => void;
+  address?: string;
+  isDemoMode?: boolean;
   onConnect: (args: { connector: ReturnType<typeof injected> }) => void;
   onDisconnect: () => void;
 }
@@ -37,24 +27,12 @@ export function Header({
   navItems,
   isConnected,
   address,
-  isFunding,
-  onFund,
+  isDemoMode = false,
   onConnect,
   onDisconnect,
 }: HeaderProps) {
   const pathname = usePathname();
-  const [fundingPhase, setFundingPhase] = useState(0);
   const [copiedAddress, setCopiedAddress] = useState(false);
-
-  useEffect(() => {
-    if (!isFunding) return;
-
-    const interval = window.setInterval(() => {
-      setFundingPhase((phase) => (phase + 1) % FUNDING_PHASES.length);
-    }, 900);
-
-    return () => window.clearInterval(interval);
-  }, [isFunding]);
 
   useEffect(() => {
     if (!copiedAddress) return;
@@ -65,11 +43,6 @@ export function Header({
 
     return () => window.clearTimeout(timeoutId);
   }, [copiedAddress]);
-
-  const handleFundClick = () => {
-    setFundingPhase(0);
-    onFund();
-  };
 
   const handleCopyAddress = async () => {
     if (!address) return;
@@ -93,55 +66,16 @@ export function Header({
 
           {isConnected ? (
             <>
-              <Button
-                variant="default"
-                size="sm"
-                className={cn(
-                  "relative h-8 rounded-lg px-3 overflow-hidden",
-                  isFunding &&
-                    "shadow-[0_0_0_1px_rgba(23,32,16,0.18),0_12px_30px_-20px_rgba(23,32,16,0.75)]",
-                )}
-                onClick={handleFundClick}
-                disabled={isFunding}
-              >
-                {isFunding && (
-                  <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(199,243,107,0.16)_0%,rgba(165,205,99,0.04)_35%,rgba(199,243,107,0.16)_100%)] animate-pulse" />
-                )}
-                {isFunding ? (
-                  <span className="relative flex size-4 items-center justify-center">
-                    <span className="absolute inset-0 rounded-full border border-dashed border-[#172010]/60 animate-[spin_2s_linear_infinite]" />
-                    <span className="absolute inset-[3px] rounded-full border border-transparent border-t-[#172010] border-l-[#172010] animate-[spin_1s_linear_infinite]" />
-                    <span className="absolute -top-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-[#172010]/70 animate-ping" />
-                    <span
-                      className="absolute -right-1.5 top-1/2 size-1 -translate-y-1/2 rounded-full bg-[#172010]/70 animate-bounce"
-                      style={{ animationDelay: "120ms" }}
-                    />
-                    <span
-                      className="absolute -left-1.5 top-1/2 size-1 -translate-y-1/2 rounded-full bg-[#172010]/70 animate-bounce"
-                      style={{ animationDelay: "280ms" }}
-                    />
-                    <Droplets className="size-2.5 text-[#172010] animate-pulse" />
-                  </span>
-                ) : (
-                  <Droplets className="size-3.5" />
-                )}
-                {isFunding ? (
-                  <span className="relative inline-flex min-w-[90px] items-center justify-start gap-1.5">
-                    {FUNDING_PHASES[fundingPhase]}...
-                  </span>
-                ) : (
-                  "Fund Token"
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 rounded-lg"
-                onClick={onDisconnect}
-              >
+              {isDemoMode ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c7f36b]/35 bg-[#c7f36b]/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8f68d]">
+                  <span className="size-1.5 rounded-full bg-[#c7f36b]" />
+                  Demo Mode
+                </span>
+              ) : null}
+              <div className="inline-flex h-8 items-center gap-2 rounded-lg border border-input bg-transparent px-3 text-sm shadow-xs">
                 <CreditCard className="size-3.5" />
-                {address?.slice(0, 6)}...{address?.slice(-4)}
-              </Button>
+                {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Syncing demo wallet..."}
+              </div>
               <Button
                 variant={copiedAddress ? "default" : "outline"}
                 size="sm"
@@ -163,6 +97,14 @@ export function Header({
                 ) : (
                   <Copy className="size-3.5" />
                 )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-lg"
+                onClick={onDisconnect}
+              >
+                Disconnect
               </Button>
             </>
           ) : (

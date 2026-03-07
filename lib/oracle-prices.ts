@@ -67,6 +67,17 @@ export const ORACLE_PRICE_TOKENS: OraclePriceTokenConfig[] = [
     surfaceTint: "rgba(240, 185, 11, 0.14)",
     glowTint: "rgba(240, 185, 11, 0.26)",
   },
+  {
+    id: "fake-cbbtc-short-demo",
+    symbol: "BTC",
+    chainKey: "base-sepolia",
+    fallbackPriceUsd: 91325.18,
+    tickerChangePct: 1.26,
+    demoOnly: true,
+    logoSrc: "/tokens/images.png",
+    surfaceTint: "rgba(247, 147, 26, 0.14)",
+    glowTint: "rgba(247, 147, 26, 0.26)",
+  },
 ];
 
 function normalizePriceUsd(

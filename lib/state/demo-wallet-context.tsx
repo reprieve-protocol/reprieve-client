@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -10,14 +11,24 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
+import { type Position } from "@/lib/domain/types";
+import {
+  getMockShortPositions,
+  isMockShortPositionList,
+} from "@/components/dashboard/dashboard-view/dashboard-position-utils";
 import { useDemoWalletsControllerGenerate } from "@/src/services/queries";
 
 interface DemoWalletContextValue {
   demoWalletAddress: string;
   isResolvingDemoWallet: boolean;
+  mockPositions: Position[];
+  ensureMockPositions: () => Position[];
+  clearMockPositions: () => void;
 }
 
 const DemoWalletContext = createContext<DemoWalletContextValue | null>(null);
+const MOCK_POSITIONS_STORAGE_KEY = "demoMockPositions";
+const MOCK_POSITION_WALLET_STORAGE_KEY = "demoMockPositionWallet";
 
 function readStorageItem(key: string): string {
   if (typeof window === "undefined") {
@@ -25,6 +36,58 @@ function readStorageItem(key: string): string {
   }
 
   return window.localStorage.getItem(key) ?? "";
+}
+
+function normalizeWalletAddress(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function clearStoredMockPosition() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(MOCK_POSITIONS_STORAGE_KEY);
+  window.localStorage.removeItem(MOCK_POSITION_WALLET_STORAGE_KEY);
+}
+
+function readStoredMockPositions(walletAddress: string): Position[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const storedWalletAddress = readStorageItem(MOCK_POSITION_WALLET_STORAGE_KEY);
+  const storedMockPositions = readStorageItem(MOCK_POSITIONS_STORAGE_KEY);
+
+  if (
+    normalizeWalletAddress(storedWalletAddress) !==
+      normalizeWalletAddress(walletAddress) ||
+    !storedMockPositions
+  ) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(storedMockPositions) as unknown;
+    return isMockShortPositionList(parsed) ? parsed.map((item) => ({ ...item })) : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistMockPositions(walletAddress: string, positions: Position[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    MOCK_POSITION_WALLET_STORAGE_KEY,
+    normalizeWalletAddress(walletAddress),
+  );
+  window.localStorage.setItem(
+    MOCK_POSITIONS_STORAGE_KEY,
+    JSON.stringify(positions),
+  );
 }
 
 function clearDemoWalletQueries(
@@ -90,7 +153,56 @@ export function DemoWalletProvider({
 
   const [demoWalletAddress, setDemoWalletAddress] = useState("");
   const [isResolvingDemoWallet, setIsResolvingDemoWallet] = useState(false);
+  const [mockPositions, setMockPositions] = useState<Position[]>([]);
   const lastSyncedWalletAddressRef = useRef<string | null>(null);
+
+  const ensureMockPositions = useCallback((): Position[] => {
+    if (!isConnected || !address) {
+      setMockPositions((current) => (current.length === 0 ? current : []));
+      return [];
+    }
+
+    const normalizedAddress = normalizeWalletAddress(address);
+    const storedMockPositions = readStoredMockPositions(normalizedAddress);
+
+    if (storedMockPositions.length > 0) {
+      setMockPositions(storedMockPositions);
+      return storedMockPositions;
+    }
+
+    clearStoredMockPosition();
+    const nextMockPositions = getMockShortPositions();
+    persistMockPositions(normalizedAddress, nextMockPositions);
+    setMockPositions(nextMockPositions);
+    return nextMockPositions;
+  }, [address, isConnected]);
+
+  const clearMockPositions = useCallback(() => {
+    clearStoredMockPosition();
+    setMockPositions((current) => (current.length === 0 ? current : []));
+  }, []);
+
+  useEffect(() => {
+    if (isConnecting || isReconnecting) {
+      return;
+    }
+
+    if (!isConnected || !address) {
+      setMockPositions([]);
+      return;
+    }
+
+    const normalizedAddress = normalizeWalletAddress(address);
+    const storedMockPositions = readStoredMockPositions(normalizedAddress);
+
+    if (storedMockPositions.length > 0) {
+      setMockPositions(storedMockPositions);
+      return;
+    }
+
+    clearStoredMockPosition();
+    setMockPositions([]);
+  }, [address, isConnected, isConnecting, isReconnecting]);
 
   useEffect(() => {
     if (isConnecting || isReconnecting) {
@@ -203,8 +315,17 @@ export function DemoWalletProvider({
     () => ({
       demoWalletAddress,
       isResolvingDemoWallet,
+      mockPositions,
+      ensureMockPositions,
+      clearMockPositions,
     }),
-    [demoWalletAddress, isResolvingDemoWallet],
+    [
+      clearMockPositions,
+      demoWalletAddress,
+      ensureMockPositions,
+      isResolvingDemoWallet,
+      mockPositions,
+    ],
   );
 
   return (

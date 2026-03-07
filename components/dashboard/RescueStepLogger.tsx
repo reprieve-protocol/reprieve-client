@@ -28,12 +28,14 @@ type RescueStepResponse = {
 
 export function RescueStepLogger({
   address,
+  hasPositions = false,
   lowestHealthFactor,
   currentEthPriceWad,
   simulationRunId,
   simulateEthPriceDrop,
 }: {
   address: string;
+  hasPositions?: boolean;
   lowestHealthFactor?: number | null;
   currentEthPriceWad?: string | null;
   simulationRunId?: number;
@@ -54,6 +56,8 @@ export function RescueStepLogger({
       },
     },
   });
+
+  console.log("creRegistration", creRegistration);
   const hasCreRegistration = Boolean(normalizeCreRegistration(creRegistration));
   const creRegistrationStatusCode = getResponseStatusCode(creRegistrationError);
   const creRegistrationMissing = creRegistrationStatusCode === 404;
@@ -67,7 +71,6 @@ export function RescueStepLogger({
       },
     },
   );
-  console.log("rescueStepData: ", rescueStepData);
   const rescueStep = (rescueStepData as RescueStepResponse | undefined)
     ?.rescueStep;
   const currentRescueStep = rescueStep?.currentStep;
@@ -87,7 +90,6 @@ export function RescueStepLogger({
       },
     },
   );
-  console.log("rescueSimulationData: ", rescueSimulationData);
   const rescueSimulation = getSimulateApiGuardPayload(rescueSimulationData);
   const rescueDecision = getRescueSimulationDecision(rescueSimulationData);
   const isRescue = getIsRescueFromSimulation(rescueSimulationData);
@@ -112,7 +114,7 @@ export function RescueStepLogger({
     );
   }
 
-  if (creRegistrationMissing || !hasCreRegistration) {
+  if (hasPositions && (creRegistrationMissing || !hasCreRegistration)) {
     return (
       <div className="rounded-2xl border border-dashed border-[#2d3932] bg-[#0b120f]/90 px-4 py-5">
         <p className="text-sm font-medium text-orange-300">
@@ -131,24 +133,61 @@ export function RescueStepLogger({
       </div>
     );
   }
+  console.log("showRescueActionWorkflow: ", showRescueActionWorkflow);
 
   return (
-    <>
-      <RescueCREWorkflowAnimation
-        isRescue={isRescue}
-        decision={rescueDecision}
-        lowestHealthFactor={lowestHealthFactor}
-      />
-
+    <div className="space-y-4">
       {showRescueActionWorkflow && (
-        <RescueActionWorkflowAnimation
-          key={actionWorkflowKey}
-          autoPlaySequence={Boolean(simulateEthPriceDrop && simulationRunId)}
-          decision={rescueDecision}
-          currentStep={simulateEthPriceDrop ? null : normalizedRescueStep}
-          collateralAmount={rescueCollateralAmount}
-        />
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-3"></div>
+
+          <RescueActionWorkflowAnimation
+            key={actionWorkflowKey}
+            autoPlaySequence={Boolean(simulateEthPriceDrop && simulationRunId)}
+            decision={rescueDecision}
+            currentStep={simulateEthPriceDrop ? null : normalizedRescueStep}
+            collateralAmount={rescueCollateralAmount}
+          />
+        </section>
       )}
-    </>
+
+      {creRegistration && (
+        <section
+          className={
+            showRescueActionWorkflow
+              ? "rounded-[24px] border border-[#27312b] bg-[#09100c]/80 p-3 opacity-80"
+              : ""
+          }
+        >
+          {showRescueActionWorkflow ? (
+            <div className="px-3 pb-3 pt-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8fa197]">
+                CRE decision workflow
+              </p>
+              <p className="mt-1 text-sm text-[#95a299]">
+                This workflow checks whether positions need rescue or not, then
+                computes the decision, action, and execution plan.
+              </p>
+            </div>
+          ) : (
+            <div className="px-3 pb-3 pt-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8fa197]">
+                CRE monitoring workflow
+              </p>
+              <p className="mt-1 text-sm text-[#95a299]">
+                This workflow continuously checks positions, decides if rescue
+                is needed, and prepares the action plan before any funds move.
+              </p>
+            </div>
+          )}
+
+          <RescueCREWorkflowAnimation
+            isRescue={isRescue}
+            decision={rescueDecision}
+            lowestHealthFactor={lowestHealthFactor}
+          />
+        </section>
+      )}
+    </div>
   );
 }

@@ -49,6 +49,8 @@ type WorkflowConfig = {
   connectors: WorkflowConnector[];
   completeDetail: string;
   metrics: WorkflowMetric[];
+  actionLabel: string;
+  routeLabel: string;
 };
 
 function formatRescueAmountLabel(collateralAmount?: string) {
@@ -109,6 +111,8 @@ function getWorkflowConfig(
         },
       ],
       completeDetail: `${rescueAmountLabel} moved directly on the source chain and restored the position without a cross-chain bridge.`,
+      actionLabel: "Direct same-chain rescue",
+      routeLabel: "ETH Sepolia -> ETH Sepolia",
       metrics: [
         {
           label: "Source",
@@ -196,6 +200,8 @@ function getWorkflowConfig(
         nextColor: "#b5e86f",
       },
     ],
+    actionLabel: "Cross-chain rescue route",
+    routeLabel: "ETH Sepolia -> Base Sepolia",
     completeDetail: `${rescueAmountLabel} withdrawn from AAVE on ETH Sepolia, bridged via Chainlink CCIP, and deposited into Compound on Base Sepolia. Position secured cross-chain.`,
     metrics: [
       {
@@ -254,11 +260,16 @@ const StageNode: React.FC<{
       <motion.div
         animate={{ opacity: isActive ? 1 : 0.2 }}
         transition={{ duration: 0.4 }}
-        className="mb-2.5 px-2 py-0.5 rounded text-[8px] font-bold tracking-widest whitespace-nowrap"
+        className="mb-2.5 rounded border px-2.5 py-1 text-[10px] font-bold tracking-[0.18em] whitespace-nowrap"
         style={{
-          background: `${stage.badgeColor}18`,
-          color: stage.badgeColor,
-          border: `1px solid ${stage.badgeColor}30`,
+          background: isActive
+            ? `${stage.badgeColor}22`
+            : "rgba(255,255,255,0.04)",
+          color: isActive ? "#e8f7bf" : "#9aa79f",
+          border: isActive
+            ? `1px solid ${stage.badgeColor}55`
+            : "1px solid rgba(255,255,255,0.08)",
+          boxShadow: isCurrent ? `0 0 18px ${stage.badgeColor}22` : "none",
         }}
       >
         {stage.badge}
@@ -276,7 +287,7 @@ const StageNode: React.FC<{
               : "none",
         }}
         transition={{ duration: 0.4 }}
-        className="w-14 h-14 rounded-2xl border-2 flex items-center justify-center relative"
+        className="h-16 w-16 rounded-2xl border-2 flex items-center justify-center relative"
         style={{
           background: isActive ? `${stage.color}15` : "rgba(255,255,255,0.03)",
         }}
@@ -297,12 +308,12 @@ const StageNode: React.FC<{
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 16 }}
           >
-            <Check size={20} style={{ color: stage.color }} />
+            <Check size={22} style={{ color: stage.color }} />
           </motion.div>
         ) : (
           <Icon
-            size={20}
-            style={{ color: isActive ? stage.color : "#637267" }}
+            size={22}
+            style={{ color: isActive ? stage.color : "#7b8b80" }}
           />
         )}
 
@@ -320,14 +331,20 @@ const StageNode: React.FC<{
       {/* Chain + Protocol label */}
       <div className="mt-2.5 text-center">
         <div
-          className="text-[11px] font-bold leading-tight"
-          style={{ color: isActive ? "#f0f3ee" : "#637267" }}
+          className="text-[18px] font-bold leading-tight tracking-tight"
+          style={{
+            color: isActive ? "#ffffff" : "#a4b0a8",
+            textShadow: isCurrent ? "0 0 18px rgba(255,255,255,0.08)" : "none",
+          }}
         >
           {stage.label}
         </div>
         <div
-          className="text-[10px] font-semibold leading-tight mt-0.5"
-          style={{ color: isActive ? stage.color : "#37453e" }}
+          className="mt-1 text-[14px] font-semibold leading-tight"
+          style={{
+            color: isActive ? "#d9f68f" : "#7b8a81",
+            textShadow: isCurrent ? `0 0 16px ${stage.color}20` : "none",
+          }}
         >
           {stage.sublabel}
         </div>
@@ -345,13 +362,13 @@ const Connector: React.FC<{
   color: string;
   nextColor: string;
 }> = ({ active, isCurrent, label, dashed, color, nextColor }) => (
-  <div className="flex-1 flex flex-col items-center gap-1.5 self-center mt-[-36px] mx-1 min-w-0">
+  <div className="mx-1 mt-[-36px] flex min-w-0 flex-1 flex-col items-center gap-2 self-center">
     {/* Label above */}
     <motion.span
       animate={{ opacity: active ? 1 : 0.2 }}
       transition={{ duration: 0.4 }}
-      className="text-[9px] font-medium text-center whitespace-nowrap"
-      style={{ color: active ? color : "#637267" }}
+      className="text-[11px] font-semibold text-center whitespace-nowrap tracking-[0.04em]"
+      style={{ color: active ? "#dce8df" : "#7d8b83" }}
     >
       {label}
     </motion.span>
@@ -448,7 +465,14 @@ export const RescueActionWorkflowAnimation: React.FC<
   const isControlled = currentStep !== null && currentStep !== undefined;
   const workflowVariant = getWorkflowVariant(decision);
   const workflow = getWorkflowConfig(workflowVariant, rescueAmountLabel);
-  const { stages, connectors, metrics, completeDetail } = workflow;
+  const {
+    stages,
+    connectors,
+    metrics,
+    completeDetail,
+    actionLabel,
+    routeLabel,
+  } = workflow;
   const TOTAL = stages.length;
 
   useEffect(() => {
@@ -481,13 +505,34 @@ export const RescueActionWorkflowAnimation: React.FC<
   const isPreviewStep = isControlled && activeStep === 0;
   const currentStage = activeStep < TOTAL ? stages[activeStep] : null;
   const progressPct = (activeStep / TOTAL) * 100;
+  const sourceStage = stages[0];
+  const destinationStage = stages[stages.length - 1];
 
   return (
-    <div className="w-full relative rounded-2xl overflow-hidden border border-white/5 bg-[#0b0f0d]">
+    <div className="relative w-full overflow-hidden rounded-[28px] border border-[#b5e86f]/20 bg-[radial-gradient(circle_at_top,rgba(181,232,111,0.12),transparent_40%),linear-gradient(180deg,rgba(10,15,12,0.98),rgba(7,11,9,0.98))] shadow-[0_24px_80px_-38px_rgba(181,232,111,0.28)]">
+      <div className="border-b border-[#d3f78e]/10 px-5 py-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d9f68f]">
+              Rescue action route
+            </p>
+            <h3 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              {actionLabel}
+            </h3>
+            <p className="mt-2 text-base leading-7 text-[#b9c5bd]">
+              {routeLabel} · {rescueAmountLabel} ·{" "}
+              {workflowVariant === "same-chain"
+                ? "No bridge hop required"
+                : "CCIP bridge orchestration"}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Header bar */}
       <div
         className="flex items-center justify-between px-5 py-3.5 border-b border-white/5"
-        style={{ background: "rgba(55,91,210,0.05)" }}
+        style={{ background: "rgba(181,232,111,0.04)" }}
       >
         <div className="flex items-center gap-3">
           <div className="flex gap-1.5">
@@ -496,10 +541,10 @@ export const RescueActionWorkflowAnimation: React.FC<
             <span className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-[#8c9890] font-mono tracking-wider">
+            <span className="text-[11px] text-[#a5b2ab] font-mono tracking-wider">
               chainlink-cre / rescue-workflow.ts
             </span>
-            <span className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] text-[#8c9890]">
+            <span className="rounded border border-[#d3f78e]/15 bg-[#d3f78e]/8 px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] text-[#d9f68f]">
               {workflowVariant === "same-chain" ? "same-chain" : "cross-chain"}
             </span>
           </div>
@@ -571,7 +616,7 @@ export const RescueActionWorkflowAnimation: React.FC<
       </div>
 
       {/* Detail panel */}
-      <div className="mx-5 mb-5 rounded-xl overflow-hidden border border-white/5">
+      <div className="mx-5 mb-5 overflow-hidden rounded-2xl border border-[#d3f78e]/10 shadow-[0_16px_50px_-38px_rgba(181,232,111,0.35)]">
         <AnimatePresence mode="wait">
           {currentStage ? (
             <motion.div
@@ -580,49 +625,59 @@ export const RescueActionWorkflowAnimation: React.FC<
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="p-4 flex items-start gap-3.5"
-              style={{ background: `${currentStage.color}09` }}
+              className="flex items-start gap-4 p-5"
+              style={{ background: `${currentStage.color}11` }}
             >
               <div
-                className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+                className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                 style={{
-                  background: `${currentStage.color}20`,
-                  border: `1px solid ${currentStage.color}35`,
+                  background: `${currentStage.color}24`,
+                  border: `1px solid ${currentStage.color}42`,
                 }}
               >
                 {React.createElement(currentStage.icon, {
-                  size: 16,
+                  size: 18,
                   style: { color: currentStage.color },
                 })}
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
                   <span
-                    className="text-[11px] font-bold"
-                    style={{ color: currentStage.color }}
+                    className="rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em]"
+                    style={{
+                      color: currentStage.color,
+                      borderColor: `${currentStage.color}45`,
+                      background: `${currentStage.color}14`,
+                    }}
                   >
-                    {currentStage.label} · {currentStage.sublabel}
-                  </span>
-                  <ChevronRight
-                    size={11}
-                    style={{ color: currentStage.color }}
-                  />
-                  <span className="text-[10px] text-[#8c9890]">
                     {currentStage.badge}
                   </span>
+                  <span
+                    className="text-[14px] font-bold"
+                    style={{ color: "#f1f4ef" }}
+                  >
+                    {currentStage.label}
+                  </span>
+                  <ChevronRight size={13} style={{ color: "#7f8d84" }} />
+                  <span
+                    className="text-[14px] font-semibold"
+                    style={{ color: currentStage.color }}
+                  >
+                    {currentStage.sublabel}
+                  </span>
                 </div>
-                <p className="text-[12px] leading-relaxed text-[#ccd7cf]">
+                <p className="text-[14px] leading-7 text-[#d4ddd7]">
                   {currentStage.detail}
                 </p>
                 {isControlled ? (
-                  <p className="mt-2 text-[10px] font-mono text-[#8c9890]">
+                  <p className="mt-3 text-[12px] font-mono text-[#d9f68f]">
                     {`Simulated rescue amount: ${rescueAmountLabel}`}
                   </p>
                 ) : null}
               </div>
 
-              <div className="shrink-0 flex items-center gap-1 text-[10px] text-[#69776f] font-mono">
+              <div className="shrink-0 flex items-center gap-1 text-[11px] text-[#8fa197] font-mono">
                 <Clock size={10} />
                 {activeStep + 1}/{TOTAL}
               </div>
@@ -634,7 +689,7 @@ export const RescueActionWorkflowAnimation: React.FC<
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              className="p-4 flex items-center gap-3.5"
+              className="flex items-center gap-3.5 p-5"
               style={{ background: "rgba(182,234,218,0.10)" }}
             >
               <div
@@ -647,10 +702,10 @@ export const RescueActionWorkflowAnimation: React.FC<
                 <Zap size={16} style={{ color: "#b5e86f" }} />
               </div>
               <div>
-                <p className="text-[11px] font-bold text-[#b5e86f] mb-1">
+                <p className="mb-1 text-[13px] font-bold text-[#b5e86f]">
                   Rescue Complete ✓
                 </p>
-                <p className="text-[12px] text-[#c7f36b]">{completeDetail}</p>
+                <p className="text-[14px] text-[#e1f7a5]">{completeDetail}</p>
               </div>
             </motion.div>
           )}
@@ -658,16 +713,16 @@ export const RescueActionWorkflowAnimation: React.FC<
       </div>
 
       {/* Metrics footer */}
-      <div className="border-t border-white/5 grid grid-cols-3 divide-x divide-white/5">
+      <div className="grid grid-cols-3 divide-x divide-white/5 border-t border-white/5">
         {metrics.map((m) => (
-          <div key={m.label} className="px-4 py-3 text-center">
-            <div className="text-[9px] uppercase tracking-widest text-[#637267] mb-1">
+          <div key={m.label} className="px-4 py-4 text-center">
+            <div className="mb-1 text-[10px] uppercase tracking-widest text-[#7e8b84]">
               {m.label}
             </div>
-            <div className="text-[13px] font-bold" style={{ color: m.color }}>
+            <div className="text-[18px] font-bold" style={{ color: m.color }}>
               {m.value}
             </div>
-            <div className="text-[9px] text-[#69776f] mt-0.5">{m.sub}</div>
+            <div className="mt-1 text-[11px] text-[#afbbb3]">{m.sub}</div>
           </div>
         ))}
       </div>

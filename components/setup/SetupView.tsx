@@ -41,6 +41,18 @@ const DEFAULT_QUEUE_PRIORITY =
 
 type CreateCreStage = "fee" | "register" | null;
 
+function shortAddress(value?: string | null): string {
+  if (!value) {
+    return "Wallet syncing";
+  }
+
+  if (value.length <= 14) {
+    return value;
+  }
+
+  return `${value.slice(0, 6)}...${value.slice(-4)}`;
+}
+
 function formatQueuePriority(
   value: string | undefined,
 ): "Same-chain first" | "Cross-chain first" {
@@ -262,16 +274,103 @@ export function SetupView() {
             <h1 className="text-2xl font-bold tracking-tight text-white">
               Protection Setup
             </h1>
-            <p className="mt-0.5 text-sm text-[#a9b2ab]">
-              Tune protection parameters, pay the on-chain LINK fee, then create
-              your off-chain CRE workflow.
+            <p className="mt-1 max-w-2xl text-base leading-7 text-[#a9b2ab]">
+              Tune protection parameters, pay the on-chain LINK fee, then
+              register the off-chain CRE workflow that watches your demo
+              account.
             </p>
           </div>
-          <span className="tag">
-            <span className="size-1.5 rounded-full bg-[#b5e86f]" />
-            Wizard Mode
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="tag">
+              <span className="size-1.5 rounded-full bg-[#b5e86f]" />
+              Wizard Mode
+            </span>
+            <span className="rounded-full border border-[#c7f36b]/35 bg-[#c7f36b]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d8f68d]">
+              Demo Mode
+            </span>
+          </div>
         </div>
+
+        <section className="card overflow-hidden p-0">
+          <div className="grid gap-0 lg:grid-cols-[1.3fr_0.9fr]">
+            <div className="space-y-4 border-b border-[#253128] bg-[radial-gradient(circle_at_top_left,rgba(199,243,107,0.14),transparent_42%),linear-gradient(180deg,rgba(17,24,20,0.98),rgba(12,18,14,0.98))] px-5 py-6 lg:border-b-0 lg:border-r">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#c7f36b]">
+                CRE workflow steps
+              </p>
+              <h2 className="text-3xl font-semibold tracking-tight text-white">
+                Big picture, in 3 steps
+              </h2>
+              <div className="grid gap-3">
+                {[
+                  {
+                    step: "01",
+                    title: "Tune thresholds and budget",
+                    detail:
+                      "Set HF threshold, queue priority, and the daily budget cap your workflow is allowed to spend.",
+                  },
+                  {
+                    step: "02",
+                    title: "Pay the Sepolia LINK fee",
+                    detail:
+                      "Transfer 0.5 LINK on Sepolia so the CRE workflow can be deployed and registered.",
+                  },
+                  {
+                    step: "03",
+                    title: "Create the CRE workflow",
+                    detail:
+                      "Submit the final config and activate the workflow for the demo wallet shown on this screen.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.step}
+                    className="rounded-2xl border border-[#2c3830] bg-[#101712]/75 p-4"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#c7f36b]/30 bg-[#c7f36b]/10 text-lg font-semibold text-[#d8f68d]">
+                        {item.step}
+                      </div>
+                      <div>
+                        <p className="text-xl font-semibold text-white">
+                          {item.title}
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-[#aeb8b1]">
+                          {item.detail}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 px-5 py-6">
+              <div className="rounded-2xl border border-[#2c3830] bg-[#101712]/90 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8fa197]">
+                  Configuring wallet
+                </p>
+                <p className="mt-3 text-xl font-semibold text-white">
+                  {shortAddress(address)}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#a9b2ab]">
+                  This is the demo wallet that Reprieve will fund, scan, and
+                  protect in demo mode.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#2c3830] bg-[#0d1410] p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8fa197]">
+                  Deployment cost
+                </p>
+                <p className="mt-3 text-3xl font-semibold text-white">
+                  {CRE_DEPLOY_FEE_LINK} LINK
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#a9b2ab]">
+                  One Sepolia LINK payment is required before the first CRE
+                  workflow registration.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {address && (
           <section className="card p-4 space-y-3">
@@ -353,61 +452,93 @@ export function SetupView() {
               </>
             ) : (
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-white">
+                <p className="text-lg font-semibold text-white">
                   No CRE workflow registered yet.
                 </p>
-                <p className="text-xs text-[#a9b2ab]">
-                  Complete these steps to create a new CRE workflow.
+                <p className="text-sm leading-6 text-[#a9b2ab]">
+                  Complete the 3 steps below to create the first CRE workflow
+                  for this demo wallet.
                 </p>
-                <ol className="list-decimal list-inside space-y-1 text-xs text-[#c7f36b]">
-                  <li>Review and tune your protection parameters.</li>
-                  <li>
-                    Deposit 0.5 LINK as the on-chain fee to deploy CRE. Use the{" "}
-                    Sepolia LINK token at{" "}
-                    <span className="inline-flex max-w-full items-center gap-2 align-middle">
-                      <code className="max-w-[min(56vw,520px)] overflow-hidden text-ellipsis whitespace-nowrap rounded-md bg-[#191f1b] px-2 py-1 font-mono text-[11px] text-[#f1f4ef] sm:text-xs">
-                        {LINK_TOKEN_ADDRESS}
-                      </code>
-                      <Button
-                        type="button"
-                        variant={copiedTokenAddress ? "default" : "outline"}
-                        size="xs"
-                        onClick={() => void copyLinkTokenAddress()}
-                        aria-label={
-                          copiedTokenAddress
-                            ? "LINK token address copied"
-                            : "Copy LINK token address"
-                        }
-                        title={
-                          copiedTokenAddress
-                            ? "LINK token address copied"
-                            : "Copy LINK token address"
-                        }
-                        className={
-                          copiedTokenAddress
-                            ? "shrink-0 min-w-[84px]"
-                            : "shrink-0 min-w-[84px] border-[#3d4d43] bg-[#171d19] text-[#eef5df] hover:bg-[#202722]"
-                        }
-                      >
-                        {copiedTokenAddress ? (
-                          <>
-                            <Check className="size-3.5" />
-                            Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="size-3.5" />
-                            Copy
-                          </>
-                        )}
-                      </Button>
-                    </span>
-                  </li>
-                  <li>
-                    Click <code>Create CRE</code> to submit and create the
-                    off-chain workflow.
-                  </li>
-                </ol>
+                <div className="grid gap-3 lg:grid-cols-3">
+                  <div className="rounded-2xl border border-[#2d3932] bg-[#101712] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#c7f36b]">
+                      Step 1
+                    </p>
+                    <p className="mt-3 text-xl font-semibold text-white">
+                      Review parameters
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#a9b2ab]">
+                      Confirm threshold, budget cap, and queue priority.
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[#2d3932] bg-[#101712] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#c7f36b]">
+                      Step 2
+                    </p>
+                    <p className="mt-3 text-xl font-semibold text-white">
+                      Pay {CRE_DEPLOY_FEE_LINK} LINK
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#a9b2ab]">
+                      Use the Sepolia LINK token address below to fund the CRE
+                      deployment fee.
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[#2d3932] bg-[#101712] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#c7f36b]">
+                      Step 3
+                    </p>
+                    <p className="mt-3 text-xl font-semibold text-white">
+                      Create workflow
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#a9b2ab]">
+                      Submit the config and activate protection for the current
+                      demo wallet.
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-[#2d3932] bg-[#111814] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#c7f36b]">
+                    Sepolia LINK token
+                  </p>
+                  <div className="mt-3 flex max-w-full flex-wrap items-center gap-2">
+                    <code className="max-w-[min(68vw,560px)] overflow-hidden text-ellipsis whitespace-nowrap rounded-md bg-[#191f1b] px-2 py-1 font-mono text-[11px] text-[#f1f4ef] sm:text-xs">
+                      {LINK_TOKEN_ADDRESS}
+                    </code>
+                    <Button
+                      type="button"
+                      variant={copiedTokenAddress ? "default" : "outline"}
+                      size="xs"
+                      onClick={() => void copyLinkTokenAddress()}
+                      aria-label={
+                        copiedTokenAddress
+                          ? "LINK token address copied"
+                          : "Copy LINK token address"
+                      }
+                      title={
+                        copiedTokenAddress
+                          ? "LINK token address copied"
+                          : "Copy LINK token address"
+                      }
+                      className={
+                        copiedTokenAddress
+                          ? "shrink-0 min-w-[84px]"
+                          : "shrink-0 min-w-[84px] border-[#3d4d43] bg-[#171d19] text-[#eef5df] hover:bg-[#202722]"
+                      }
+                    >
+                      {copiedTokenAddress ? (
+                        <>
+                          <Check className="size-3.5" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="size-3.5" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
 

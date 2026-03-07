@@ -20,10 +20,12 @@ export function DashboardPortfolioSummary({
   totalCollateralUsd,
   totalDebtUsd,
   walletAddress,
+  isDemoMode = false,
 }: {
   totalCollateralUsd: number;
   totalDebtUsd: number;
   walletAddress?: string | null;
+  isDemoMode?: boolean;
 }) {
   return (
     <section className="space-y-3">
@@ -33,19 +35,28 @@ export function DashboardPortfolioSummary({
             Current User Portfolio
           </p>
           <p className="mt-1 text-sm text-[#8c9890]">
-            Live exposure for the wallet currently connected to Reprieve.
+            Live exposure for the demo wallet currently routed through
+            Reprieve.
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#3c4a42] bg-[#121815]/90 px-3 py-2 text-xs text-[#d8e3db] shadow-[0_10px_30px_-22px_rgba(0,0,0,0.9)]">
+        <div className="inline-flex items-center gap-3 rounded-full border border-[#3c4a42] bg-[#121815]/90 px-3 py-2 text-xs text-[#d8e3db] shadow-[0_10px_30px_-22px_rgba(0,0,0,0.9)]">
           <span className="flex size-7 items-center justify-center rounded-full bg-[#c7f36b]/12 ring-1 ring-[#c7f36b]/20">
             <Wallet className="size-3.5 text-[#d6f57f]" />
           </span>
           <div className="leading-tight">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-[#d8e3db]">
-              Your wallet
+            <p className="text-[10px] uppercase tracking-[0.24em] text-[#d8e3db]/80">
+              {isDemoMode ? "Demo wallet" : "Wallet"}
+            </p>
+            <p className="mt-1 font-mono text-sm text-white">
+              {shortAddress(walletAddress)}
             </p>
           </div>
+          {isDemoMode ? (
+            <span className="rounded-full border border-[#c7f36b]/35 bg-[#c7f36b]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d8f68d]">
+              Demo Mode
+            </span>
+          ) : null}
         </div>
       </div>
 

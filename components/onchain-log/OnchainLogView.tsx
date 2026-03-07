@@ -93,8 +93,8 @@ export function OnchainLogView() {
               Rescue executions
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-[#9ba69e]">
-              Browse rescue runs for the connected wallet. Open an execution in
-              its own page when you need the full event detail and payloads.
+              Browse rescue runs for the active demo wallet. Open an execution
+              in its own page when you need the full event detail and payloads.
             </p>
           </div>
 

@@ -5,9 +5,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/components/common/EmptyState";
 import { RescueOverlay } from "@/components/rescue/RescueOverlay";
 import {
+  getCreRegistrationsControllerGetRegistrationQueryKey,
+  useCreRegistrationsControllerGetRegistration,
   usePositionsControllerGetRiskSnapshot,
   getPositionsControllerGetRiskSnapshotQueryKey,
   useDemoWalletsControllerBootstrapPositions,
+  useDemoWalletsControllerFund,
 } from "@/src/services/queries";
 import { useAppState } from "@/lib/state/app-context";
 import { type Position } from "@/lib/domain/types";
@@ -22,10 +25,15 @@ import { DashboardPositionsSection } from "@/components/dashboard/dashboard-view
 import { DashboardStatusHeader } from "@/components/dashboard/dashboard-view/DashboardStatusHeader";
 import {
   buildDashboardPositions,
+  getDashboardPositionCount,
   hasDashboardPositions,
 } from "@/components/dashboard/dashboard-view/dashboard-position-utils";
 import { useDemoWallet } from "@/lib/state/demo-wallet-context";
 import { buildRiskSnapshotParams } from "@/lib/api/simulate-api-guard";
+import {
+  getResponseStatusCode,
+  normalizeCreRegistration,
+} from "@/lib/cre-registration";
 import { fetchOraclePrice, ORACLE_PRICE_TOKENS } from "@/lib/oracle-prices";
 
 const DASHBOARD_LOADING_MESSAGES = [
@@ -141,7 +149,13 @@ function DashboardLoadingState({
 export function DashboardView() {
   const queryClient = useQueryClient();
   const { isConnected, isConnecting, isReconnecting, address } = useAccount();
-  const { demoWalletAddress, isResolvingDemoWallet } = useDemoWallet();
+  const {
+    demoWalletAddress,
+    isResolvingDemoWallet,
+    mockPositions,
+    ensureMockPositions,
+    clearMockPositions,
+  } = useDemoWallet();
   const [isEthPriceShockEnabled, setIsEthPriceShockEnabled] = useState(false);
   const [simulationRunId, setSimulationRunId] = useState(0);
 
@@ -158,10 +172,31 @@ export function DashboardView() {
         PRIMARY_ETH_PRICE_TOKEN.asset,
       ],
       queryFn: () => fetchOraclePrice(PRIMARY_ETH_PRICE_TOKEN),
-      staleTime: 60_000,
+      staleTime: 5_000,
+      refetchInterval: 5_000,
+      refetchIntervalInBackground: true,
       refetchOnWindowFocus: false,
       retry: 1,
     });
+
+  const {
+    data: creRegistration,
+    isLoading: isLoadingCreRegistration,
+  } = useCreRegistrationsControllerGetRegistration(demoWalletAddress ?? "", {
+    query: {
+      enabled: !!demoWalletAddress,
+      queryKey: getCreRegistrationsControllerGetRegistrationQueryKey(
+        demoWalletAddress ?? "",
+      ),
+      retry: (failureCount, error) => {
+        const statusCode = getResponseStatusCode(error);
+        if (statusCode === 404) return false;
+        return failureCount < 2;
+      },
+    },
+  });
+
+  const hasCreWorkflow = Boolean(normalizeCreRegistration(creRegistration));
 
   const riskSnapshotParams = useMemo(
     () =>
@@ -191,6 +226,8 @@ export function DashboardView() {
     },
   );
 
+  const { mutateAsync: fundDemoWallet, isPending: isFundingDemoWallet } =
+    useDemoWalletsControllerFund();
   const { mutateAsync: bootstrapPositions, isPending: isCreatingPosition } =
     useDemoWalletsControllerBootstrapPositions();
   const [isWaitingForCreatedPosition, setIsWaitingForCreatedPosition] =
@@ -205,8 +242,32 @@ export function DashboardView() {
     () => hasDashboardPositions(positionsData),
     [positionsData],
   );
+  const apiPositionCount = useMemo(
+    () => getDashboardPositionCount(positionsData),
+    [positionsData],
+  );
   const shouldPollForCreatedPosition =
-    isWaitingForCreatedPosition && !hasAnyPositions;
+    isWaitingForCreatedPosition && apiPositionCount < 3;
+
+  useEffect(() => {
+    if (!isConnected || isResolvingDemoWallet || !hasAnyPositions) {
+      return;
+    }
+
+    if (apiPositionCount > 1) {
+      ensureMockPositions();
+      return;
+    }
+
+    clearMockPositions();
+  }, [
+    apiPositionCount,
+    clearMockPositions,
+    ensureMockPositions,
+    hasAnyPositions,
+    isConnected,
+    isResolvingDemoWallet,
+  ]);
 
   useEffect(() => {
     if (!shouldPollForCreatedPosition) {
@@ -215,18 +276,20 @@ export function DashboardView() {
 
     const intervalId = window.setInterval(() => {
       void refetchPositions().then((result) => {
-        const polledData = result.data as { positions?: unknown[] } | undefined;
-        const polledHasPositions =
-          Array.isArray(polledData?.positions) &&
-          polledData.positions.length > 0;
-        if (polledHasPositions) {
+        const polledCount = getDashboardPositionCount(result.data);
+
+        if (polledCount > 1) {
+          ensureMockPositions();
+        }
+
+        if (polledCount >= 3) {
           setIsWaitingForCreatedPosition(false);
         }
       });
     }, 3000);
 
     return () => window.clearInterval(intervalId);
-  }, [shouldPollForCreatedPosition, refetchPositions]);
+  }, [ensureMockPositions, shouldPollForCreatedPosition, refetchPositions]);
 
   useEffect(() => {
     if (!loading && !isLoadingPositions) {
@@ -253,8 +316,21 @@ export function DashboardView() {
 
     setCreatePositionError(null);
     setIsWaitingForCreatedPosition(true);
+    clearMockPositions();
 
     try {
+      await fundDemoWallet({
+        demoWalletAddress,
+        data: {
+          ethereumSepoliaGasEth: "0.003",
+          baseSepoliaGasEth: "0.0001",
+          ethereumSepoliaWethTarget: "80",
+          ethereumSepoliaUsdcTarget: "90000",
+          baseSepoliaWethTarget: "50",
+          baseSepoliaUsdcTarget: "90000",
+        },
+      });
+
       await bootstrapPositions({
         demoWalletAddress,
         data: {
@@ -271,18 +347,19 @@ export function DashboardView() {
         ),
       });
       const refetchResult = await refetchPositions();
-      const latestData = refetchResult.data as
-        | { positions?: unknown[] }
-        | undefined;
-      const latestHasPositions =
-        Array.isArray(latestData?.positions) && latestData.positions.length > 0;
-      if (latestHasPositions) {
+      const latestCount = getDashboardPositionCount(refetchResult.data);
+
+      if (latestCount > 1) {
+        ensureMockPositions();
+      }
+
+      if (latestCount >= 3) {
         setIsWaitingForCreatedPosition(false);
       }
     } catch (error) {
-      console.error("Failed to bootstrap positions:", error);
+      console.error("Failed to fund and bootstrap positions:", error);
       setCreatePositionError(
-        "Failed to create new position. Please try again.",
+        "Failed to generate the demo account. Please try again.",
       );
       setIsWaitingForCreatedPosition(false);
     }
@@ -311,8 +388,12 @@ export function DashboardView() {
         0.6
       : (ethOraclePrice?.priceUsd ?? PRIMARY_ETH_PRICE_TOKEN.fallbackPriceUsd);
 
-    return buildDashboardPositions(positionsData, effectiveEthPriceUsd);
-  }, [ethOraclePrice?.priceUsd, isEthPriceShockEnabled, positionsData]);
+    return buildDashboardPositions(
+      positionsData,
+      effectiveEthPriceUsd,
+      mockPositions,
+    );
+  }, [ethOraclePrice?.priceUsd, isEthPriceShockEnabled, mockPositions, positionsData]);
 
   const simulatedEthPriceUsd = useMemo(() => {
     if (!isEthPriceShockEnabled) {
@@ -416,6 +497,10 @@ export function DashboardView() {
   return (
     <div className="space-y-6 animate-fade-up">
       <OraclePricesSection
+        hasCreWorkflow={hasCreWorkflow}
+        isCheckingCreWorkflow={Boolean(
+          demoWalletAddress && isLoadingCreRegistration,
+        )}
         isEthPriceShockEnabled={isEthPriceShockEnabled}
         isEthPriceShockPending={isLoadingEthOraclePrice}
         onStartEthPriceShock={() => {
@@ -430,6 +515,7 @@ export function DashboardView() {
         totalCollateralUsd={totalCollateralUsd}
         totalDebtUsd={totalDebtUsd}
         walletAddress={demoWalletAddress || address || null}
+        isDemoMode={Boolean(demoWalletAddress)}
       />
 
       {/* CRE Workflow Animation */}
@@ -441,6 +527,7 @@ export function DashboardView() {
         </div>
         <RescueStepLogger
           address={demoWalletAddress}
+          hasPositions={displayPositions.length > 0}
           currentEthPriceWad={ethOraclePrice?.priceWad ?? null}
           lowestHealthFactor={lowestHealthFactor}
           simulationRunId={simulationRunId}
@@ -457,7 +544,7 @@ export function DashboardView() {
           rescueRun={rescueRun}
           createPositionError={createPositionError}
           demoWalletAddress={demoWalletAddress}
-          isCreatingPosition={isCreatingPosition}
+          isCreatingPosition={isFundingDemoWallet || isCreatingPosition}
           isRefreshingPositions={isRefreshingPositions}
           isWaitingForCreatedPosition={shouldPollForCreatedPosition}
           onCreatePosition={onCreatePosition}

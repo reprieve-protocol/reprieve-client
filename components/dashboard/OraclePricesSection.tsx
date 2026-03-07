@@ -15,7 +15,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+const ORACLE_PRICE_POLL_INTERVAL_MS = 5_000;
+
 interface OraclePricesSectionProps {
+  hasCreWorkflow?: boolean;
+  isCheckingCreWorkflow?: boolean;
   isEthPriceShockEnabled?: boolean;
   isEthPriceShockPending?: boolean;
   onStartEthPriceShock?: () => void;
@@ -33,6 +37,8 @@ function formatTickerPrice(value: number): string {
 }
 
 export function OraclePricesSection({
+  hasCreWorkflow = false,
+  isCheckingCreWorkflow = false,
   isEthPriceShockEnabled = false,
   isEthPriceShockPending = false,
   onStartEthPriceShock,
@@ -44,7 +50,9 @@ export function OraclePricesSection({
     queries: ORACLE_PRICE_TOKENS.map((token) => ({
       queryKey: ["oracle-prices", token.chainKey, token.asset ?? token.id],
       queryFn: () => fetchOraclePrice(token),
-      staleTime: 60_000,
+      staleTime: ORACLE_PRICE_POLL_INTERVAL_MS,
+      refetchInterval: ORACLE_PRICE_POLL_INTERVAL_MS,
+      refetchIntervalInBackground: true,
       refetchOnWindowFocus: false,
       retry: 1,
     })),
@@ -96,11 +104,13 @@ export function OraclePricesSection({
             <button
               type="button"
               onClick={() => setIsInstructionOpen(true)}
-              disabled={isEthPriceShockPending}
+              disabled={isEthPriceShockPending || isCheckingCreWorkflow}
               className={`rounded-full border border-[#c7f36b]/40 bg-[#c7f36b]/10 px-3 py-1.5 text-xs font-medium text-[#d6f57f] transition hover:bg-[#c7f36b]/15 ${isEthPriceShockPending ? "cursor-wait opacity-70" : ""}`}
             >
               {isEthPriceShockPending
                 ? "Syncing price..."
+                : isCheckingCreWorkflow
+                  ? "Checking workflow..."
                 : "Simulate CRE Workflow Run"}
             </button>
           ) : null}
@@ -166,59 +176,88 @@ export function OraclePricesSection({
                 <Shield className="size-5 text-[#ff9aa5]" strokeWidth={2.2} />
               </div>
               <div>
-                <DialogTitle>Simulate CRE Workflow Run</DialogTitle>
+                <DialogTitle>
+                  {hasCreWorkflow
+                    ? "Simulate CRE Workflow Run"
+                    : "Create a CRE Workflow First"}
+                </DialogTitle>
                 <DialogDescription className="mt-1">
-                  This demo artificially drops ETH by 40% to trigger the CRE
-                  protection flow and visualize how the workflow reacts.
+                  {hasCreWorkflow
+                    ? "This demo artificially drops ETH by 40% to trigger the CRE protection flow and visualize how the workflow reacts."
+                    : "The simulator only works after a CRE workflow has been created for this demo wallet."}
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
           <div className="space-y-4 overflow-y-auto px-5 py-5">
-            <div className="rounded-xl border border-[#2b352f] bg-[#0d1210] p-4">
-              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#c7f36b]">
-                What This Does
-              </p>
-              <div className="mt-3 space-y-2 text-sm text-[#cbd5ce]">
-                <p>
-                  It sends simulated ETH price overrides into both
-                  `risk-snapshot` and `simulate-api-guard`.
-                </p>
-                <p>
-                  It is only for visualization. No real market price is changed
-                  and no real rescue is executed by this popup.
-                </p>
-                <p>
-                  The dashboard then shows how the CRE trigger, decisioning
-                  flow, and rescue animation respond to the stressed market.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-xl border border-[#2b352f] bg-[#111713] p-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-white">
-                  <Activity className="size-4 text-[#c7f36b]" />
-                  Trigger Condition
+            {hasCreWorkflow ? (
+              <>
+                <div className="rounded-xl border border-[#2b352f] bg-[#0d1210] p-4">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#c7f36b]">
+                    What This Does
+                  </p>
+                  <div className="mt-3 space-y-2 text-sm text-[#cbd5ce]">
+                    <p>
+                      It sends simulated ETH price overrides into both
+                      `risk-snapshot` and `simulate-api-guard`.
+                    </p>
+                    <p>
+                      It is only for visualization. No real market price is
+                      changed and no real rescue is executed by this popup.
+                    </p>
+                    <p>
+                      The dashboard then shows how the CRE trigger, decisioning
+                      flow, and rescue animation respond to the stressed market.
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-2 text-sm text-[#9aa79f]">
-                  Simulated ETH dump of 40% across Sepolia feeds to push health
-                  factors lower.
-                </p>
-              </div>
 
-              <div className="rounded-xl border border-[#2b352f] bg-[#111713] p-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-white">
-                  <Shield className="size-4 text-[#ff9aa5]" strokeWidth={2.2} />
-                  Visual Output
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-xl border border-[#2b352f] bg-[#111713] p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white">
+                      <Activity className="size-4 text-[#c7f36b]" />
+                      Trigger Condition
+                    </div>
+                    <p className="mt-2 text-sm text-[#9aa79f]">
+                      Simulated ETH dump of 40% across Sepolia feeds to push
+                      health factors lower.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-[#2b352f] bg-[#111713] p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white">
+                      <Shield
+                        className="size-4 text-[#ff9aa5]"
+                        strokeWidth={2.2}
+                      />
+                      Visual Output
+                    </div>
+                    <p className="mt-2 text-sm text-[#9aa79f]">
+                      CRE workflow panels update so the user can see detection,
+                      simulation, and rescue planning behavior.
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-2 text-sm text-[#9aa79f]">
-                  CRE workflow panels update so the user can see detection,
-                  simulation, and rescue planning behavior.
+              </>
+            ) : (
+              <div className="rounded-xl border border-dashed border-[#2d3932] bg-[#0d1210] p-4">
+                <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#c7f36b]">
+                  Simulator Prerequisite
                 </p>
+                <div className="mt-3 space-y-2 text-sm text-[#cbd5ce]">
+                  <p>
+                    Create the user&apos;s CRE workflow first so the simulator
+                    has an active protection flow to run against.
+                  </p>
+                  <p>
+                    After setup, this simulator can trigger the stressed ETH
+                    scenario and show how the workflow detects risk, simulates
+                    rescue, and plans execution.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             <DialogFooter className="px-0 pb-0">
               <Button
@@ -228,15 +267,21 @@ export function OraclePricesSection({
               >
                 Cancel
               </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  setIsInstructionOpen(false);
-                  onStartEthPriceShock?.();
-                }}
-              >
-                Start Simulation
-              </Button>
+              {hasCreWorkflow ? (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setIsInstructionOpen(false);
+                    onStartEthPriceShock?.();
+                  }}
+                >
+                  Start Simulation
+                </Button>
+              ) : (
+                <Button type="button" disabled>
+                  Start Simulation
+                </Button>
+              )}
             </DialogFooter>
           </div>
         </DialogContent>

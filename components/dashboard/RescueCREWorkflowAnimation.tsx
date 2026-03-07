@@ -66,6 +66,19 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
   { id: "s5", type: "decision", label: "Safe (Lowest HF = ?)" },
 ];
 
+function getStepHeadline(step: WorkflowStep): string {
+  if (step.type === "input" && step.target) {
+    const targetNode = INPUT_NODES.find((node) => node.id === step.target);
+    return targetNode ? `Pulling ${targetNode.title}` : step.label;
+  }
+
+  if (step.type === "compute") {
+    return "Computing rescue risk";
+  }
+
+  return "Final CRE decision";
+}
+
 type ConnectorVariant = "top-elbow" | "straight" | "bottom-elbow";
 
 const CONNECTOR_GEOMETRY: Record<
@@ -148,13 +161,13 @@ const InputNodeCard: React.FC<{
       </div>
 
       <p
-        className="text-[14px] font-semibold leading-tight"
+        className="text-[18px] font-semibold leading-tight"
         style={{ color: isActive ? "#e7efe9" : "#91a59b" }}
       >
         {node.title}
       </p>
       {node.subtitle ? (
-        <p className="mt-1 text-[11px] text-[#8fa197]">{node.subtitle}</p>
+        <p className="mt-2 text-[13px] text-[#8fa197]">{node.subtitle}</p>
       ) : null}
     </motion.div>
   );
@@ -311,13 +324,12 @@ const RiskEngineCard: React.FC<{ isComputing: boolean; isLit: boolean }> = ({
     </div>
 
     {/* Title */}
-    <p
-      className="text-[14px] font-semibold leading-tight"
-      style={{ color: isLit ? "#e7efe9" : "#91a59b" }}
-    >
+    <p className="text-[22px] font-semibold leading-tight text-white">
       Risk Engine
     </p>
-    <p className="mt-1 text-[11px] text-[#8fa197]">CRE risk computation</p>
+    <p className="mt-2 text-[13px] text-[#8fa197]">
+      CRE risk computation and route selection
+    </p>
 
     {/* Center glow icon */}
     <div className="relative flex flex-1 items-center justify-center">
@@ -427,13 +439,13 @@ const DecisionCard: React.FC<{
           <div className="flex items-start justify-between gap-3">
             <div>
               <p
-                className="text-[11px] font-bold uppercase tracking-[0.16em]"
+                className="text-[12px] font-bold uppercase tracking-[0.18em]"
                 style={{ color: active ? "#b6f36f" : "#6f8a7c" }}
               >
                 Status
               </p>
               <p
-                className="mt-1 text-[18px] font-semibold leading-tight"
+                className="mt-1 text-[28px] font-semibold leading-tight"
                 style={{ color: active ? "#f2ffe4" : "#c9d7d0" }}
               >
                 Safe
@@ -527,9 +539,12 @@ export const RescueCREWorkflowAnimation: React.FC<
     currentStep.type === "compute" || currentStep.type === "decision";
 
   const progressPct = ((step + 1) / totalSteps) * 100;
+  const stepHeadline = getStepHeadline(currentStep);
 
   return (
     <div className="relative w-full overflow-hidden rounded-2xl border border-white/5 bg-[#070d0a]">
+      <div className="border-b border-white/5 bg-[radial-gradient(circle_at_top,rgba(182,243,111,0.12),transparent_58%)] px-6 py-6"></div>
+
       <div className="overflow-x-auto px-6 pb-4 pt-8">
         <div className="mx-auto grid min-w-[1220px] grid-cols-[320px_210px_350px_210px_320px] grid-rows-3 items-center gap-y-4">
           {INPUT_NODES.map((node, idx) => {
@@ -597,6 +612,13 @@ export const RescueCREWorkflowAnimation: React.FC<
               lowestHealthFactor={lowestHealthFactor}
             />
           </div>
+        </div>
+      </div>
+
+      <div className="px-6 pb-5">
+        <div className="rounded-2xl border border-[#243029] bg-[#0c1310]/80 px-4 py-3 text-sm text-[#bfc9c2]">
+          <span className="font-semibold text-white">Current step:</span>{" "}
+          {currentStep.label}
         </div>
       </div>
     </div>
